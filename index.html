@@ -15,17 +15,15 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand">
-    <img src="assets/favicon.png" alt="">
-    <span class="logo">tabia</span>
-    <span class="tag">open source chess drills</span>
-  </div>
+  <button class="brand" id="brandHome" title="tabia — home">
+    <canvas id="brandLogo" width="176" height="44" aria-label="tabia"></canvas>
+  </button>
   <nav class="top">
-    <button data-view="home" class="active">⌂ Home</button>
-    <button data-view="train">♟ Study</button>
+    <button data-view="home" class="active"><span class="bi" id="navHomeIcon"></span>Home</button>
+    <button data-view="train"><span class="bi" id="navStudyIcon"></span>Study</button>
   </nav>
   <div class="right">
-    <button class="ghbtn" id="connectBtn"><span class="bi" id="connectIcon"></span><span id="connectLabel">Connect</span></button>
+    <button class="ghbtn connect" id="connectBtn"><span class="bi" id="connectIcon"></span><span id="connectLabel">Connect</span></button>
     <a class="ghbtn" id="ghlink" href="#" target="_blank" title="Source on GitHub"><span class="bi" id="ghIcon"></span>GitHub</a>
   </div>
 </header>
@@ -143,11 +141,23 @@
 
           <div class="set-block">
             <label class="set-lbl">Board pieces</label>
-            <div class="seg" id="pieceSeg">
-              <button data-piece="cburnett" class="active">lichess</button>
-              <button data-piece="cardinal">cardinal</button>
-              <button data-piece="maestro">maestro</button>
-              <button data-piece="pixel">pixel</button>
+            <div class="pieceset" id="pieceSeg"></div>
+          </div>
+
+          <div class="set-block">
+            <label class="set-lbl">Move method</label>
+            <div class="seg" id="moveMethodSeg">
+              <button data-mm="both" class="active">Drag + click</button>
+              <button data-mm="drag">Drag only</button>
+              <button data-mm="click">Click only</button>
+            </div>
+          </div>
+
+          <div class="set-block">
+            <label class="set-lbl">Sounds</label>
+            <div class="seg" id="soundSeg">
+              <button data-snd="on" class="active">On</button>
+              <button data-snd="off">Off</button>
             </div>
           </div>
 
@@ -166,6 +176,22 @@
 
   </div>
 </main>
+
+<footer class="site-foot">
+  <div class="wrap foot-grid">
+    <div class="foot-col">
+      <canvas id="footLogo" width="120" height="30" aria-label="tabia"></canvas>
+      <p class="foot-tag">Open-source chess opening trainer. Browser-local, no server, no tracking — your prep never leaves this machine.</p>
+      <a class="foot-link" id="footGh" href="#" target="_blank"><span class="bi" id="footGhIcon"></span> Source on GitHub</a>
+    </div>
+    <div class="foot-col">
+      <div class="foot-h">Donate</div>
+      <p class="foot-mini">If tabia helps you, a tip keeps it free and open.</p>
+      <div class="donate" id="donate"></div>
+    </div>
+  </div>
+  <div class="foot-bottom"><span class="wrap">tabia · MIT · built with stockfish + chess.js · made for the love of the game</span></div>
+</footer>
 
 <!-- connect account drawer -->
 <div class="msgcfg" id="connectModal" hidden>

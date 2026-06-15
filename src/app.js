@@ -7,6 +7,7 @@ import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js';
 import { Sound } from './sound.js';
 import { Auth } from './auth.js';
 import { ICON, siteIcon } from './icons.js';
+import { Engine } from './engine.js';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -20,11 +21,90 @@ const groupPill = g => ({ accepted: 'acc', declined: 'dec', ryder: 'ryd' }[g] ||
 const groupLabel = g => ({ accepted: 'Accepted', declined: 'Declined', ryder: 'Ryder' }[g] || g);
 
 document.getElementById('ghlink').href = REPO_URL;
-// brand logos
+$('#footGh').href = REPO_URL;
+// brand + nav logos
 $('#ghIcon').innerHTML = ICON.github;
+$('#footGhIcon').innerHTML = ICON.github;
 $('#connectIcon').innerHTML = ICON.link;
 $('#liLogo').innerHTML = ICON.lichess;
 $('#ccLogo').innerHTML = ICON.chesscom;
+$('#navHomeIcon').innerHTML = ICON.home;
+$('#navStudyIcon').innerHTML = ICON.study;
+$('#brandHome').onclick = () => showView('home');
+
+// ---------- animated dot-matrix wordmark ----------
+function dotWordmark(canvas, text, dotMax) {
+  const ctx = canvas.getContext('2d'); const DPR = Math.min(2, window.devicePixelRatio || 1);
+  const W = canvas.width, H = canvas.height;
+  canvas.width = W * DPR; canvas.height = H * DPR; canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  // sample the text onto an offscreen grid
+  const off = document.createElement('canvas'); off.width = W; off.height = H;
+  const o = off.getContext('2d');
+  o.fillStyle = '#fff'; o.textBaseline = 'middle';
+  let fs = H * 0.82; o.font = `700 ${fs}px ${getComputedStyle(document.body).getPropertyValue('--mono')}`;
+  while (o.measureText(text).width > W - 4 && fs > 6) { fs -= 1; o.font = `700 ${fs}px monospace`; }
+  o.fillText(text, 2, H / 2 + 1);
+  const img = o.getImageData(0, 0, W, H).data;
+  const step = 3, dots = [];
+  for (let y = 0; y < H; y += step) for (let x = 0; x < W; x += step) {
+    if (img[(y * W + x) * 4 + 3] > 110) dots.push({ x, y, ph: (x * 7 + y * 13) % 628 / 100 });
+  }
+  let t = 0;
+  function frame() {
+    t += 0.045; ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const d of dots) {
+      const a = 0.55 + 0.45 * Math.sin(t + d.ph - d.x * 0.03);  // left-to-right shimmer
+      ctx.beginPath(); ctx.arc(d.x * DPR, d.y * DPR, (dotMax || 1.15) * DPR, 0, 6.28);
+      ctx.fillStyle = `rgba(244,244,244,${a})`; ctx.fill();
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
+dotWordmark($('#brandLogo'), 'tabia', 1.55);
+dotWordmark($('#footLogo'), 'tabia', 1.2);
+
+// ---------- crypto donate ----------
+const DONATE = [   // replace with your own wallet addresses
+  { key: 'btc',  name: 'Bitcoin',  logo: 'bitcoin',  addr: 'bc1qexampleexampleexampleexampleexamplexx' },
+  { key: 'eth',  name: 'Ethereum', logo: 'ethereum', addr: '0xExampleExampleExampleExampleExampleExa1' },
+  { key: 'sol',  name: 'Solana',   logo: 'solana',   addr: 'So1anaExampleExampleExampleExampleExampleXx' },
+  { key: 'usdc', name: 'USDC',     logo: 'tether',   addr: '0xExampleExampleExampleExampleExampleExa1' },
+];
+$('#donate').innerHTML = DONATE.map(d =>
+  `<button class="dchip" data-addr="${d.addr}" title="Copy ${d.name} address">
+     <img class="dlogo" src="assets/logos/${d.logo}.svg" alt=""><span>${d.name}</span><span class="dcopy">${ICON.copy}</span>
+   </button>`).join('');
+$('#donate').querySelectorAll('.dchip').forEach(b => b.onclick = async () => {
+  try { await navigator.clipboard.writeText(b.dataset.addr); } catch {}
+  const c = b.querySelector('.dcopy'); c.innerHTML = ICON.check; b.classList.add('copied');
+  setTimeout(() => { c.innerHTML = ICON.copy; b.classList.remove('copied'); }, 1400);
+});
+
+// ---------- settings: piece previews, move method, sound ----------
+const PIECE_SETS = [{ id: 'cburnett', name: 'lichess' }, { id: 'cardinal', name: 'cardinal' }, { id: 'maestro', name: 'maestro' }, { id: 'pixel', name: 'pixel' }];
+function buildPieceSeg() {
+  $('#pieceSeg').innerHTML = PIECE_SETS.map(s =>
+    `<button class="ptile ${s.id === pieceSet ? 'active' : ''}" data-piece="${s.id}">
+       <img src="src/pieces/${s.id}/wN.svg" alt=""><img src="src/pieces/${s.id}/bQ.svg" alt=""><span>${s.name}</span>
+     </button>`).join('');
+  $('#pieceSeg').querySelectorAll('[data-piece]').forEach(b => b.onclick = () => setPieceSet(b.dataset.piece));
+}
+function setPieceSet(p) {
+  pieceSet = p; Store.setPref('pieceSet', p);
+  buildPieceSeg(); trBoard.setPieceSet(p); renderMoves(); renderHome();
+}
+let moveMethod = Store.prefs().moveMethod || 'both';
+let soundOn = Store.prefs().sound !== false;
+function syncSeg(id, val, attr) { document.querySelectorAll(`#${id} button`).forEach(b => b.classList.toggle('active', b.dataset[attr] === val)); }
+document.querySelectorAll('#moveMethodSeg button').forEach(b => b.onclick = () => {
+  moveMethod = b.dataset.mm; Store.setPref('moveMethod', moveMethod); trBoard.setMoveMethod(moveMethod); syncSeg('moveMethodSeg', moveMethod, 'mm');
+});
+document.querySelectorAll('#soundSeg button').forEach(b => b.onclick = () => {
+  soundOn = b.dataset.snd === 'on'; Sound.enabled = soundOn; Store.setPref('sound', soundOn);
+  syncSeg('soundSeg', soundOn ? 'on' : 'off', 'snd'); $('#trSound').textContent = soundOn ? '🔊' : '🔇'; $('#trSound').classList.toggle('on', soundOn);
+  if (soundOn) Sound.move();
+});
 
 // ---------- connect account (Lichess OAuth / Chess.com public) ----------
 function renderAccount() {
@@ -52,15 +132,7 @@ $('#connectChesscom').onclick = async () => {
 Auth.handleRedirect().then(acc => { if (acc) { renderAccount(); $('#connectModal').hidden = false; } });
 
 // ---------- piece set + view nav ----------
-let pieceSet = Store.prefs().pieceSet || 'cardinal';
-document.querySelectorAll('#pieceSeg button').forEach(b => {
-  b.classList.toggle('active', b.dataset.piece === pieceSet);
-  b.addEventListener('click', () => {
-    pieceSet = b.dataset.piece; Store.setPref('pieceSet', pieceSet);
-    document.querySelectorAll('#pieceSeg button').forEach(x => x.classList.toggle('active', x === b));
-    trBoard.setPieceSet(pieceSet); renderMoves();
-  });
-});
+let pieceSet = Store.prefs().pieceSet || 'cburnett';
 function showView(v) {
   document.querySelectorAll('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + v));
   document.querySelectorAll('nav.top button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
@@ -188,13 +260,18 @@ function coach(text, cls = '') {
   const b = $('#trBubble'); b.textContent = text; b.className = 'coach-bubble' + (cls ? ' ' + cls : '');
   const av = $('#trAvatar'); av.className = 'coach-av' + (cls ? ' ' + cls : '');
 }
-function updateEval() {
-  const raw = evaluate(trGame.fen());
-  const e = userColor() === 'w' ? raw : -raw;   // always from the trainee's side
+function paintEval(e) {                     // e = pawns, from the trainee's side
   const pct = Math.max(2, Math.min(98, winPct(e)));
   $('#trEvalFill').style.height = pct + '%';
   const r = $('#trEvalRead'); r.textContent = fmtEval(e);
   r.className = 'evread ' + (e > 0.4 ? 'up' : e < -0.4 ? 'down' : '');
+}
+function updateEval() {
+  const fen = trGame.fen();
+  paintEval(userColor() === 'w' ? evaluate(fen) : -evaluate(fen));   // instant heuristic
+  if (Engine.available) Engine.evaluate(fen, white => {              // real Stockfish, streams as depth climbs
+    if (trGame.fen() === fen) paintEval(userColor() === 'w' ? white : -white);
+  });
 }
 function setArrows() {
   const learn = drill.mode === 'learn' && drill.active && drill.line;
@@ -506,6 +583,11 @@ function heroFx() {
 }
 
 // ---------- boot ----------
+Engine.init();
+buildPieceSeg();
+trBoard.setMoveMethod(moveMethod);
+syncSeg('moveMethodSeg', moveMethod, 'mm');
+syncSeg('soundSeg', soundOn ? 'on' : 'off', 'snd');
 setMode('drill');
 refreshMastery(); renderHome(); heroFx(); updateEval(); renderAccount();
 $('#trSound').textContent = Sound.enabled ? '🔊' : '🔇';

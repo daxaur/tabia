@@ -23,11 +23,13 @@ export class Board {
     this.drag = null;
     this.userColor = opts.userColor || null;   // the human's side (enables pre-moves)
     this.premove = null;                        // { from, to, promo } queued for next turn
+    this.moveMethod = opts.moveMethod || 'both';// 'both' | 'drag' | 'click'
     this._build();
     this._placeAll(false);
   }
 
   setUserColor(c) { this.userColor = c; }
+  setMoveMethod(m) { this.moveMethod = m; }
   clearPremove() { this._clearPremove(); }
   // can the human make a normal move *right now*?
   _canMove() { return !this.locked && (!this.userColor || this.chess.turn() === this.userColor); }
@@ -248,9 +250,11 @@ export class Board {
       this._clearSel(); return;
     }
     if (!piece || piece.color !== this.chess.turn()) { this._clearSel(); return; }
-    // begin drag of own piece
+    // select the piece
     e.preventDefault();
     this._select(sq);
+    if (this.moveMethod === 'click') return;     // click-only: move happens on the next click
+    // begin drag of own piece
     const p = this.pieces[sq]; if (!p) return;
     const rect = this.root.getBoundingClientRect();
     this.drag = { from: sq, p, rect, moved: false };
@@ -299,7 +303,7 @@ export class Board {
     if (moved) { this._snapHome(d.p, d.from); this._tryMove(d.from, to); this._clearSel(); }
     else {
       this._snapHome(d.p, d.from);              // snap back to origin
-      if (!d.moved) { /* was a click — keep selection for click-to-move */ }
+      if (!d.moved) { if (this.moveMethod === 'drag') this._clearSel(); /* else keep selection for click-to-move */ }
       else this._clearSel();
     }
   }
