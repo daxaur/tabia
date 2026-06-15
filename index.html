@@ -13,8 +13,9 @@
 <body>
 <header class="top">
   <div class="brand">
-    <span class="logo">ta<b>bia</b></span>
-    <span class="tag">open opening trainer</span>
+    <img src="assets/favicon.png" alt="">
+    <span class="logo">tabia</span>
+    <span class="tag">open source chess drills</span>
   </div>
   <nav class="top">
     <button data-view="home" class="active">Home</button>
@@ -23,9 +24,10 @@
   </nav>
   <div class="right">
     <div class="seg" id="pieceSeg" title="Piece set">
-      <button data-piece="maestro" class="active">maestro</button>
+      <button data-piece="cardinal" class="active">cardinal</button>
+      <button data-piece="gioco">gioco</button>
+      <button data-piece="maestro">maestro</button>
       <button data-piece="pixel">pixel</button>
-      <button data-piece="fresca">fresca</button>
     </div>
     <a class="ghbtn" id="ghlink" href="#" target="_blank">★ GitHub</a>
   </div>
@@ -37,9 +39,10 @@
     <!-- HOME -->
     <section class="view active" id="view-home">
       <div class="hero">
-        <h1>Train your <span class="hl">repertoire</span> until it’s muscle memory.</h1>
-        <p>Spaced-repetition drilling for chess openings. Everything lives in your browser —
-           no account, no server, no tracking. Ships with a complete Blackmar-Diemer Gambit to drill today.</p>
+        <span class="kicker">open source · browser-local · spaced repetition</span>
+        <h1>Drill your openings<br>until they’re muscle memory.</h1>
+        <p>Pick an opening, train its lines, and let spaced repetition do the rest.
+           No account, no server — your prep lives in this browser.</p>
       </div>
       <div class="cards" id="homeCards"></div>
       <div class="foot">

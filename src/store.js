@@ -11,7 +11,7 @@ export const Store = {
   s: read(),
   _flush() { write(this.s); },
 
-  prefs() { this.s.prefs ||= { pieceSet: 'maestro', orientation: 'white' }; return this.s.prefs; },
+  prefs() { this.s.prefs ||= { pieceSet: 'cardinal', orientation: 'white' }; return this.s.prefs; },
   setPref(k, v) { this.prefs()[k] = v; this._flush(); },
 
   _rep(repId) { this.s.reps ||= {}; this.s.reps[repId] ||= { lines: {} }; return this.s.reps[repId]; },

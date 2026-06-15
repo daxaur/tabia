@@ -12,7 +12,7 @@ const groupLabel = g => ({ accepted: 'Accepted', declined: 'Declined', ryder: 'R
 document.getElementById('ghlink').href = REPO_URL;
 
 // ---------- piece set + view nav ----------
-let pieceSet = Store.prefs().pieceSet || 'maestro';
+let pieceSet = Store.prefs().pieceSet || 'cardinal';
 document.querySelectorAll('#pieceSeg button').forEach(b => {
   b.classList.toggle('active', b.dataset.piece === pieceSet);
   b.addEventListener('click', () => {
@@ -166,31 +166,32 @@ function expectedSan() { return drill.line.moves[drill.ply]?.[0]; }
 function trMove(from, to, promo) {
   if (!drill.active || trGame.turn() !== 'w') return;
   const exp = expectedSan();
+  const before = trGame.fen();
   const mv = trGame.move({ from, to, promotion: promo });
   if (!mv) return;
   if (norm(mv.san) === norm(exp)) {
     drill.correct += drill.hinted ? 0 : 1;
     $('#trCorrect').textContent = drill.correct;
-    trBoard.setFen(trGame.fen(), { lastMove: [from, to] });
-    trBoard.flash(to, 'tb-ok');
+    trBoard.setFen(trGame.fen(), { lastMove: { from, to } });
+    trBoard.flash(to, 'ok');
     const cm = drill.line.moves[drill.ply][1];
     setStatus('ok', `✓ ${mv.san}`, cm || '');
     drill.ply++; drill.hinted = false;
-    setTimeout(afterUserMove, 360);
+    setTimeout(afterUserMove, 380);
   } else {
     trGame.undo();
+    trBoard.setFen(before);              // sync revert — snap the dragged piece home
     drill.wrong++; drill.mistake = true;
     $('#trWrong').textContent = drill.wrong;
-    setStatus('bad', `✗ Not the book move — it’s ${exp}`, 'Watch it played, then keep going.');
-    // show the correct move and play it for them
-    const m2 = trGame.move(exp);
+    setStatus('bad', `✗ Not the move — it’s ${exp}`, 'Watch it, then continue.');
     trBoard.lock(true);
     setTimeout(() => {
-      trBoard.setFen(trGame.fen(), { lastMove: [m2.from, m2.to] });
-      trBoard.flash(m2.to, 'tb-bad');
+      const m2 = trGame.move(exp);
+      trBoard.setFen(trGame.fen(), { lastMove: { from: m2.from, to: m2.to } });
+      trBoard.flash(m2.to, 'bad');
       drill.ply++;
-      setTimeout(afterUserMove, 420);
-    }, 250);
+      setTimeout(afterUserMove, 460);
+    }, 420);
   }
 }
 function afterUserMove() {
@@ -241,8 +242,8 @@ $('#trHint').onclick = () => {
   const exp = expectedSan(); if (!exp) return;
   const m = trGame.move(exp); const from = m.from, to = m.to; trGame.undo();
   drill.hinted = true;
-  trBoard.setFen(trGame.fen(), { lastMove: drill.ply > 0 ? trBoard.lastMove : null, shapes: [{ from, to }] });
-  setStatus('neu', `💡 Try ${exp[0] === exp[0].toUpperCase() && exp[0] !== 'O' ? exp[0] : 'the pawn'}…`, 'Arrow shows the move.');
+  trBoard.setShapes([{ from, to }]);
+  setStatus('neu', '💡 Hint', 'The arrow marks your move.');
 };
 
 // ---------- boot ----------
