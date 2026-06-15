@@ -1,0 +1,14 @@
+{
+  "name": "tabia",
+  "version": "0.1.0",
+  "description": "A browser-local, open-source chess opening trainer — drill your repertoire with spaced repetition. No account, no server: your data lives in your browser.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "homepage": "https://daxaur.github.io/tabia/",
+  "scripts": {
+    "dev": "python3 -m http.server 4173",
+    "validate": "node tools/validate.mjs"
+  },
+  "keywords": ["chess", "openings", "trainer", "repertoire", "spaced-repetition", "blackmar-diemer", "self-hosted"]
+}

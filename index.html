@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tabia — open chess opening trainer</title>
+<meta name="description" content="Drill your chess opening repertoire with spaced repetition. Browser-local, open source, no account.">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <span class="logo">ta<b>bia</b></span>
+    <span class="tag">open opening trainer</span>
+  </div>
+  <nav class="top">
+    <button data-view="home" class="active">Home</button>
+    <button data-view="explore">Explore</button>
+    <button data-view="train">Train</button>
+  </nav>
+  <div class="right">
+    <div class="seg" id="pieceSeg" title="Piece set">
+      <button data-piece="maestro" class="active">maestro</button>
+      <button data-piece="pixel">pixel</button>
+      <button data-piece="fresca">fresca</button>
+    </div>
+    <a class="ghbtn" id="ghlink" href="#" target="_blank">★ GitHub</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <!-- HOME -->
+    <section class="view active" id="view-home">
+      <div class="hero">
+        <h1>Train your <span class="hl">repertoire</span> until it’s muscle memory.</h1>
+        <p>Spaced-repetition drilling for chess openings. Everything lives in your browser —
+           no account, no server, no tracking. Ships with a complete Blackmar-Diemer Gambit to drill today.</p>
+      </div>
+      <div class="cards" id="homeCards"></div>
+      <div class="foot">
+        <span>tabia · MIT · your data never leaves this browser</span>
+        <span id="footStats"></span>
+      </div>
+    </section>
+
+    <!-- EXPLORE -->
+    <section class="view" id="view-explore">
+      <div class="play">
+        <div class="boardcol">
+          <div class="boardwrap"><div id="exBoard"></div></div>
+          <div class="bctrls">
+            <button class="btn" id="exFirst">⏮</button>
+            <button class="btn" id="exPrev">◀ Prev</button>
+            <button class="btn primary" id="exNext">Next ▶</button>
+            <button class="btn" id="exLast">⏭</button>
+            <button class="btn ghost" id="exFlip">⇅ Flip</button>
+          </div>
+          <div class="hintbar" id="exHint">Use ← → keys to step. Or grab a piece and explore your own ideas.</div>
+        </div>
+        <div class="side">
+          <div class="panel">
+            <h3>Variation</h3>
+            <select id="exSelect" style="width:100%;background:#0e131a;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px;font-family:var(--mono);font-size:12px;"></select>
+            <div class="lineName" id="exIdea" style="margin-top:10px;color:var(--dim);"></div>
+          </div>
+          <div class="panel">
+            <h3>Moves</h3>
+            <div class="movelist" id="exMoves">—</div>
+          </div>
+          <div class="panel">
+            <h3>Note</h3>
+            <div class="subtext" id="exComment" style="min-height:46px;">Step through to read the plan move by move.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRAIN -->
+    <section class="view" id="view-train">
+      <div class="play">
+        <div class="boardcol">
+          <div class="boardwrap"><div id="trBoard"></div></div>
+          <div class="bctrls">
+            <button class="btn primary" id="trStart">▶ Start session</button>
+            <button class="btn" id="trHint">💡 Hint</button>
+            <button class="btn ghost" id="trSkip">Skip line</button>
+            <button class="btn ghost" id="trFlip">⇅ Flip</button>
+          </div>
+          <div class="stats">
+            <div class="stat"><div class="n" id="trCorrect">0</div><div class="l">correct</div></div>
+            <div class="stat"><div class="n" id="trWrong">0</div><div class="l">missed</div></div>
+            <div class="stat"><div class="n" id="trDue">0</div><div class="l">lines due</div></div>
+          </div>
+        </div>
+        <div class="side">
+          <div class="panel">
+            <h3>Drill</h3>
+            <div class="status neu" id="trStatus">Press “Start session” to drill what’s due.</div>
+            <div class="subtext" id="trSub"></div>
+            <div class="lineName" id="trLine"></div>
+          </div>
+          <div class="panel">
+            <h3>Scope</h3>
+            <div class="seg" id="trScope">
+              <button data-scope="all" class="active">All</button>
+              <button data-scope="accepted">Accepted</button>
+              <button data-scope="ryder">Ryder</button>
+              <button data-scope="declined">Declined</button>
+            </div>
+            <div class="small" style="margin-top:10px;">It shows you positions; you play White’s repertoire move. Get a line clean and it won’t come back for a while. Miss it and it returns soon.</div>
+          </div>
+          <div class="panel">
+            <h3>Mastery</h3>
+            <div class="varlist" id="trMastery"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script type="module" src="src/app.js"></script>
+</body>
+</html>
