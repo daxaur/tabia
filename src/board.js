@@ -11,7 +11,7 @@ export class Board {
   constructor(root, opts = {}) {
     this.root = root;
     this.orientation = opts.orientation || 'white';
-    this.pieceSet = opts.pieceSet || 'maestro';
+    this.pieceSet = opts.pieceSet || 'cburnett';
     this.interactive = opts.interactive !== false;
     this.onMove = opts.onMove || (() => {});
     this.animMs = opts.animMs ?? 180;

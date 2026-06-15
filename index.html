@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>tabia — open chess opening trainer</title>
 <meta name="description" content="Drill your chess opening repertoire with spaced repetition. Browser-local, open source, no account.">
 <link rel="icon" type="image/png" href="assets/favicon.png">
@@ -23,11 +26,12 @@
   </nav>
   <div class="right">
     <div class="seg" id="pieceSeg" title="Piece set">
-      <button data-piece="cardinal" class="active">cardinal</button>
-      <button data-piece="gioco">gioco</button>
+      <button data-piece="cburnett" class="active">lichess</button>
+      <button data-piece="cardinal">cardinal</button>
       <button data-piece="maestro">maestro</button>
       <button data-piece="pixel">pixel</button>
     </div>
+    <button class="ghbtn" id="connectBtn">⚇ Connect</button>
     <a class="ghbtn" id="ghlink" href="#" target="_blank">★ GitHub</a>
   </div>
 </header>
@@ -159,6 +163,29 @@
 
   </div>
 </main>
+
+<!-- connect account drawer -->
+<div class="msgcfg" id="connectModal" hidden>
+  <div class="msgcfg-card connect-card">
+    <div class="msgcfg-head"><h3>Connect an account</h3><button class="btn ghost sm" id="connectClose">✕ Close</button></div>
+    <p class="small">Link a profile to pull your games and stats. Everything stays in this browser — tabia has no server and stores nothing remotely.</p>
+
+    <div class="connect-row">
+      <div class="connect-info"><div class="cl-name">♞ Lichess</div><div class="cl-sub">Secure OAuth — no password shared.</div></div>
+      <button class="btn primary" id="connectLichess">Connect</button>
+    </div>
+
+    <div class="connect-row">
+      <div class="connect-info"><div class="cl-name">♟ Chess.com</div><div class="cl-sub">Public profile by username.</div></div>
+      <div class="connect-cc">
+        <input id="ccUser" placeholder="username" autocomplete="off" spellcheck="false">
+        <button class="btn" id="connectChesscom">Link</button>
+      </div>
+    </div>
+
+    <div class="connect-status" id="connectStatus" hidden></div>
+  </div>
+</div>
 
 <script type="module" src="src/app.js"></script>
 </body>

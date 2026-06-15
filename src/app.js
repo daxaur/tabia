@@ -5,6 +5,7 @@ import { Store } from './store.js';
 import { evaluate, winPct, fmtEval } from './eval.js';
 import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js';
 import { Sound } from './sound.js';
+import { Auth } from './auth.js';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -18,6 +19,31 @@ const groupPill = g => ({ accepted: 'acc', declined: 'dec', ryder: 'ryd' }[g] ||
 const groupLabel = g => ({ accepted: 'Accepted', declined: 'Declined', ryder: 'Ryder' }[g] || g);
 
 document.getElementById('ghlink').href = REPO_URL;
+
+// ---------- connect account (Lichess OAuth / Chess.com public) ----------
+function renderAccount() {
+  const a = Auth.current();
+  const btn = $('#connectBtn');
+  btn.textContent = a ? `${a.site === 'lichess' ? '♞' : '♟'} ${a.username}` : '⚇ Connect';
+  btn.classList.toggle('linked', !!a);
+  const st = $('#connectStatus');
+  if (a) {
+    st.hidden = false;
+    st.innerHTML = `<div class="cs-on"><b>${a.username}</b> · ${a.site === 'lichess' ? 'Lichess' : 'Chess.com'}${a.rating ? ' · ' + a.rating : ''}
+      <a href="${a.url}" target="_blank" class="cs-link">view profile ↗</a></div>
+      <button class="btn ghost sm" id="connectDisc">Disconnect</button>`;
+    $('#connectDisc').onclick = () => { Auth.disconnect(); renderAccount(); };
+  } else { st.hidden = true; st.innerHTML = ''; }
+}
+$('#connectBtn').onclick = () => { renderAccount(); $('#connectModal').hidden = false; };
+$('#connectClose').onclick = () => { $('#connectModal').hidden = true; };
+$('#connectLichess').onclick = () => Auth.startLichess();
+$('#connectChesscom').onclick = async () => {
+  const st = $('#connectStatus'); st.hidden = false; st.innerHTML = '<div class="cs-busy">Linking…</div>';
+  try { await Auth.connectChesscom($('#ccUser').value); renderAccount(); }
+  catch (e) { st.hidden = false; st.innerHTML = `<div class="cs-err">${e.message}</div>`; }
+};
+Auth.handleRedirect().then(acc => { if (acc) { renderAccount(); $('#connectModal').hidden = false; } });
 
 // ---------- piece set + view nav ----------
 let pieceSet = Store.prefs().pieceSet || 'cardinal';
@@ -466,7 +492,7 @@ function heroFx() {
 
 // ---------- boot ----------
 setMode('drill');
-refreshMastery(); renderHome(); heroFx(); updateEval();
+refreshMastery(); renderHome(); heroFx(); updateEval(); renderAccount();
 $('#trSound').textContent = Sound.enabled ? '🔊' : '🔇';
 $('#trSound').classList.toggle('on', Sound.enabled);
 window.addEventListener('hashchange', () => showView(location.hash.slice(1) || 'home'));

@@ -11,8 +11,17 @@ export const Store = {
   s: read(),
   _flush() { write(this.s); },
 
-  prefs() { this.s.prefs ||= { pieceSet: 'cardinal', orientation: 'white', sound: true }; if (this.s.prefs.sound === undefined) this.s.prefs.sound = true; return this.s.prefs; },
-  setPref(k, v) { this.prefs()[k] = v; this._flush(); },
+  prefs() {
+    const p = (this.s.prefs ||= {});
+    if (p.sound === undefined) p.sound = true;
+    if (!p.orientation) p.orientation = 'white';
+    if (!p.pieceChosen && p.pieceSet !== 'cburnett') p.pieceSet = 'cburnett'; // default to the lichess set
+    return p;
+  },
+  setPref(k, v) { const p = this.prefs(); p[k] = v; if (k === 'pieceSet') p.pieceChosen = true; this._flush(); },
+  account() { return this.s.account || null; },
+  setAccount(a) { this.s.account = a; this._flush(); },
+  clearAccount() { delete this.s.account; this._flush(); },
 
   _rep(repId) { this.s.reps ||= {}; this.s.reps[repId] ||= { lines: {} }; return this.s.reps[repId]; },
   line(repId, lineId) {
