@@ -18,9 +18,8 @@
     <span class="tag">open source chess drills</span>
   </div>
   <nav class="top">
-    <button data-view="home" class="active">Home</button>
-    <button data-view="explore">Explore</button>
-    <button data-view="train">Train</button>
+    <button data-view="home" class="active">⌂ Home</button>
+    <button data-view="train">♟ Study</button>
   </nav>
   <div class="right">
     <div class="seg" id="pieceSeg" title="Piece set">
@@ -64,8 +63,7 @@
           <h1 id="opName"></h1>
           <p id="opOneliner"></p>
           <div class="op-actions">
-            <button class="btn primary" id="opTrain">▶ Train opening</button>
-            <button class="btn" id="opExplore">Explore</button>
+            <button class="btn primary" id="opTrain">▶ Study this opening</button>
           </div>
         </div>
         <div class="op-preview"><div id="opBoard"></div></div>
@@ -73,93 +71,78 @@
       <div class="tree" id="opTree"></div>
     </section>
 
-    <!-- EXPLORE -->
-    <section class="view" id="view-explore">
-      <div class="play">
-        <div class="boardcol">
-          <div class="boardwrap"><div id="exBoard"></div></div>
-          <div class="bctrls">
-            <button class="btn" id="exFirst">⏮</button>
-            <button class="btn" id="exPrev">◀ Prev</button>
-            <button class="btn primary" id="exNext">Next ▶</button>
-            <button class="btn" id="exLast">⏭</button>
-            <button class="btn ghost" id="exFlip">⇅ Flip</button>
-          </div>
-          <div class="hintbar" id="exHint">Use ← → keys to step. Or grab a piece and explore your own ideas.</div>
-        </div>
-        <div class="side">
-          <div class="panel">
-            <h3>Variation</h3>
-            <select id="exSelect" style="width:100%;background:#0e131a;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px;font-family:var(--mono);font-size:12px;"></select>
-            <div class="lineName" id="exIdea" style="margin-top:10px;color:var(--dim);"></div>
-          </div>
-          <div class="panel">
-            <h3>Moves</h3>
-            <div class="movelist" id="exMoves">—</div>
-          </div>
-          <div class="panel">
-            <h3>Note</h3>
-            <div class="subtext" id="exComment" style="min-height:46px;">Step through to read the plan move by move.</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- TRAIN -->
+    <!-- STUDY HUB (board + chessreps-style mode panel) -->
     <section class="view" id="view-train">
-      <div class="trainbar">
-        <div class="seg modes" id="trModes" title="How you train">
-          <button data-mode="learn">Learn</button>
-          <button data-mode="practice">Practice</button>
-          <button data-mode="drill" class="active">Drill</button>
-        </div>
-        <div class="discovered" id="trDiscovered">0 / 0 lines discovered</div>
-        <button class="btn ghost sm" id="trSettings">⚙ Messages</button>
-      </div>
-      <div class="play">
-        <div class="boardcol">
+      <div class="hub">
+        <div class="hub-board">
           <div class="boardrow">
             <div class="evalbar" id="trEvalBar"><i id="trEvalFill"></i></div>
-            <div class="boardwrap"><div id="trBoard"></div></div>
+            <div class="boardwrap big"><div id="trBoard"></div></div>
           </div>
-          <div class="bctrls">
-            <button class="btn primary" id="trStart">▶ Start</button>
-            <button class="btn" id="trHint">💡 Hint</button>
-            <button class="btn" id="trNext" hidden>Next ▶</button>
-            <button class="btn ghost" id="trSkip">Skip line</button>
-            <button class="btn ghost" id="trFlip">⇅ Flip</button>
+          <div class="hub-controls">
+            <button class="ic" id="trSettings" title="Coach messages">⚙</button>
+            <button class="ic on" id="trSound" title="Sound on/off">🔊</button>
+            <button class="ic" id="trFlip" title="Flip board">⇅</button>
             <span class="evread" id="trEvalRead">+0.0</span>
+            <span class="sp"></span>
+            <button class="btn ghost" id="trHint">💡 Hint</button>
+            <button class="ic" id="trPrev" title="Step back" disabled>‹</button>
+            <button class="ic" id="trNext" title="Step forward" disabled>›</button>
           </div>
         </div>
-        <div class="side">
+
+        <aside class="hub-panel">
           <div class="coach">
             <div class="coach-av" id="trAvatar">♞</div>
             <div class="coach-body">
-              <div class="coach-name">Coach <span id="trMode" class="coach-mode">drill</span></div>
-              <div class="coach-bubble" id="trBubble">Pick a mode and press Start.</div>
-              <div class="coach-sub" id="trLine"></div>
+              <div class="coach-name">
+                <span id="trModeIcon">🥁</span> <b id="trModeName">Drill</b>
+                <span class="coach-op" id="trOpName"></span>
+                <span class="coach-idx" id="trLineIdx"></span>
+              </div>
+              <div class="coach-bubble" id="trBubble">Pick a mode, then press Start.</div>
             </div>
           </div>
-          <div class="stats">
+
+          <div class="modegrid" id="trModes">
+            <button class="modetile" data-mode="learn"><span class="mi">📖</span><span class="ml">Learn</span><span class="ms" id="ms-learn">walk the lines</span></button>
+            <button class="modetile" data-mode="practice"><span class="mi">🎯</span><span class="ml">Practice</span><span class="ms">forgiving reps</span></button>
+            <button class="modetile active" data-mode="drill"><span class="mi">🥁</span><span class="ml">Drill</span><span class="ms" id="ms-drill">spaced repetition</span></button>
+            <button class="modetile" data-mode="hyper"><span class="mi">⚡</span><span class="ml">Hyper</span><span class="ms">bot plays a line</span></button>
+          </div>
+
+          <div class="hub-actions">
+            <button class="btn primary big" id="trStart">▶ Start</button>
+            <button class="btn" id="trSkip">⏭ Skip line</button>
+            <button class="btn" id="trRestart" hidden>↻ New round</button>
+          </div>
+
+          <div class="stats compact">
             <div class="stat"><div class="n" id="trCorrect">0</div><div class="l">correct</div></div>
             <div class="stat"><div class="n" id="trWrong">0</div><div class="l">missed</div></div>
-            <div class="stat"><div class="n" id="trDue">0</div><div class="l">lines due</div></div>
+            <div class="stat"><div class="n" id="trDue">0</div><div class="l">due</div></div>
+            <div class="stat"><div class="n" id="trRounds">0</div><div class="l">rounds</div></div>
           </div>
+
           <div class="panel">
-            <h3>Scope</h3>
-            <div class="seg" id="trScope">
-              <button data-scope="all" class="active">All</button>
-              <button data-scope="accepted">Accepted</button>
-              <button data-scope="ryder">Ryder</button>
-              <button data-scope="declined">Declined</button>
+            <div class="ph"><h3>Lines <span class="disc" id="trDiscovered"></span></h3>
+              <div class="seg mini" id="trScope">
+                <button data-scope="all" class="active">All</button>
+                <button data-scope="accepted">Acc</button>
+                <button data-scope="ryder">Ryd</button>
+                <button data-scope="declined">Dec</button>
+              </div>
             </div>
-          </div>
-          <div class="panel">
-            <h3>Lines</h3>
             <div class="varlist" id="trMastery"></div>
           </div>
-        </div>
+
+          <div class="panel">
+            <h3>Moves</h3>
+            <div class="movelist icons" id="trMoves">—</div>
+          </div>
+        </aside>
       </div>
+
       <!-- custom messages drawer -->
       <div class="msgcfg" id="trMsgCfg" hidden>
         <div class="msgcfg-card">

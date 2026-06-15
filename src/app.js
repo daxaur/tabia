@@ -4,6 +4,7 @@ import { openings, groupsOf } from './data/index.js';
 import { Store } from './store.js';
 import { evaluate, winPct, fmtEval } from './eval.js';
 import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js';
+import { Sound } from './sound.js';
 
 const repertoire = openings[0];     // single opening for explore/train (multi-opening ready)
 let currentOpening = openings[0];
@@ -23,7 +24,7 @@ document.querySelectorAll('#pieceSeg button').forEach(b => {
   b.addEventListener('click', () => {
     pieceSet = b.dataset.piece; Store.setPref('pieceSet', pieceSet);
     document.querySelectorAll('#pieceSeg button').forEach(x => x.classList.toggle('active', x === b));
-    exBoard.setPieceSet(pieceSet); trBoard.setPieceSet(pieceSet);
+    trBoard.setPieceSet(pieceSet); renderMoves();
   });
 });
 function showView(v) {
@@ -47,7 +48,7 @@ function previewBoard(el, op, plies, interactive = false) {
   const g = new Chess(); const main = op.lines.find(l => l.star) || op.lines[0];
   for (const [san] of main.moves.slice(0, plies)) g.move(san);
   const h = g.history({ verbose: true });
-  b.setFen(g.fen(), { lastMove: h.length ? { from: h[h.length - 1].from, to: h[h.length - 1].to } : null });
+  b.setFen(g.fen(), { lastMove: h.length ? { from: h[h.length - 1].from, to: h[h.length - 1].to } : null, silent: true });
   return b;
 }
 function renderHome() {
@@ -92,80 +93,31 @@ function renderOpening() {
         </div>`;}).join('')}</div>
     </div>`).join('');
   $('#opTree').querySelectorAll('.fhead').forEach(h => h.onclick = () => h.parentElement.classList.toggle('closed'));
-  $('#opTree').querySelectorAll('.branch').forEach(b => b.onclick = () => { exSelectLine(b.dataset.line); showView('explore'); });
+  $('#opTree').querySelectorAll('.branch').forEach(b => b.onclick = () => { showView('train'); trSelectLine(b.dataset.line); });
 }
 $('#crumbHome').onclick = () => showView('home');
 $('#opTrain').onclick = () => showView('train');
-$('#opExplore').onclick = () => showView('explore');
 
-// ============================== EXPLORE ==============================
-const exBoard = new Board($('#exBoard'), { pieceSet, onMove: exMove });
-let exGame = new Chess(), exLine = null, exPly = 0;
-function buildExSelect() {
-  $('#exSelect').innerHTML = repertoire.lines.map((l, i) =>
-    `<option value="${i}">${groupLabel(l.group)} — ${l.name}</option>`).join('');
-}
-function loadExLine(i) {
-  exLine = repertoire.lines[i]; exGame = new Chess(); exPly = 0;
-  exBoard.setOrientation('white'); exBoard.setFen(exGame.fen());
-  $('#exIdea').textContent = exLine.idea || '';
-  renderExMoves(); $('#exComment').textContent = 'Step through to read the plan move by move.';
-}
-function renderExMoves() {
-  const hist = exGame.history();
-  let out = '';
-  for (let i = 0; i < exLine.moves.length; i += 2) {
-    const w = exLine.moves[i]?.[0], b = exLine.moves[i + 1]?.[0];
-    const wc = i === exPly ? 'cur' : '', bc = i + 1 === exPly ? 'cur' : '';
-    out += `<span class="num">${i / 2 + 1}.</span> <span class="${wc}">${w || ''}</span> <span class="${bc}">${b || ''}</span> `;
-  }
-  $('#exMoves').innerHTML = out;
-}
-function exStep(dir) {
-  if (dir > 0 && exPly < exLine.moves.length) {
-    const [san, comment] = exLine.moves[exPly];
-    const mv = exGame.move(san);
-    exBoard.setFen(exGame.fen(), { lastMove: mv ? [mv.from, mv.to] : null });
-    $('#exComment').textContent = comment || (exPly % 2 === 0 ? '' : '…');
-    exPly++;
-  } else if (dir < 0 && exPly > 0) {
-    exGame.undo(); exPly--;
-    const h = exGame.history({ verbose: true });
-    exBoard.setFen(exGame.fen(), { lastMove: h.length ? [h[h.length - 1].from, h[h.length - 1].to] : null });
-    $('#exComment').textContent = exPly > 0 ? (exLine.moves[exPly - 1][1] || '') : 'Start of the line.';
-  }
-  renderExMoves();
-}
-function exGoto(target) { while (exPly < target) exStep(1); while (exPly > target) exStep(-1); }
-function exMove(from, to, promo) {  // free exploration
-  const mv = exGame.move({ from, to, promotion: promo });
-  if (!mv) return;
-  exPly = exGame.history().length;
-  exBoard.setFen(exGame.fen(), { lastMove: [from, to] });
-  $('#exComment').textContent = 'Free exploration — Reset (⏮) to return to the line.';
-  renderExMoves();
-}
-$('#exNext').onclick = () => exStep(1);
-$('#exPrev').onclick = () => exStep(-1);
-$('#exFirst').onclick = () => exGoto(0);
-$('#exLast').onclick = () => exGoto(exLine.moves.length);
-$('#exFlip').onclick = () => exBoard.flip();
-$('#exSelect').onchange = e => loadExLine(+e.target.value);
-function exSelectLine(id) { const i = repertoire.lines.findIndex(l => l.id === id); if (i >= 0) { $('#exSelect').value = i; loadExLine(i); } }
-document.addEventListener('keydown', e => {
-  if (!$('#view-explore').classList.contains('active')) return;
-  if (e.key === 'ArrowRight') exStep(1);
-  if (e.key === 'ArrowLeft') exStep(-1);
-});
+// ============================== STUDY HUB (modes + bot + eval + sound) ==============================
+const GLYPH = { p: 'P', n: 'N', b: 'B', r: 'R', q: 'Q', k: 'K' };
+const MODE_META = {
+  learn:    { icon: '📖', name: 'Learn',    intro: 'Learn mode — I’ll walk you through each line. Press Start, then use › / ‹ (or arrow keys) to step.' },
+  practice: { icon: '🎯', name: 'Practice', intro: 'Practice mode — play the moves yourself. Slip up as many times as you like; nothing is penalised.' },
+  drill:    { icon: '🥁', name: 'Drill',    intro: 'Drill mode — spaced repetition. Get a line clean and it won’t come back for a while.' },
+  hyper:    { icon: '⚡', name: 'Hyper',    intro: 'Hyper mode — I become your opponent and play a random line. Hold your repertoire, then start another round.' },
+};
 
-// ============================== TRAIN (coach + modes + eval) ==============================
 const trBoard = new Board($('#trBoard'), { pieceSet, onMove: trMove });
 let trGame = new Chess();
-const drill = { active: false, mode: 'drill', scope: 'all', line: null, ply: 0, mistake: false, correct: 0, wrong: 0, hinted: false };
+const drill = { active: false, mode: 'drill', scope: 'all', line: null, ply: 0, mistake: false, correct: 0, wrong: 0, rounds: 0, hinted: false };
+let hyper = null;   // { candidates:[lines], ply } while a Hyper round is live
 
-function scopedLineIds() {
-  return repertoire.lines.filter(l => drill.scope === 'all' || l.group === drill.scope).map(l => l.id);
-}
+Sound.enabled = Store.prefs().sound !== false;
+
+function scopedLines() { return repertoire.lines.filter(l => drill.scope === 'all' || l.group === drill.scope); }
+function scopedLineIds() { return scopedLines().map(l => l.id); }
+function lineById(id) { return repertoire.lines.find(l => l.id === id); }
+
 function setScope(s) {
   drill.scope = s;
   document.querySelectorAll('#trScope button').forEach(b => b.classList.toggle('active', b.dataset.scope === s));
@@ -175,16 +127,21 @@ document.querySelectorAll('#trScope button').forEach(b => b.onclick = () => setS
 
 function setMode(m) {
   drill.mode = m;
-  document.querySelectorAll('#trModes button').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
-  $('#trMode').textContent = m;
-  $('#trNext').hidden = m !== 'learn';
-  if (drill.active && drill.line) beginLine(drill.line); // restart current line in new mode
+  document.querySelectorAll('#trModes .modetile').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+  $('#trModeIcon').textContent = MODE_META[m].icon;
+  $('#trModeName').textContent = MODE_META[m].name;
+  $('#trRestart').hidden = m !== 'hyper';
+  $('#trSkip').hidden = m === 'hyper';
+  $('#trStart').textContent = m === 'hyper' ? '▶ Start round' : '▶ Start';
+  drill.active = false; drill.line = null; hyper = null;
+  resetIdle();
+  $('#trLineIdx').textContent = '';
+  $('#trOpName').textContent = repertoire.name;
+  coach(MODE_META[m].intro);
 }
-document.querySelectorAll('#trModes button').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+document.querySelectorAll('#trModes .modetile').forEach(b => b.onclick = () => setMode(b.dataset.mode));
 
-function lineById(id) { return repertoire.lines.find(l => l.id === id); }
-
-// ---- coach + eval helpers ----
+// ---- coach + eval + helpers ----
 function coach(text, cls = '') {
   const b = $('#trBubble'); b.textContent = text; b.className = 'coach-bubble' + (cls ? ' ' + cls : '');
   const av = $('#trAvatar'); av.className = 'coach-av' + (cls ? ' ' + cls : '');
@@ -196,7 +153,35 @@ function updateEval() {
   const r = $('#trEvalRead'); r.textContent = fmtEval(e);
   r.className = 'evread ' + (e > 0.4 ? 'up' : e < -0.4 ? 'down' : '');
 }
+function setArrows() {
+  const learn = drill.mode === 'learn' && drill.active && drill.line;
+  $('#trNext').disabled = !learn || drill.ply >= drill.line.moves.length;
+  $('#trPrev').disabled = !learn || drill.ply === 0;
+}
+function renderMoves() {
+  const h = trGame.history({ verbose: true });
+  if (!h.length) { $('#trMoves').innerHTML = '<span class="mvempty">—</span>'; return; }
+  let html = '';
+  for (let i = 0; i < h.length; i++) {
+    const m = h[i];
+    if (i % 2 === 0) html += `<span class="mvno">${i / 2 + 1}.</span>`;
+    const ic = m.piece === 'p' ? '' : `<img class="mvpc" src="src/pieces/${pieceSet}/${m.color}${GLYPH[m.piece]}.svg" alt="">`;
+    html += `<span class="mv${i === h.length - 1 ? ' cur' : ''}">${ic}${m.san}</span>`;
+  }
+  $('#trMoves').innerHTML = html;
+  $('#trMoves .cur')?.scrollIntoView({ block: 'nearest' });
+}
+function resetIdle() {
+  trGame = new Chess(); trBoard.setOrientation('white');
+  trBoard.setFen(trGame.fen(), { silent: true }); trBoard.setShapes([]); trBoard.lock(true);
+  updateEval(); renderMoves(); setArrows();
+}
+function setLineHeader(line) {
+  $('#trOpName').textContent = repertoire.name;
+  $('#trLineIdx').textContent = `#${repertoire.lines.indexOf(line) + 1} · ${line.name}`;
+}
 
+// ---- Learn / Practice / Drill ----
 function startSession() {
   drill.active = true; drill.correct = 0; drill.wrong = 0;
   $('#trCorrect').textContent = 0; $('#trWrong').textContent = 0;
@@ -205,137 +190,200 @@ function startSession() {
 }
 function nextLine() {
   const ids = scopedLineIds();
-  const pick = drill.mode === 'learn'
-    ? (Store.pickNext(repertoire.id, ids) || ids[0])   // learn: still surface the weakest first
-    : Store.pickNext(repertoire.id, ids);
-  beginLine(lineById(pick));
+  beginLine(lineById(Store.pickNext(repertoire.id, ids) || ids[0]));
 }
 function beginLine(line) {
   drill.line = line; drill.ply = 0; drill.mistake = false; drill.hinted = false;
-  trGame = new Chess();
-  trBoard.setOrientation('white');
-  trBoard.setFen(trGame.fen());
-  trBoard.setShapes([]);
+  trGame = new Chess(); trBoard.setOrientation('white');
+  trBoard.setFen(trGame.fen(), { silent: true }); trBoard.setShapes([]);
   Store.discover(repertoire.id, line.id);
-  $('#trLine').textContent = `${groupLabel(line.group)} · ${line.name}`;
-  refreshMastery();
-  updateEval();
-  if (drill.mode === 'learn') {
-    trBoard.lock(true);
-    coach(coachSay('learn') + ' ' + (line.idea || ''));
-  } else {
-    trBoard.lock(false);
-    coach(line.idea || 'Your move — play White’s repertoire move.');
-  }
+  setLineHeader(line); refreshMastery(); updateEval(); renderMoves();
+  if (drill.mode === 'learn') { trBoard.lock(true); coach(coachSay('learn') + ' ' + (line.idea || '')); }
+  else { trBoard.lock(false); coach(line.idea || 'Your move — play White’s repertoire move.'); }
+  setArrows();
 }
 function expectedSan() { return drill.line.moves[drill.ply]?.[0]; }
 
-// advance one ply in LEARN mode (auto-play both colors with narration)
-function learnStep() {
+function learnStep(dir) {
   if (!drill.active || drill.mode !== 'learn' || !drill.line) return;
-  if (drill.ply >= drill.line.moves.length) { return finishLine(); }
-  const [san, cm] = drill.line.moves[drill.ply];
-  const m = trGame.move(san);
-  if (!m) return;
-  trBoard.setFen(trGame.fen(), { lastMove: { from: m.from, to: m.to } });
-  updateEval();
-  const who = m.color === 'w' ? '▲' : '▼';
-  coach(`${who} ${m.san}${cm ? ' — ' + cm : ''}`);
-  drill.ply++;
-  if (drill.ply >= drill.line.moves.length) setTimeout(finishLine, 700);
+  if (dir > 0) {
+    if (drill.ply >= drill.line.moves.length) return;
+    const [san, cm] = drill.line.moves[drill.ply];
+    const m = trGame.move(san); if (!m) return;
+    trBoard.setFen(trGame.fen(), { lastMove: { from: m.from, to: m.to } });
+    coach(`${m.color === 'w' ? '▲' : '▼'} ${m.san}${cm ? ' — ' + cm : ''}`);
+    drill.ply++;
+    if (drill.ply >= drill.line.moves.length) coach('That’s the whole line. Try Practice, or pick another line.', 'ok');
+  } else {
+    if (drill.ply <= 0) return;
+    trGame.undo(); drill.ply--;
+    const h = trGame.history({ verbose: true });
+    trBoard.setFen(trGame.fen(), { lastMove: h.length ? { from: h[h.length - 1].from, to: h[h.length - 1].to } : null, silent: true });
+    coach(drill.ply > 0 ? (drill.line.moves[drill.ply - 1][1] || drill.line.idea || '…') : 'Start of the line.');
+  }
+  updateEval(); renderMoves(); setArrows();
 }
 
 function trMove(from, to, promo) {
-  if (!drill.active || drill.mode === 'learn' || trGame.turn() !== 'w') return;
-  const exp = expectedSan();
-  const before = trGame.fen();
+  if (!drill.active) return;
+  if (drill.mode === 'hyper') return hyperUserMove(from, to, promo);
+  if (drill.mode === 'learn' || trGame.turn() !== 'w') return;
+  const exp = expectedSan(), before = trGame.fen();
   const mv = trGame.move({ from, to, promotion: promo });
   if (!mv) return;
   if (norm(mv.san) === norm(exp)) {
-    drill.correct += drill.hinted ? 0 : 1;
-    $('#trCorrect').textContent = drill.correct;
+    drill.correct += drill.hinted ? 0 : 1; $('#trCorrect').textContent = drill.correct;
     trBoard.setFen(trGame.fen(), { lastMove: { from, to } });
     trBoard.flash(to, 'ok'); trBoard.setShapes([]);
     const cm = drill.line.moves[drill.ply][1];
     coach(coachSay('correct') + (cm ? ' ' + cm : ''), 'ok');
-    drill.ply++; drill.hinted = false;
-    updateEval();
-    setTimeout(afterUserMove, 380);
+    drill.ply++; drill.hinted = false; updateEval(); renderMoves();
+    setTimeout(afterUserMove, 360);
   } else {
-    trGame.undo();
-    trBoard.setFen(before);              // sync revert — snap the dragged piece home
-    drill.mistake = true;
-    coach(coachSay('wrong', { exp }), 'bad');
-    if (drill.mode === 'practice') {
-      // forgiving: count the slip, let them try again, no auto-play
-      drill.wrong++; $('#trWrong').textContent = drill.wrong;
-      trBoard.flash(to, 'bad');
-    } else {
-      // drill: count it, show the move, move on
-      drill.wrong++; $('#trWrong').textContent = drill.wrong;
-      trBoard.flash(to, 'bad'); trBoard.lock(true);
+    trGame.undo(); trBoard.setFen(before, { silent: true }); Sound.error();
+    drill.mistake = true; drill.wrong++; $('#trWrong').textContent = drill.wrong;
+    coach(coachSay('wrong', { exp }), 'bad'); trBoard.flash(to, 'bad');
+    if (drill.mode !== 'practice') {           // drill: reveal the move, then continue
+      trBoard.lock(true);
       setTimeout(() => {
         const m2 = trGame.move(exp);
         trBoard.setFen(trGame.fen(), { lastMove: { from: m2.from, to: m2.to } });
-        drill.ply++; updateEval();
+        drill.ply++; updateEval(); renderMoves();
         setTimeout(afterUserMove, 460);
-      }, 480);
-    }
+      }, 520);
+    }                                          // practice: just let them retry
   }
 }
 function afterUserMove() {
   trBoard.lock(false);
   if (drill.ply >= drill.line.moves.length) return finishLine();
-  // opponent (Black) reply
   const bsan = drill.line.moves[drill.ply][0];
   const m = trGame.move(bsan);
   trBoard.setFen(trGame.fen(), { lastMove: m ? { from: m.from, to: m.to } : null });
-  drill.ply++; updateEval();
+  drill.ply++; updateEval(); renderMoves();
   if (drill.ply >= drill.line.moves.length) return finishLine();
   coach('Your move.');
 }
 function finishLine() {
   trBoard.lock(true);
   const ok = !drill.mistake;
-  if (drill.mode !== 'learn') Store.record(repertoire.id, drill.line.id, ok);
+  Store.record(repertoire.id, drill.line.id, ok);
   refreshMastery();
-  if (drill.mode === 'learn') coach('That’s the whole line. Switch to Practice to play it yourself.', 'ok');
-  else coach(coachSay(ok ? 'done' : 'doneMiss'), ok ? 'ok' : 'bad');
-  if (drill.mode !== 'learn') setTimeout(() => { if (drill.active) nextLine(); }, 1400);
+  coach(coachSay(ok ? 'done' : 'doneMiss'), ok ? 'ok' : 'bad');
+  if (ok) Sound.success();
+  setTimeout(() => { if (drill.active && drill.mode !== 'learn') nextLine(); }, 1300);
 }
+
+// ---- Hyper: the bot plays a random line as your opponent ----
+function startRound() {
+  drill.active = true; drill.mode = 'hyper'; drill.mistake = false; drill.hinted = false;
+  hyper = { candidates: scopedLines().slice(), ply: 0 };
+  trGame = new Chess(); trBoard.setOrientation('white');
+  trBoard.setFen(trGame.fen(), { silent: true }); trBoard.setShapes([]); trBoard.lock(false);
+  drill.rounds++; $('#trRounds').textContent = drill.rounds;
+  $('#trOpName').textContent = repertoire.name; $('#trLineIdx').textContent = `live game · round ${drill.rounds}`;
+  updateEval(); renderMoves(); setArrows();
+  coach(`Round ${drill.rounds} — you’re White. Play your repertoire and I’ll answer.`);
+  Sound.round();
+}
+function hyperExpected() {
+  if (!hyper) return null;
+  return [...new Set(hyper.candidates.map(l => l.moves[hyper.ply]?.[0]).filter(Boolean))][0];
+}
+function hyperUserMove(from, to, promo) {
+  if (!hyper || trGame.turn() !== 'w') return;
+  const before = trGame.fen();
+  const mv = trGame.move({ from, to, promotion: promo });
+  if (!mv) return;
+  const matching = hyper.candidates.filter(l => l.moves[hyper.ply] && norm(l.moves[hyper.ply][0]) === norm(mv.san));
+  if (!matching.length) {
+    trGame.undo(); trBoard.setFen(before, { silent: true }); Sound.error();
+    const exp = hyperExpected();
+    coach(`That leaves the book${exp ? ` — the move is ${exp}` : ''}.`, 'bad'); trBoard.flash(to, 'bad');
+    return;
+  }
+  hyper.candidates = matching; hyper.ply++;
+  trBoard.setFen(trGame.fen(), { lastMove: { from, to } });
+  trBoard.flash(to, 'ok'); trBoard.setShapes([]); updateEval(); renderMoves();
+  if (!hyper.candidates.some(l => l.moves[hyper.ply])) return hyperWin();
+  coach('Good — my turn…'); trBoard.lock(true);
+  setTimeout(hyperBotMove, 500);
+}
+function hyperBotMove() {
+  if (!hyper) return;
+  const cands = hyper.candidates.filter(l => l.moves[hyper.ply]);
+  if (!cands.length) return hyperWin();
+  const pick = cands[Math.floor(Math.random() * cands.length)];
+  const bsan = pick.moves[hyper.ply][0];
+  const m = trGame.move(bsan);
+  trBoard.setFen(trGame.fen(), { lastMove: m ? { from: m.from, to: m.to } : null });
+  hyper.candidates = cands.filter(l => norm(l.moves[hyper.ply][0]) === norm(bsan));
+  hyper.ply++; updateEval(); renderMoves(); trBoard.lock(false);
+  if (!hyper.candidates.some(l => l.moves[hyper.ply])) return hyperWin();
+  coach('Your move.');
+}
+function hyperWin() {
+  trBoard.lock(true);
+  const name = hyper.candidates[0]?.name;
+  coach(`You held the line${name ? ` — ${name}` : ''}! Press ↻ New round to face another.`, 'ok');
+  Sound.success();
+  if (hyper.candidates[0]) Store.record(repertoire.id, hyper.candidates[0].id, true);
+  refreshMastery();
+}
+
+function doHint() {
+  if (!drill.active) return;
+  if (drill.mode === 'learn') return learnStep(1);
+  const exp = drill.mode === 'hyper' ? hyperExpected() : (trGame.turn() === 'w' ? expectedSan() : null);
+  if (!exp) return;
+  const m = trGame.move(exp); if (!m) return; const f = m.from, t = m.to; trGame.undo();
+  if (drill.mode !== 'hyper') drill.hinted = true;
+  trBoard.setShapes([{ from: f, to: t }]);
+  coach('The arrow marks the move.');
+}
+
 function refreshMastery() {
   const ids = scopedLineIds();
   $('#trDue').textContent = Store.dueCount(repertoire.id, ids);
-  const all = scopedLineIds();
-  $('#trDiscovered').innerHTML = `<b>${Store.discoveredCount(repertoire.id, all)}</b> / ${all.length} lines discovered`;
+  $('#trDiscovered').innerHTML = `· <b>${Store.discoveredCount(repertoire.id, ids)}</b>/${ids.length}`;
   const dots = b => '●'.repeat(b) + '○'.repeat(6 - b);
-  $('#trMastery').innerHTML = repertoire.lines
-    .filter(l => drill.scope === 'all' || l.group === drill.scope)
-    .map(l => {
-      const box = Store.mastery(repertoire.id, l.id);
-      const sel = drill.line && drill.line.id === l.id ? 'sel' : '';
-      const dueDot = Store.isDue(repertoire.id, l.id) ? '<span class="pill ' + groupPill(l.group) + '">due</span>' : '';
-      return `<div class="varitem ${sel}" data-line="${l.id}">
-        <div><span class="nm">${l.name}</span><div class="mastery">${dots(box)}</div></div>
-        ${dueDot}</div>`;
-    }).join('');
+  $('#trMastery').innerHTML = scopedLines().map(l => {
+    const box = Store.mastery(repertoire.id, l.id);
+    const sel = drill.line && drill.line.id === l.id ? 'sel' : '';
+    const disc = Store.isDiscovered(repertoire.id, l.id);
+    const due = Store.isDue(repertoire.id, l.id) ? `<span class="pill ${groupPill(l.group)}">due</span>` : '';
+    return `<div class="varitem ${sel}" data-line="${l.id}">
+      <div><span class="nm">${disc ? '' : '<i class="undisc">•</i>'}${l.name}</span><div class="mastery">${dots(box)}</div></div>
+      ${due}</div>`;
+  }).join('');
   $('#trMastery').querySelectorAll('[data-line]').forEach(el => el.onclick = () => {
-    drill.active = true;
-    beginLine(lineById(el.dataset.line));
+    if (drill.mode === 'hyper') setMode('drill');
+    drill.active = true; beginLine(lineById(el.dataset.line));
   });
 }
-$('#trStart').onclick = startSession;
-$('#trNext').onclick = learnStep;
-$('#trSkip').onclick = () => { if (drill.active) nextLine(); };
+function trSelectLine(id) {
+  const l = lineById(id); if (!l) return;
+  if (drill.mode === 'hyper') setMode('drill');
+  drill.active = true; beginLine(l);
+}
+
+$('#trStart').onclick = () => (drill.mode === 'hyper' ? startRound() : startSession());
+$('#trRestart').onclick = startRound;
+$('#trSkip').onclick = () => { if (drill.active && drill.mode !== 'hyper') nextLine(); };
 $('#trFlip').onclick = () => trBoard.flip();
-$('#trHint').onclick = () => {
-  if (!drill.active || drill.mode === 'learn' || trGame.turn() !== 'w') return;
-  const exp = expectedSan(); if (!exp) return;
-  const m = trGame.move(exp); const from = m.from, to = m.to; trGame.undo();
-  drill.hinted = true;
-  trBoard.setShapes([{ from, to }]);
-  coach('The arrow marks your move.');
+$('#trNext').onclick = () => learnStep(1);
+$('#trPrev').onclick = () => learnStep(-1);
+$('#trHint').onclick = doHint;
+$('#trSound').onclick = () => {
+  Sound.enabled = !Sound.enabled; Store.setPref('sound', Sound.enabled);
+  const b = $('#trSound'); b.classList.toggle('on', Sound.enabled); b.textContent = Sound.enabled ? '🔊' : '🔇';
+  if (Sound.enabled) Sound.move();
 };
+document.addEventListener('keydown', e => {
+  if (!$('#view-train').classList.contains('active') || drill.mode !== 'learn' || !drill.active) return;
+  if (e.key === 'ArrowRight') learnStep(1);
+  if (e.key === 'ArrowLeft') learnStep(-1);
+});
 
 // ---- custom coach messages ----
 (function buildMsgCfg() {
@@ -390,7 +438,9 @@ function heroFx() {
 }
 
 // ---------- boot ----------
-buildExSelect(); loadExLine(0);
+setMode('drill');
 refreshMastery(); renderHome(); heroFx(); updateEval();
+$('#trSound').textContent = Sound.enabled ? '🔊' : '🔇';
+$('#trSound').classList.toggle('on', Sound.enabled);
 window.addEventListener('hashchange', () => showView(location.hash.slice(1) || 'home'));
-showView(['explore', 'train'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'home');
+showView(location.hash.slice(1) === 'train' ? 'train' : 'home');

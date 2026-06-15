@@ -1,6 +1,7 @@
 // tabia board — absolutely-positioned pieces that *slide*, buttery pointer-drag,
 // click-to-move, animated programmatic moves, crisp arrows. Dependency-free, chess.js-backed.
 import { Chess } from './vendor/chess.js';
+import { Sound } from './sound.js';
 
 const FILES = 'abcdefgh';
 const GLYPH = { p: 'P', n: 'N', b: 'B', r: 'R', q: 'Q', k: 'K' };
@@ -78,16 +79,33 @@ export class Board {
   turn() { return this.chess.turn(); }
 
   /** Drive the board to a position. If lastMove given, the moved piece slides. */
-  setFen(fen, { lastMove = null, shapes = [], animate = !!lastMove } = {}) {
+  setFen(fen, { lastMove = null, shapes = [], animate = !!lastMove, silent = false } = {}) {
     this._clearSel();
     if (Array.isArray(lastMove)) lastMove = lastMove[0] ? { from: lastMove[0], to: lastMove[1] } : null;
     const prev = this.chess.fen();
+    // detect move character BEFORE we load the new position (pieces map = old state)
+    let snd = null;
+    if (!silent && lastMove && prev !== fen) {
+      const mover = this.pieces[lastMove.from];
+      const capture = !!this.pieces[lastMove.to] ||
+        (mover && mover.type === 'p' && lastMove.from[0] !== lastMove.to[0] && !this.pieces[lastMove.to]); // incl. en passant
+      const castle = mover && mover.type === 'k' &&
+        Math.abs(FILES.indexOf(lastMove.from[0]) - FILES.indexOf(lastMove.to[0])) === 2;
+      snd = { capture, castle };
+    }
     this.chess.load(fen);
     this.lastMove = lastMove;
     if (animate && lastMove && prev !== fen) this._animateTo(lastMove);
     else this._placeAll(false);
     this._markLast();
     this._drawShapes(shapes);
+    if (snd) {
+      const inChk = (this.chess.isCheck?.() || this.chess.inCheck?.()) ?? false;
+      if (inChk) Sound.check();
+      else if (snd.castle) Sound.castle();
+      else if (snd.capture) Sound.capture();
+      else Sound.move();
+    }
   }
 
   // ---------- piece rendering ----------
