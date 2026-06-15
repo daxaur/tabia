@@ -39,16 +39,38 @@
     <!-- HOME -->
     <section class="view active" id="view-home">
       <div class="hero">
-        <span class="kicker">open source · browser-local · spaced repetition</span>
-        <h1>Drill your openings<br>until they’re muscle memory.</h1>
-        <p>Pick an opening, train its lines, and let spaced repetition do the rest.
-           No account, no server — your prep lives in this browser.</p>
+        <canvas id="heroFx" class="herofx"></canvas>
+        <div class="herotext">
+          <span class="kicker">open source · browser-local · spaced repetition</span>
+          <h1>Drill your openings<br>until they’re <span class="shimmer">muscle memory</span>.</h1>
+          <p>Pick an opening, train its lines, and let spaced repetition do the rest.
+             No account, no server — your prep lives in this browser.</p>
+        </div>
       </div>
-      <div class="cards" id="homeCards"></div>
+      <div class="lib-head"><h2>Openings</h2><span class="lib-sub" id="libSub"></span></div>
+      <div class="library" id="library"></div>
       <div class="foot">
         <span>tabia · MIT · your data never leaves this browser</span>
         <span id="footStats"></span>
       </div>
+    </section>
+
+    <!-- OPENING DETAIL (folders → branches) -->
+    <section class="view" id="view-opening">
+      <div class="crumbs"><a id="crumbHome">Home</a> <span>›</span> <b id="crumbName"></b></div>
+      <div class="op-head">
+        <div class="op-meta">
+          <span class="kicker" id="opEco"></span>
+          <h1 id="opName"></h1>
+          <p id="opOneliner"></p>
+          <div class="op-actions">
+            <button class="btn primary" id="opTrain">▶ Train opening</button>
+            <button class="btn" id="opExplore">Explore</button>
+          </div>
+        </div>
+        <div class="op-preview"><div id="opBoard"></div></div>
+      </div>
+      <div class="tree" id="opTree"></div>
     </section>
 
     <!-- EXPLORE -->

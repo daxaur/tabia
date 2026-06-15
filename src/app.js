@@ -1,7 +1,10 @@
 import { Chess } from './vendor/chess.js';
 import { Board } from './board.js';
-import { repertoire } from './data/bdg.js';
+import { openings, groupsOf } from './data/index.js';
 import { Store } from './store.js';
+
+const repertoire = openings[0];     // single opening for explore/train (multi-opening ready)
+let currentOpening = openings[0];
 
 const REPO_URL = 'https://github.com/daxaur/tabia';
 const $ = s => document.querySelector(s);
@@ -25,42 +28,73 @@ function showView(v) {
   document.querySelectorAll('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + v));
   document.querySelectorAll('nav.top button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
   if (v === 'home') renderHome();
+  if (v === 'opening') renderOpening();
   if (v === 'train') refreshMastery();
+  window.scrollTo(0, 0);
 }
 document.querySelectorAll('nav.top button').forEach(b => b.addEventListener('click', () => showView(b.dataset.view)));
 
-// ============================== HOME ==============================
-function renderHome() {
-  const ids = repertoire.lines.map(l => l.id);
-  const due = Store.dueCount(repertoire.id, ids);
-  const mastered = ids.filter(id => Store.mastery(repertoire.id, id) >= 4).length;
-  $('#homeCards').innerHTML = `
-    <div class="card" style="grid-column:1/-1;border-color:var(--accent);">
-      <span class="ct">opening · ${repertoire.eco}</span>
-      <h3>${repertoire.name}</h3>
-      <p>${repertoire.oneLiner}</p>
-      <div class="meta"><span><b>${repertoire.lines.length}</b> variations</span><span><b>${due}</b> due now</span><span><b>${mastered}</b> mastered</span></div>
-      <div class="row">
-        <button class="btn primary" id="goTrain">▶ Train now</button>
-        <button class="btn" id="goExplore">Explore lines</button>
-      </div>
-    </div>` +
-    ['accepted', 'ryder', 'declined'].map(g => {
-      const ls = repertoire.lines.filter(l => l.group === g);
-      if (!ls.length) return '';
-      return `<div class="card">
-        <span class="ct">${groupLabel(g)} · ${ls.length} lines</span>
-        <h3>${g === 'accepted' ? '5.Nxf3 — the main lines' : g === 'ryder' ? '5.Qxf3 — the Ryder' : 'Black declines'}</h3>
-        <p>${ls.map(l => l.name.replace(/\s*\(.*?\)/, '')).join(' · ')}</p>
-        <div class="row"><button class="btn" data-scope="${g}">Drill ${groupLabel(g).toLowerCase()}</button></div>
-      </div>`;
-    }).join('');
-  $('#goTrain').onclick = () => { showView('train'); };
-  $('#goExplore').onclick = () => { showView('explore'); };
-  $('#homeCards').querySelectorAll('[data-scope]').forEach(b => b.onclick = () => { setScope(b.dataset.scope); showView('train'); });
-  const total = ids.reduce((a, id) => a + Store.line(repertoire.id, id).seen, 0);
-  $('#footStats').textContent = `${total} reps logged · ${mastered}/${ids.length} lines mastered`;
+// ============================== HOME (library) ==============================
+function statsFor(op) {
+  const ids = op.lines.map(l => l.id);
+  return { ids, due: Store.dueCount(op.id, ids), mastered: ids.filter(id => Store.mastery(op.id, id) >= 4).length,
+    reps: ids.reduce((a, id) => a + Store.line(op.id, id).seen, 0) };
 }
+function previewBoard(el, op, plies, interactive = false) {
+  const b = new Board(el, { interactive, pieceSet });
+  const g = new Chess(); const main = op.lines.find(l => l.star) || op.lines[0];
+  for (const [san] of main.moves.slice(0, plies)) g.move(san);
+  const h = g.history({ verbose: true });
+  b.setFen(g.fen(), { lastMove: h.length ? { from: h[h.length - 1].from, to: h[h.length - 1].to } : null });
+  return b;
+}
+function renderHome() {
+  $('#libSub').textContent = `${openings.length} opening${openings.length > 1 ? 's' : ''} · drill any line`;
+  $('#library').innerHTML = openings.map((op, i) => {
+    const s = statsFor(op); const pct = Math.round(s.mastered / s.ids.length * 100);
+    return `<div class="opcard" data-op="${op.id}" style="animation-delay:${i * 80}ms">
+      <div class="opcard-board"><div id="mini-${op.id}"></div></div>
+      <div class="opcard-body">
+        <span class="ct">${op.eco} · ${op.lines.length} lines${s.due ? ` · <b>${s.due} due</b>` : ''}</span>
+        <h3>${op.name}</h3>
+        <p>${op.oneLiner}</p>
+        <div class="bar"><i style="width:${pct}%"></i></div>
+        <span class="go">${pct ? `${pct}% mastered` : 'Start training'} →</span>
+      </div></div>`;
+  }).join('');
+  openings.forEach(op => previewBoard(document.getElementById(`mini-${op.id}`), op, 7));
+  $('#library').querySelectorAll('[data-op]').forEach(c => c.onclick = () => openOpening(c.dataset.op));
+  const s0 = statsFor(repertoire);
+  $('#footStats').textContent = `${s0.reps} reps logged · ${s0.mastered}/${s0.ids.length} lines mastered`;
+}
+
+// ============================== OPENING DETAIL (folders → branches) ==============================
+let opPreview = null;
+function openOpening(id) { currentOpening = openings.find(o => o.id === id) || openings[0]; showView('opening'); }
+function renderOpening() {
+  const op = currentOpening;
+  $('#crumbName').textContent = op.name;
+  $('#opEco').textContent = `opening · ${op.eco}`;
+  $('#opName').textContent = op.name;
+  $('#opOneliner').textContent = op.oneLiner;
+  $('#opBoard').innerHTML = ''; opPreview = previewBoard($('#opBoard'), op, 9);
+  $('#opTree').innerHTML = groupsOf(op).map(grp => `
+    <div class="folder" data-folder="${grp.key}">
+      <div class="fhead"><span class="fchev">▸</span> ${grp.label} <span class="cnt">${grp.lines.length} lines · ${grp.blurb}</span></div>
+      <div class="fbody">${grp.lines.map(l => {
+        const box = Store.mastery(op.id, l.id), due = Store.isDue(op.id, l.id);
+        const fm = l.moves.slice(0, 8).map((m, i) => i % 2 ? m[0] : `${Math.floor(i / 2) + 1}.${m[0]}`).join(' ');
+        return `<div class="branch" data-line="${l.id}">
+          <div><div class="nm">${l.name}</div><div class="mv">${fm}…</div></div>
+          <div class="bend">${due ? '<span class="pill due">due</span>' : ''}<span class="mastery">${'●'.repeat(box) + '○'.repeat(6 - box)}</span></div>
+        </div>`;}).join('')}</div>
+    </div>`).join('');
+  $('#opTree').querySelectorAll('.fhead').forEach(h => h.onclick = () => h.parentElement.classList.toggle('closed'));
+  $('#opTree').querySelectorAll('.branch').forEach(b => b.onclick = () => { exSelectLine(b.dataset.line); showView('explore'); });
+}
+$('#crumbHome').onclick = () => showView('home');
+$('#opTrain').onclick = () => showView('train');
+$('#opExplore').onclick = () => showView('explore');
 
 // ============================== EXPLORE ==============================
 const exBoard = new Board($('#exBoard'), { pieceSet, onMove: exMove });
@@ -115,6 +149,7 @@ $('#exFirst').onclick = () => exGoto(0);
 $('#exLast').onclick = () => exGoto(exLine.moves.length);
 $('#exFlip').onclick = () => exBoard.flip();
 $('#exSelect').onchange = e => loadExLine(+e.target.value);
+function exSelectLine(id) { const i = repertoire.lines.findIndex(l => l.id === id); if (i >= 0) { $('#exSelect').value = i; loadExLine(i); } }
 document.addEventListener('keydown', e => {
   if (!$('#view-explore').classList.contains('active')) return;
   if (e.key === 'ArrowRight') exStep(1);
@@ -246,8 +281,39 @@ $('#trHint').onclick = () => {
   setStatus('neu', '💡 Hint', 'The arrow marks your move.');
 };
 
+// ---------- hero dot-dispersion animation ----------
+function heroFx() {
+  const c = document.getElementById('heroFx'); if (!c) return;
+  const ctx = c.getContext('2d'); const DPR = Math.min(2, window.devicePixelRatio || 1);
+  let w, h, dots = [], t = 0;
+  function build() {
+    dots = []; const gap = 17 * DPR;
+    for (let y = gap; y < h - gap; y += gap) for (let x = gap; x < w - gap; x += gap) {
+      const disp = Math.max(0, (x / w - 0.42)) / 0.58;
+      dots.push({ x0: x, y0: y, disp, ph: Math.random() * 6.28, sp: 0.4 + Math.random() });
+    }
+  }
+  function resize() {
+    const r = c.parentElement.getBoundingClientRect();
+    w = c.width = Math.max(1, r.width * DPR); h = c.height = Math.max(1, r.height * DPR);
+    c.style.width = r.width + 'px'; c.style.height = r.height + 'px'; build();
+  }
+  function frame() {
+    t += 0.012; ctx.clearRect(0, 0, w, h);
+    for (const d of dots) {
+      const amp = d.disp * d.disp * 15 * DPR;
+      const x = d.x0 + Math.cos(t * d.sp + d.ph) * amp, y = d.y0 + Math.sin(t * d.sp * 1.3 + d.ph) * amp;
+      const a = 0.05 + d.disp * 0.24 + Math.sin(t * 2 + d.ph) * 0.04;
+      ctx.beginPath(); ctx.arc(x, y, (0.8 + d.disp * 1.2) * DPR, 0, 6.28);
+      ctx.fillStyle = `rgba(255,255,255,${Math.max(0, a)})`; ctx.fill();
+    }
+    requestAnimationFrame(frame);
+  }
+  resize(); window.addEventListener('resize', resize); frame();
+}
+
 // ---------- boot ----------
 buildExSelect(); loadExLine(0);
-refreshMastery(); renderHome();
+refreshMastery(); renderHome(); heroFx();
 window.addEventListener('hashchange', () => showView(location.hash.slice(1) || 'home'));
 showView(['explore', 'train'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'home');
