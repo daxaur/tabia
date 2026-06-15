@@ -6,8 +6,10 @@ import { evaluate, winPct, fmtEval } from './eval.js';
 import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js';
 import { Sound } from './sound.js';
 
-const repertoire = openings[0];     // single opening for explore/train (multi-opening ready)
+let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
+const userColor = () => (repo.color === 'b' ? 'b' : 'w');
+const userOrient = () => (userColor() === 'b' ? 'black' : 'white');
 
 const REPO_URL = 'https://github.com/daxaur/tabia';
 const $ = s => document.querySelector(s);
@@ -32,7 +34,7 @@ function showView(v) {
   document.querySelectorAll('nav.top button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
   if (v === 'home') renderHome();
   if (v === 'opening') renderOpening();
-  if (v === 'train') refreshMastery();
+  if (v === 'train') enterTrain();
   window.scrollTo(0, 0);
 }
 document.querySelectorAll('nav.top button').forEach(b => b.addEventListener('click', () => showView(b.dataset.view)));
@@ -44,7 +46,7 @@ function statsFor(op) {
     reps: ids.reduce((a, id) => a + Store.line(op.id, id).seen, 0) };
 }
 function previewBoard(el, op, plies, interactive = false) {
-  const b = new Board(el, { interactive, pieceSet });
+  const b = new Board(el, { interactive, pieceSet, orientation: op.color === 'b' ? 'black' : 'white' });
   const g = new Chess(); const main = op.lines.find(l => l.star) || op.lines[0];
   for (const [san] of main.moves.slice(0, plies)) g.move(san);
   const h = g.history({ verbose: true });
@@ -67,7 +69,7 @@ function renderHome() {
   }).join('');
   openings.forEach(op => previewBoard(document.getElementById(`mini-${op.id}`), op, 7));
   $('#library').querySelectorAll('[data-op]').forEach(c => c.onclick = () => openOpening(c.dataset.op));
-  const s0 = statsFor(repertoire);
+  const s0 = statsFor(repo);
   $('#footStats').textContent = `${s0.reps} reps logged · ${s0.mastered}/${s0.ids.length} lines mastered`;
 }
 
@@ -114,9 +116,9 @@ let hyper = null;   // { candidates:[lines], ply } while a Hyper round is live
 
 Sound.enabled = Store.prefs().sound !== false;
 
-function scopedLines() { return repertoire.lines.filter(l => drill.scope === 'all' || l.group === drill.scope); }
+function scopedLines() { return repo.lines.filter(l => drill.scope === 'all' || l.group === drill.scope); }
 function scopedLineIds() { return scopedLines().map(l => l.id); }
-function lineById(id) { return repertoire.lines.find(l => l.id === id); }
+function lineById(id) { return repo.lines.find(l => l.id === id); }
 
 function setScope(s) {
   drill.scope = s;
@@ -136,7 +138,7 @@ function setMode(m) {
   drill.active = false; drill.line = null; hyper = null;
   resetIdle();
   $('#trLineIdx').textContent = '';
-  $('#trOpName').textContent = repertoire.name;
+  $('#trOpName').textContent = repo.name;
   coach(MODE_META[m].intro);
 }
 document.querySelectorAll('#trModes .modetile').forEach(b => b.onclick = () => setMode(b.dataset.mode));
@@ -147,7 +149,8 @@ function coach(text, cls = '') {
   const av = $('#trAvatar'); av.className = 'coach-av' + (cls ? ' ' + cls : '');
 }
 function updateEval() {
-  const e = evaluate(trGame.fen());
+  const raw = evaluate(trGame.fen());
+  const e = userColor() === 'w' ? raw : -raw;   // always from the trainee's side
   const pct = Math.max(2, Math.min(98, winPct(e)));
   $('#trEvalFill').style.height = pct + '%';
   const r = $('#trEvalRead'); r.textContent = fmtEval(e);
@@ -172,13 +175,19 @@ function renderMoves() {
   $('#trMoves .cur')?.scrollIntoView({ block: 'nearest' });
 }
 function resetIdle() {
-  trGame = new Chess(); trBoard.setOrientation('white');
+  trGame = new Chess(); trBoard.setOrientation(userOrient());
   trBoard.setFen(trGame.fen(), { silent: true }); trBoard.setShapes([]); trBoard.lock(true);
   updateEval(); renderMoves(); setArrows();
 }
+// (re)load the opening the user picked, ready an idle board
+function enterTrain() {
+  if (repo !== currentOpening) { repo = currentOpening; drill.active = false; drill.line = null; hyper = null; }
+  refreshMastery();
+  setMode(drill.mode);
+}
 function setLineHeader(line) {
-  $('#trOpName').textContent = repertoire.name;
-  $('#trLineIdx').textContent = `#${repertoire.lines.indexOf(line) + 1} · ${line.name}`;
+  $('#trOpName').textContent = repo.name;
+  $('#trLineIdx').textContent = `#${repo.lines.indexOf(line) + 1} · ${line.name}`;
 }
 
 // ---- Learn / Practice / Drill ----
@@ -190,16 +199,27 @@ function startSession() {
 }
 function nextLine() {
   const ids = scopedLineIds();
-  beginLine(lineById(Store.pickNext(repertoire.id, ids) || ids[0]));
+  beginLine(lineById(Store.pickNext(repo.id, ids) || ids[0]));
 }
 function beginLine(line) {
   drill.line = line; drill.ply = 0; drill.mistake = false; drill.hinted = false;
-  trGame = new Chess(); trBoard.setOrientation('white');
+  trGame = new Chess(); trBoard.setOrientation(userOrient());
   trBoard.setFen(trGame.fen(), { silent: true }); trBoard.setShapes([]);
-  Store.discover(repertoire.id, line.id);
+  Store.discover(repo.id, line.id);
   setLineHeader(line); refreshMastery(); updateEval(); renderMoves();
-  if (drill.mode === 'learn') { trBoard.lock(true); coach(coachSay('learn') + ' ' + (line.idea || '')); }
-  else { trBoard.lock(false); coach(line.idea || 'Your move — play White’s repertoire move.'); }
+  if (drill.mode === 'learn') { trBoard.lock(true); coach(coachSay('learn') + ' ' + (line.idea || '')); setArrows(); return; }
+  // practice / drill — if the trainee is Black, the opponent (White) opens
+  if (userColor() === 'b') {
+    trBoard.lock(true);
+    setTimeout(() => {
+      const m = trGame.move(line.moves[0][0]);
+      trBoard.setFen(trGame.fen(), { lastMove: m ? { from: m.from, to: m.to } : null });
+      drill.ply = 1; updateEval(); renderMoves(); trBoard.lock(false);
+      coach(line.idea || 'Your move.');
+    }, 350);
+  } else {
+    trBoard.lock(false); coach(line.idea || 'Your move — play your repertoire move.');
+  }
   setArrows();
 }
 function expectedSan() { return drill.line.moves[drill.ply]?.[0]; }
@@ -227,7 +247,7 @@ function learnStep(dir) {
 function trMove(from, to, promo) {
   if (!drill.active) return;
   if (drill.mode === 'hyper') return hyperUserMove(from, to, promo);
-  if (drill.mode === 'learn' || trGame.turn() !== 'w') return;
+  if (drill.mode === 'learn' || trGame.turn() !== userColor()) return;
   const exp = expectedSan(), before = trGame.fen();
   const mv = trGame.move({ from, to, promotion: promo });
   if (!mv) return;
@@ -267,7 +287,7 @@ function afterUserMove() {
 function finishLine() {
   trBoard.lock(true);
   const ok = !drill.mistake;
-  Store.record(repertoire.id, drill.line.id, ok);
+  Store.record(repo.id, drill.line.id, ok);
   refreshMastery();
   coach(coachSay(ok ? 'done' : 'doneMiss'), ok ? 'ok' : 'bad');
   if (ok) Sound.success();
@@ -278,20 +298,27 @@ function finishLine() {
 function startRound() {
   drill.active = true; drill.mode = 'hyper'; drill.mistake = false; drill.hinted = false;
   hyper = { candidates: scopedLines().slice(), ply: 0 };
-  trGame = new Chess(); trBoard.setOrientation('white');
-  trBoard.setFen(trGame.fen(), { silent: true }); trBoard.setShapes([]); trBoard.lock(false);
+  trGame = new Chess(); trBoard.setOrientation(userOrient());
+  trBoard.setFen(trGame.fen(), { silent: true }); trBoard.setShapes([]);
   drill.rounds++; $('#trRounds').textContent = drill.rounds;
-  $('#trOpName').textContent = repertoire.name; $('#trLineIdx').textContent = `live game · round ${drill.rounds}`;
+  $('#trOpName').textContent = repo.name; $('#trLineIdx').textContent = `live game · round ${drill.rounds}`;
   updateEval(); renderMoves(); setArrows();
-  coach(`Round ${drill.rounds} — you’re White. Play your repertoire and I’ll answer.`);
   Sound.round();
+  if (trGame.turn() !== userColor()) {       // trainee is Black — the bot (White) opens
+    trBoard.lock(true);
+    coach(`Round ${drill.rounds} — I open as White; answer with your repertoire.`);
+    setTimeout(hyperBotMove, 500);
+  } else {
+    trBoard.lock(false);
+    coach(`Round ${drill.rounds} — you’re ${userColor() === 'w' ? 'White' : 'Black'}. Play your repertoire and I’ll answer.`);
+  }
 }
 function hyperExpected() {
   if (!hyper) return null;
   return [...new Set(hyper.candidates.map(l => l.moves[hyper.ply]?.[0]).filter(Boolean))][0];
 }
 function hyperUserMove(from, to, promo) {
-  if (!hyper || trGame.turn() !== 'w') return;
+  if (!hyper || trGame.turn() !== userColor()) return;
   const before = trGame.fen();
   const mv = trGame.move({ from, to, promotion: promo });
   if (!mv) return;
@@ -327,14 +354,14 @@ function hyperWin() {
   const name = hyper.candidates[0]?.name;
   coach(`You held the line${name ? ` — ${name}` : ''}! Press ↻ New round to face another.`, 'ok');
   Sound.success();
-  if (hyper.candidates[0]) Store.record(repertoire.id, hyper.candidates[0].id, true);
+  if (hyper.candidates[0]) Store.record(repo.id, hyper.candidates[0].id, true);
   refreshMastery();
 }
 
 function doHint() {
   if (!drill.active) return;
   if (drill.mode === 'learn') return learnStep(1);
-  const exp = drill.mode === 'hyper' ? hyperExpected() : (trGame.turn() === 'w' ? expectedSan() : null);
+  const exp = drill.mode === 'hyper' ? hyperExpected() : (trGame.turn() === userColor() ? expectedSan() : null);
   if (!exp) return;
   const m = trGame.move(exp); if (!m) return; const f = m.from, t = m.to; trGame.undo();
   if (drill.mode !== 'hyper') drill.hinted = true;
@@ -344,14 +371,14 @@ function doHint() {
 
 function refreshMastery() {
   const ids = scopedLineIds();
-  $('#trDue').textContent = Store.dueCount(repertoire.id, ids);
-  $('#trDiscovered').innerHTML = `· <b>${Store.discoveredCount(repertoire.id, ids)}</b>/${ids.length}`;
+  $('#trDue').textContent = Store.dueCount(repo.id, ids);
+  $('#trDiscovered').innerHTML = `· <b>${Store.discoveredCount(repo.id, ids)}</b>/${ids.length}`;
   const dots = b => '●'.repeat(b) + '○'.repeat(6 - b);
   $('#trMastery').innerHTML = scopedLines().map(l => {
-    const box = Store.mastery(repertoire.id, l.id);
+    const box = Store.mastery(repo.id, l.id);
     const sel = drill.line && drill.line.id === l.id ? 'sel' : '';
-    const disc = Store.isDiscovered(repertoire.id, l.id);
-    const due = Store.isDue(repertoire.id, l.id) ? `<span class="pill ${groupPill(l.group)}">due</span>` : '';
+    const disc = Store.isDiscovered(repo.id, l.id);
+    const due = Store.isDue(repo.id, l.id) ? `<span class="pill ${groupPill(l.group)}">due</span>` : '';
     return `<div class="varitem ${sel}" data-line="${l.id}">
       <div><span class="nm">${disc ? '' : '<i class="undisc">•</i>'}${l.name}</span><div class="mastery">${dots(box)}</div></div>
       ${due}</div>`;

@@ -279,3 +279,25 @@ select{width:100%;background:#000;color:var(--ink);border:1px solid var(--line2)
 .movelist.icons .mv.cur{background:var(--hl);color:#000;}
 .movelist.icons .mvpc{width:16px;height:16px;}
 .mvempty{color:var(--faint);}
+
+/* ============ annotations + cleaner coach ============ */
+.tb-arrow{animation:arrowin .13s ease-out;}
+.tb-arrow.live{animation:none;}
+@keyframes arrowin{from{opacity:0;}to{opacity:.85;}}
+.tb-circle{stroke:#15781b;opacity:.9;animation:arrowin .13s ease-out;}
+
+/* coach — chessreps-style white speech bubble with a tail to the avatar */
+.coach{display:flex;gap:11px;align-items:flex-start;background:transparent;border:0;padding:0;}
+.coach-av{width:42px;height:42px;flex-shrink:0;display:grid;place-items:center;font-size:23px;line-height:1;
+  background:var(--ink);color:#000;border-radius:50%;box-shadow:0 0 0 3px #000,0 0 0 4px var(--line2);transition:background .15s;}
+.coach-av.ok{background:#bce3a0;} .coach-av.bad{background:#eba6a6;} .coach-av.think{animation:cpulse 1s ease-in-out infinite;}
+.coach-body{flex:1;min-width:0;}
+.coach-name{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;letter-spacing:.5px;color:var(--dim);margin:2px 0 7px;}
+.coach-name #trModeName{color:var(--ink);font-weight:700;text-transform:uppercase;letter-spacing:1px;}
+.coach-op{color:var(--faint);} .coach-idx{margin-left:auto;color:var(--faint);}
+.coach-bubble{position:relative;background:#fff;color:#141414;font-family:var(--sans);font-size:15.5px;line-height:1.46;
+  padding:13px 15px;border-radius:4px 13px 13px 13px;box-shadow:0 8px 24px -14px #000;min-height:20px;}
+.coach-bubble::before{content:"";position:absolute;left:-8px;top:13px;border:8px solid transparent;border-right-color:#fff;border-left:0;}
+.coach-bubble.ok,.coach-bubble.bad{color:#141414;}
+.coach-bubble.ok{box-shadow:0 8px 24px -14px #000,inset 4px 0 0 #15781b;}
+.coach-bubble.bad{box-shadow:0 8px 24px -14px #000,inset 4px 0 0 #b32d2d;}

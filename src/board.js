@@ -49,9 +49,13 @@ export class Board {
     this.pieceLayer = this.root.querySelector('.tb-pieces');
     this.svg = this.root.querySelector('.tb-shapes');
     this._buildSquares();
+    this._userShapes = [];          // right-click arrows {from,to}
+    this._userCircles = new Set();  // right-click square highlights
+    this._draw = null;              // in-progress right-drag
     if (this.interactive) {
       this.pieceLayer.addEventListener('pointerdown', e => this._onDown(e));
       this.sqLayer.addEventListener('pointerdown', e => this._onDown(e));
+      this.root.addEventListener('contextmenu', e => e.preventDefault());
     }
   }
   _buildSquares() {
@@ -201,7 +205,10 @@ export class Board {
     return true;
   }
   _onDown(e) {
-    if (this.locked || !this.interactive || e.button !== 0) return;
+    if (!this.interactive) return;
+    if (e.button === 2) { e.preventDefault(); this._startDraw(e); return; }   // right-click: draw
+    if (this.locked || e.button !== 0) return;
+    this._clearUser();                                                        // left-click clears annotations
     const sq = this._pointSquare(e); if (!sq) return;
     const piece = this.chess.get(sq);
     // click-to-move target
@@ -252,32 +259,76 @@ export class Board {
   }
   _snapHome(p, sq) { const [x, y] = this._xy(sq); p.el.style.transform = `translate(${x}%, ${y}%)`; }
 
-  // ---------- arrows (lichess-style: crisp shaft + filled triangular head) ----------
-  setShapes(shapes) { this._drawShapes(shapes); }
-  _drawShapes(shapes) {
-    this._shapes = shapes || [];
-    this.svg.querySelectorAll('.tb-arrow').forEach(n => n.remove());
+  // ---------- right-click annotations (lichess-style) ----------
+  _startDraw(e) {
+    const sq = this._pointSquare(e); if (!sq) return;
+    this._draw = { from: sq, to: sq };
+    window.addEventListener('pointermove', this._dmv = ev => this._onDraw(ev));
+    window.addEventListener('pointerup', this._dup = ev => this._endDraw(ev));
+    this._renderShapes();
+  }
+  _onDraw(e) {
+    if (!this._draw) return;
+    const sq = this._pointSquare(e); if (sq) this._draw.to = sq;
+    this._renderShapes();
+  }
+  _endDraw(e) {
+    window.removeEventListener('pointermove', this._dmv);
+    window.removeEventListener('pointerup', this._dup);
+    const d = this._draw; this._draw = null; if (!d) return;
+    if (d.from === d.to) {                       // a tap = toggle a circle
+      this._userCircles.has(d.from) ? this._userCircles.delete(d.from) : this._userCircles.add(d.from);
+    } else {                                     // a drag = toggle an arrow
+      const i = this._userShapes.findIndex(s => s.from === d.from && s.to === d.to);
+      i >= 0 ? this._userShapes.splice(i, 1) : this._userShapes.push({ from: d.from, to: d.to });
+    }
+    this._renderShapes();
+  }
+  _clearUser() {
+    if (!this._userShapes.length && !this._userCircles.size) return;
+    this._userShapes = []; this._userCircles.clear(); this._renderShapes();
+  }
+
+  // ---------- arrows + circles (crisp shaft + filled triangular head) ----------
+  setShapes(shapes) { this._shapes = shapes || []; this._renderShapes(); }
+  _drawShapes(shapes) { this._shapes = shapes || []; this._renderShapes(); }
+  _renderShapes() {
+    this.svg.querySelectorAll('.tb-arrow,.tb-circle').forEach(n => n.remove());
+    const arrows = [...this._shapes, ...this._userShapes.map(s => ({ ...s, user: true }))];
+    if (this._draw && this._draw.from !== this._draw.to) arrows.push({ ...this._draw, user: true, live: true });
+    for (const s of arrows) this._arrow(s);
+    const circles = new Set(this._userCircles);
+    if (this._draw && this._draw.from === this._draw.to) circles.add(this._draw.from);
+    for (const sq of circles) this._circle(sq);
+  }
+  _arrow(s) {
     const NS = 'http://www.w3.org/2000/svg';
     const W = 0.17, HEAD = 0.42, HALF = 0.26, TAIL = 0.32; // square units
-    for (const s of this._shapes) {
-      const [fc, fr] = this._colrow(s.from), [tc, tr] = this._colrow(s.to);
-      let x1 = fc + .5, y1 = fr + .5; const x2 = tc + .5, y2 = tr + .5;
-      const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1;
-      const ux = dx / len, uy = dy / len, px = -uy, py = ux;
-      // start a touch ahead of the origin centre so the piece stays visible
-      x1 += ux * TAIL; y1 += uy * TAIL;
-      const bx = x2 - ux * HEAD, by = y2 - uy * HEAD;   // base of the head
-      const g = document.createElementNS(NS, 'g');
-      g.setAttribute('class', 'tb-arrow ' + (s.kind || ''));
-      const ln = document.createElementNS(NS, 'line');
-      ln.setAttribute('x1', x1); ln.setAttribute('y1', y1);
-      ln.setAttribute('x2', bx); ln.setAttribute('y2', by);
-      ln.setAttribute('stroke-width', W); ln.setAttribute('stroke-linecap', 'round');
-      const head = document.createElementNS(NS, 'polygon');
-      head.setAttribute('points',
-        `${x2},${y2} ${bx + px * HALF},${by + py * HALF} ${bx - px * HALF},${by - py * HALF}`);
-      g.appendChild(ln); g.appendChild(head);
-      this.svg.appendChild(g);
-    }
+    const [fc, fr] = this._colrow(s.from), [tc, tr] = this._colrow(s.to);
+    let x1 = fc + .5, y1 = fr + .5; const x2 = tc + .5, y2 = tr + .5;
+    const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1;
+    const ux = dx / len, uy = dy / len, px = -uy, py = ux;
+    x1 += ux * TAIL; y1 += uy * TAIL;                  // clear the origin piece
+    const bx = x2 - ux * HEAD, by = y2 - uy * HEAD;    // base of the head
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('class', 'tb-arrow ' + (s.user ? 'user ' : '') + (s.live ? 'live ' : '') + (s.kind || ''));
+    const ln = document.createElementNS(NS, 'line');
+    ln.setAttribute('x1', x1); ln.setAttribute('y1', y1);
+    ln.setAttribute('x2', bx); ln.setAttribute('y2', by);
+    ln.setAttribute('stroke-width', W); ln.setAttribute('stroke-linecap', 'round');
+    const head = document.createElementNS(NS, 'polygon');
+    head.setAttribute('points',
+      `${x2},${y2} ${bx + px * HALF},${by + py * HALF} ${bx - px * HALF},${by - py * HALF}`);
+    g.appendChild(ln); g.appendChild(head);
+    this.svg.appendChild(g);
+  }
+  _circle(sq) {
+    const NS = 'http://www.w3.org/2000/svg';
+    const [c, r] = this._colrow(sq);
+    const el = document.createElementNS(NS, 'circle');
+    el.setAttribute('cx', c + .5); el.setAttribute('cy', r + .5); el.setAttribute('r', 0.46);
+    el.setAttribute('class', 'tb-circle');
+    el.setAttribute('fill', 'none'); el.setAttribute('stroke-width', 0.06);
+    this.svg.appendChild(el);
   }
 }
