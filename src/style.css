@@ -184,3 +184,45 @@ select{width:100%;background:#000;color:var(--ink);border:1px solid var(--line2)
 .fhead .cnt{margin-left:auto;color:var(--faint);text-transform:none;letter-spacing:.5px;font-size:11px;}
 .branch .bend{display:flex;gap:8px;align-items:center;}
 .branch .mastery{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:1px;}
+
+/* ============ training view ============ */
+.trainbar{display:flex;align-items:center;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
+.seg.modes button{padding:9px 18px;font-size:11px;}
+.discovered{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);}
+.discovered b{color:var(--ink);}
+.btn.sm{padding:7px 12px;font-size:10px;}
+.trainbar .btn.sm{margin-left:auto;}
+.boardrow{display:flex;gap:12px;align-items:stretch;}
+/* eval / "winning" bar */
+.evalbar{width:16px;flex-shrink:0;background:#1a1a1a;border:1px solid var(--line2);position:relative;overflow:hidden;
+  align-self:stretch;min-height:120px;}
+.evalbar i{position:absolute;left:0;right:0;bottom:0;height:50%;background:#f0f0f0;transition:height .45s cubic-bezier(.2,.7,.2,1);}
+.evread{font-family:var(--mono);font-size:13px;letter-spacing:1px;color:var(--dim);align-self:center;margin-left:auto;}
+.evread.up{color:#cfcfcf;} .evread.down{color:#7a7a7a;}
+/* coach */
+.coach{display:flex;gap:14px;border:1px solid var(--line2);background:var(--panel);padding:16px;align-items:flex-start;}
+.coach-av{width:52px;height:52px;flex-shrink:0;display:grid;place-items:center;font-size:30px;line-height:1;
+  background:var(--ink);color:#000;border-radius:50%;
+  box-shadow:0 0 0 4px #000,0 0 0 5px var(--line2);}
+.coach-av.think{animation:cpulse 1s ease-in-out infinite;}
+.coach-av.ok{background:#bfe6a0;} .coach-av.bad{background:#e8a3a3;}
+@keyframes cpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.coach-body{flex:1;min-width:0;}
+.coach-name{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--faint);margin-bottom:5px;}
+.coach-mode{color:var(--ink);}
+.coach-bubble{font-size:17px;line-height:1.4;color:var(--ink);min-height:24px;}
+.coach-bubble.ok{color:#9fe07a;} .coach-bubble.bad{color:#ef9a9a;}
+.coach-sub{margin-top:8px;font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.5px;}
+/* messages drawer */
+.msgcfg{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(3px);z-index:60;display:grid;place-items:center;padding:20px;}
+.msgcfg[hidden]{display:none;}
+.msgcfg-card{background:var(--bg);border:1px solid var(--line2);max-width:620px;width:100%;max-height:86vh;overflow:auto;padding:24px;}
+.msgcfg-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.msgcfg-head h3{margin:0;font-size:20px;}
+.msgcfg .mf{margin-top:16px;}
+.msgcfg .mf label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin-bottom:6px;}
+.msgcfg textarea{width:100%;background:#0c0c0c;color:var(--ink);border:1px solid var(--line2);padding:9px 11px;
+  font-family:var(--mono);font-size:13px;line-height:1.5;resize:vertical;min-height:64px;}
+.msgcfg textarea:focus{outline:none;border-color:var(--ink);}
+.msgcfg code{font-family:var(--mono);color:var(--ink);background:#181818;padding:1px 5px;}
+.msgcfg-actions{display:flex;gap:10px;margin-top:20px;}

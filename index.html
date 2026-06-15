@@ -107,27 +107,43 @@
 
     <!-- TRAIN -->
     <section class="view" id="view-train">
+      <div class="trainbar">
+        <div class="seg modes" id="trModes" title="How you train">
+          <button data-mode="learn">Learn</button>
+          <button data-mode="practice">Practice</button>
+          <button data-mode="drill" class="active">Drill</button>
+        </div>
+        <div class="discovered" id="trDiscovered">0 / 0 lines discovered</div>
+        <button class="btn ghost sm" id="trSettings">⚙ Messages</button>
+      </div>
       <div class="play">
         <div class="boardcol">
-          <div class="boardwrap"><div id="trBoard"></div></div>
+          <div class="boardrow">
+            <div class="evalbar" id="trEvalBar"><i id="trEvalFill"></i></div>
+            <div class="boardwrap"><div id="trBoard"></div></div>
+          </div>
           <div class="bctrls">
-            <button class="btn primary" id="trStart">▶ Start session</button>
+            <button class="btn primary" id="trStart">▶ Start</button>
             <button class="btn" id="trHint">💡 Hint</button>
+            <button class="btn" id="trNext" hidden>Next ▶</button>
             <button class="btn ghost" id="trSkip">Skip line</button>
             <button class="btn ghost" id="trFlip">⇅ Flip</button>
+            <span class="evread" id="trEvalRead">+0.0</span>
+          </div>
+        </div>
+        <div class="side">
+          <div class="coach">
+            <div class="coach-av" id="trAvatar">♞</div>
+            <div class="coach-body">
+              <div class="coach-name">Coach <span id="trMode" class="coach-mode">drill</span></div>
+              <div class="coach-bubble" id="trBubble">Pick a mode and press Start.</div>
+              <div class="coach-sub" id="trLine"></div>
+            </div>
           </div>
           <div class="stats">
             <div class="stat"><div class="n" id="trCorrect">0</div><div class="l">correct</div></div>
             <div class="stat"><div class="n" id="trWrong">0</div><div class="l">missed</div></div>
             <div class="stat"><div class="n" id="trDue">0</div><div class="l">lines due</div></div>
-          </div>
-        </div>
-        <div class="side">
-          <div class="panel">
-            <h3>Drill</h3>
-            <div class="status neu" id="trStatus">Press “Start session” to drill what’s due.</div>
-            <div class="subtext" id="trSub"></div>
-            <div class="lineName" id="trLine"></div>
           </div>
           <div class="panel">
             <h3>Scope</h3>
@@ -137,11 +153,22 @@
               <button data-scope="ryder">Ryder</button>
               <button data-scope="declined">Declined</button>
             </div>
-            <div class="small" style="margin-top:10px;">It shows you positions; you play White’s repertoire move. Get a line clean and it won’t come back for a while. Miss it and it returns soon.</div>
           </div>
           <div class="panel">
-            <h3>Mastery</h3>
+            <h3>Lines</h3>
             <div class="varlist" id="trMastery"></div>
+          </div>
+        </div>
+      </div>
+      <!-- custom messages drawer -->
+      <div class="msgcfg" id="trMsgCfg" hidden>
+        <div class="msgcfg-card">
+          <div class="msgcfg-head"><h3>Coach messages</h3><button class="btn ghost sm" id="trMsgClose">✕ Close</button></div>
+          <p class="small">One message per line. Leave blank to use the defaults. <code>{exp}</code> is replaced with the correct move.</p>
+          <div id="trMsgFields"></div>
+          <div class="msgcfg-actions">
+            <button class="btn primary" id="trMsgSave">Save messages</button>
+            <button class="btn ghost" id="trMsgReset">Reset to defaults</button>
           </div>
         </div>
       </div>

@@ -31,6 +31,9 @@ export const Store = {
     return l;
   },
   isDue(repId, lineId) { return this.line(repId, lineId).due <= Date.now(); },
+  discover(repId, lineId) { const l = this.line(repId, lineId); if (!l.disc) { l.disc = 1; this._flush(); } },
+  isDiscovered(repId, lineId) { return !!this.line(repId, lineId).disc; },
+  discoveredCount(repId, lineIds) { return lineIds.filter(id => this.isDiscovered(repId, id)).length; },
   // pick the next line to drill from a list of lineIds: most overdue / lowest box first
   pickNext(repId, lineIds) {
     const now = Date.now();
