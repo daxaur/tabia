@@ -1,13 +1,13 @@
-import { Chess } from './vendor/chess.js?v=11';
-import { Board } from './board.js?v=11';
-import { openings, groupsOf } from './data/index.js?v=11';
-import { Store } from './store.js?v=11';
-import { evaluate, winPct, fmtEval } from './eval.js?v=11';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=11';
-import { Sound } from './sound.js?v=11';
-import { Auth } from './auth.js?v=11';
-import { ICON, siteIcon } from './icons.js?v=11';
-import { Engine } from './engine.js?v=11';
+import { Chess } from './vendor/chess.js?v=12';
+import { Board } from './board.js?v=12';
+import { openings, groupsOf } from './data/index.js?v=12';
+import { Store } from './store.js?v=12';
+import { evaluate, winPct, fmtEval } from './eval.js?v=12';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=12';
+import { Sound } from './sound.js?v=12';
+import { Auth } from './auth.js?v=12';
+import { ICON, siteIcon } from './icons.js?v=12';
+import { Engine } from './engine.js?v=12';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -49,17 +49,18 @@ function dotWordmark(canvas, text, dotMax) {
   for (let y = 0; y < H; y += step) for (let x = 0; x < W; x += step) {
     if (img[(y * W + x) * 4 + 3] > 110) dots.push({ x, y, ph: (x * 7 + y * 13) % 628 / 100 });
   }
-  let t = 0;
-  function frame() {
-    t += 0.045; ctx.clearRect(0, 0, canvas.width, canvas.height);
+  let t = 0, last = 0;
+  function frame(now) {
+    requestAnimationFrame(frame);
+    if (document.hidden || now - last < 55) return;   // ~18fps, gentle, idle when tab hidden
+    last = now; t += 0.1; ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (const d of dots) {
       const a = 0.55 + 0.45 * Math.sin(t + d.ph - d.x * 0.03);  // left-to-right shimmer
       ctx.beginPath(); ctx.arc(d.x * DPR, d.y * DPR, (dotMax || 1.15) * DPR, 0, 6.28);
       ctx.fillStyle = `rgba(244,244,244,${a})`; ctx.fill();
     }
-    requestAnimationFrame(frame);
   }
-  frame();
+  requestAnimationFrame(frame);
 }
 dotWordmark($('#brandLogo'), 'tabia', 1.55);
 dotWordmark($('#footLogo'), 'tabia', 1.2);
@@ -568,8 +569,12 @@ function heroFx() {
     w = c.width = Math.max(1, r.width * DPR); h = c.height = Math.max(1, r.height * DPR);
     c.style.width = r.width + 'px'; c.style.height = r.height + 'px'; build();
   }
-  function frame() {
-    t += 0.012; ctx.clearRect(0, 0, w, h);
+  let last = 0;
+  function frame(now) {
+    requestAnimationFrame(frame);
+    // idle when tab hidden or the home view isn't on screen, cap ~30fps
+    if (document.hidden || !$('#view-home').classList.contains('active') || now - last < 33) return;
+    last = now; t += 0.03; ctx.clearRect(0, 0, w, h);
     for (const d of dots) {
       const amp = d.disp * d.disp * 15 * DPR;
       const x = d.x0 + Math.cos(t * d.sp + d.ph) * amp, y = d.y0 + Math.sin(t * d.sp * 1.3 + d.ph) * amp;
@@ -577,9 +582,8 @@ function heroFx() {
       ctx.beginPath(); ctx.arc(x, y, (0.8 + d.disp * 1.2) * DPR, 0, 6.28);
       ctx.fillStyle = `rgba(255,255,255,${Math.max(0, a)})`; ctx.fill();
     }
-    requestAnimationFrame(frame);
   }
-  resize(); window.addEventListener('resize', resize); frame();
+  resize(); window.addEventListener('resize', resize); requestAnimationFrame(frame);
 }
 
 // ---------- boot ----------

@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="src/style.css?v=11">
+<link rel="stylesheet" href="src/style.css?v=12">
 <script>
   // network-first service worker so deploys are never masked by stale cache
   if ('serviceWorker' in navigator) {
@@ -22,7 +22,8 @@
 <body>
 <header class="top">
   <button class="brand" id="brandHome" title="tabia — home">
-    <canvas id="brandLogo" width="176" height="44" aria-label="tabia"></canvas>
+    <img src="assets/favicon.png" alt="" width="30" height="30">
+    <canvas id="brandLogo" width="160" height="42" aria-label="tabia"></canvas>
   </button>
   <nav class="top">
     <button data-view="home" class="active"><span class="bi" id="navHomeIcon"></span>Home</button>
@@ -222,6 +223,6 @@
   </div>
 </div>
 
-<script type="module" src="src/app.js?v=11"></script>
+<script type="module" src="src/app.js?v=12"></script>
 </body>
 </html>
