@@ -252,23 +252,32 @@ export class Board {
   }
   _snapHome(p, sq) { const [x, y] = this._xy(sq); p.el.style.transform = `translate(${x}%, ${y}%)`; }
 
-  // ---------- arrows ----------
+  // ---------- arrows (lichess-style: crisp shaft + filled triangular head) ----------
   setShapes(shapes) { this._drawShapes(shapes); }
   _drawShapes(shapes) {
     this._shapes = shapes || [];
-    this.svg.querySelectorAll('line,circle').forEach(n => n.remove());
+    this.svg.querySelectorAll('.tb-arrow').forEach(n => n.remove());
+    const NS = 'http://www.w3.org/2000/svg';
+    const W = 0.17, HEAD = 0.42, HALF = 0.26, TAIL = 0.32; // square units
     for (const s of this._shapes) {
       const [fc, fr] = this._colrow(s.from), [tc, tr] = this._colrow(s.to);
-      const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      // shorten so the arrowhead sits nicely
-      const x1 = fc + .5, y1 = fr + .5, x2 = tc + .5, y2 = tr + .5;
-      const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy);
-      const ex = x2 - dx / len * .42, ey = y2 - dy / len * .42;
+      let x1 = fc + .5, y1 = fr + .5; const x2 = tc + .5, y2 = tr + .5;
+      const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1;
+      const ux = dx / len, uy = dy / len, px = -uy, py = ux;
+      // start a touch ahead of the origin centre so the piece stays visible
+      x1 += ux * TAIL; y1 += uy * TAIL;
+      const bx = x2 - ux * HEAD, by = y2 - uy * HEAD;   // base of the head
+      const g = document.createElementNS(NS, 'g');
+      g.setAttribute('class', 'tb-arrow ' + (s.kind || ''));
+      const ln = document.createElementNS(NS, 'line');
       ln.setAttribute('x1', x1); ln.setAttribute('y1', y1);
-      ln.setAttribute('x2', ex); ln.setAttribute('y2', ey);
-      ln.setAttribute('class', 'tb-arrow ' + (s.kind || ''));
-      ln.setAttribute('marker-end', 'url(#tb-ah)');
-      this.svg.appendChild(ln);
+      ln.setAttribute('x2', bx); ln.setAttribute('y2', by);
+      ln.setAttribute('stroke-width', W); ln.setAttribute('stroke-linecap', 'round');
+      const head = document.createElementNS(NS, 'polygon');
+      head.setAttribute('points',
+        `${x2},${y2} ${bx + px * HALF},${by + py * HALF} ${bx - px * HALF},${by - py * HALF}`);
+      g.appendChild(ln); g.appendChild(head);
+      this.svg.appendChild(g);
     }
   }
 }

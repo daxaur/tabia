@@ -94,8 +94,11 @@ main{padding:30px 0 70px;}
 .tb-pc.drag{transition:none;z-index:30;cursor:grabbing;filter:drop-shadow(0 10px 14px rgba(0,0,0,.6));}
 .tb-pc.gone{opacity:0;transition:opacity .13s;}
 /* arrows */
-.tb-shapes{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:20;color:#4e9a00;overflow:visible;}
-.tb-arrow{stroke:#4e9a00;stroke-width:.16;stroke-linecap:round;opacity:.88;}
+.tb-shapes{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:20;overflow:visible;}
+.tb-arrow{opacity:.85;}                 /* lichess green */
+.tb-arrow line{stroke:#15781b;}
+.tb-arrow polygon{fill:#15781b;}
+.tb-arrow.warn line{stroke:#b32d2d;} .tb-arrow.warn polygon{fill:#b32d2d;}
 
 /* ---------- controls ---------- */
 .bctrls{display:flex;gap:8px;flex-wrap:wrap;}
