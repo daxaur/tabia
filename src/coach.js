@@ -24,8 +24,8 @@ export function messagesFor(key) {
   const list = (custom[key] && custom[key].length) ? custom[key] : DEFAULT_MESSAGES[key];
   return list && list.length ? list : DEFAULT_MESSAGES[key] || [''];
 }
-export function coachSay(key, vars = {}) {
-  const list = messagesFor(key);
+export function coachSay(key, vars = {}, lineMsgs = null) {
+  const list = (lineMsgs && lineMsgs[key] && lineMsgs[key].length) ? lineMsgs[key] : messagesFor(key);
   let m = list[Math.floor(Math.random() * list.length)] || '';
   return m.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? '');
 }

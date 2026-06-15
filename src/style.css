@@ -69,7 +69,7 @@ main{padding:30px 0 70px;}
 /* ---------- the board ---------- */
 .tb{position:relative;width:100%;aspect-ratio:1/1;border:1px solid #000;
   box-shadow:0 0 0 1px var(--line),0 30px 80px -30px #000;user-select:none;touch-action:none;}
-.tb.locked{pointer-events:none;}
+.tb.locked .tb-pc{cursor:default;}   /* locked blocks normal moves in JS, but premoves still register */
 .tb-squares{position:absolute;inset:0;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);}
 .tb-sq{position:relative;}
 .tb-sq.lt{background:var(--sq-lt);} .tb-sq.dk{background:var(--sq-dk);}
@@ -78,6 +78,7 @@ main{padding:30px 0 70px;}
 .tb-sq.lt .tb-cf,.tb-sq.lt .tb-cr{color:var(--sq-dk);} .tb-sq.dk .tb-cf,.tb-sq.dk .tb-cr{color:var(--sq-lt);}
 /* highlights — exact lichess treatment */
 .tb-sq.last::after{content:"";position:absolute;inset:0;background:rgba(155,199,0,.41);}
+.tb-sq.pre::after{content:"";position:absolute;inset:0;background:rgba(180,70,60,.55);}  /* queued pre-move */
 .tb-sq.sel::after{content:"";position:absolute;inset:0;background:rgba(20,85,30,.5);}
 .tb-sq.hover::after{content:"";position:absolute;inset:0;background:rgba(20,85,30,.3);}
 .tb-sq.dest::before{content:"";position:absolute;left:50%;top:50%;width:32%;height:32%;border-radius:50%;
@@ -321,3 +322,15 @@ select{width:100%;background:#000;color:var(--ink);border:1px solid var(--line2)
 .cs-link{font-family:var(--mono);font-size:11px;color:var(--dim);margin-left:8px;}
 .cs-busy{color:var(--dim);font-family:var(--mono);font-size:13px;}
 .cs-err{color:#ef9a9a;font-family:var(--mono);font-size:13px;}
+
+/* ============ brand icons + settings ============ */
+.ghbtn{display:inline-flex;align-items:center;gap:7px;}
+.bi{display:inline-flex;align-items:center;}
+.ic-svg{width:13px;height:13px;display:block;}
+.cl-name{display:flex;align-items:center;gap:9px;}
+.cl-name .ic-svg{width:19px;height:19px;}
+.cs-on{display:flex;align-items:center;gap:7px;} .cs-on .ic-svg{width:15px;height:15px;}
+#ccLogo{color:#81b64c;} #liLogo{color:var(--ink);}
+.set-block{margin-top:20px;}
+.set-block:first-of-type{margin-top:6px;}
+.set-lbl{display:block;font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin-bottom:9px;}

@@ -6,6 +6,7 @@ import { evaluate, winPct, fmtEval } from './eval.js';
 import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js';
 import { Sound } from './sound.js';
 import { Auth } from './auth.js';
+import { ICON, siteIcon } from './icons.js';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -19,17 +20,22 @@ const groupPill = g => ({ accepted: 'acc', declined: 'dec', ryder: 'ryd' }[g] ||
 const groupLabel = g => ({ accepted: 'Accepted', declined: 'Declined', ryder: 'Ryder' }[g] || g);
 
 document.getElementById('ghlink').href = REPO_URL;
+// brand logos
+$('#ghIcon').innerHTML = ICON.github;
+$('#connectIcon').innerHTML = ICON.link;
+$('#liLogo').innerHTML = ICON.lichess;
+$('#ccLogo').innerHTML = ICON.chesscom;
 
 // ---------- connect account (Lichess OAuth / Chess.com public) ----------
 function renderAccount() {
   const a = Auth.current();
-  const btn = $('#connectBtn');
-  btn.textContent = a ? `${a.site === 'lichess' ? '♞' : '♟'} ${a.username}` : '⚇ Connect';
-  btn.classList.toggle('linked', !!a);
+  $('#connectIcon').innerHTML = a ? siteIcon(a.site) : ICON.link;
+  $('#connectLabel').textContent = a ? a.username : 'Connect';
+  $('#connectBtn').classList.toggle('linked', !!a);
   const st = $('#connectStatus');
   if (a) {
     st.hidden = false;
-    st.innerHTML = `<div class="cs-on"><b>${a.username}</b> · ${a.site === 'lichess' ? 'Lichess' : 'Chess.com'}${a.rating ? ' · ' + a.rating : ''}
+    st.innerHTML = `<div class="cs-on"><span class="bi">${siteIcon(a.site)}</span> <b>${a.username}</b> · ${a.site === 'lichess' ? 'Lichess' : 'Chess.com'}${a.rating ? ' · ' + a.rating : ''}
       <a href="${a.url}" target="_blank" class="cs-link">view profile ↗</a></div>
       <button class="btn ghost sm" id="connectDisc">Disconnect</button>`;
     $('#connectDisc').onclick = () => { Auth.disconnect(); renderAccount(); };
@@ -151,7 +157,14 @@ function setScope(s) {
   document.querySelectorAll('#trScope button').forEach(b => b.classList.toggle('active', b.dataset.scope === s));
   refreshMastery();
 }
-document.querySelectorAll('#trScope button').forEach(b => b.onclick = () => setScope(b.dataset.scope));
+// rebuild the scope chips from the loaded opening's own groups
+function buildScope() {
+  if (!repo.lines.some(l => l.group === drill.scope)) drill.scope = 'all';
+  const groups = groupsOf(repo);
+  $('#trScope').innerHTML = `<button data-scope="all" class="${drill.scope === 'all' ? 'active' : ''}">All</button>` +
+    groups.map(g => `<button data-scope="${g.key}" class="${drill.scope === g.key ? 'active' : ''}">${g.label.split('·')[0].trim().slice(0, 8)}</button>`).join('');
+  $('#trScope').querySelectorAll('button').forEach(b => b.onclick = () => setScope(b.dataset.scope));
+}
 
 function setMode(m) {
   drill.mode = m;
@@ -161,6 +174,7 @@ function setMode(m) {
   $('#trRestart').hidden = m !== 'hyper';
   $('#trSkip').hidden = m === 'hyper';
   $('#trStart').textContent = m === 'hyper' ? '▶ Start round' : '▶ Start';
+  $('#linesPanel').style.display = m === 'hyper' ? 'none' : '';   // Hyper picks lines itself
   drill.active = false; drill.line = null; hyper = null;
   resetIdle();
   $('#trLineIdx').textContent = '';
@@ -201,13 +215,14 @@ function renderMoves() {
   $('#trMoves .cur')?.scrollIntoView({ block: 'nearest' });
 }
 function resetIdle() {
-  trGame = new Chess(); trBoard.setOrientation(userOrient());
+  trGame = new Chess(); trBoard.setOrientation(userOrient()); trBoard.setUserColor(userColor()); trBoard.clearPremove();
   trBoard.setFen(trGame.fen(), { silent: true }); trBoard.setShapes([]); trBoard.lock(true);
   updateEval(); renderMoves(); setArrows();
 }
 // (re)load the opening the user picked, ready an idle board
 function enterTrain() {
   if (repo !== currentOpening) { repo = currentOpening; drill.active = false; drill.line = null; hyper = null; }
+  buildScope();
   refreshMastery();
   setMode(drill.mode);
 }
@@ -229,7 +244,7 @@ function nextLine() {
 }
 function beginLine(line) {
   drill.line = line; drill.ply = 0; drill.mistake = false; drill.hinted = false;
-  trGame = new Chess(); trBoard.setOrientation(userOrient());
+  trGame = new Chess(); trBoard.setOrientation(userOrient()); trBoard.setUserColor(userColor()); trBoard.clearPremove();
   trBoard.setFen(trGame.fen(), { silent: true }); trBoard.setShapes([]);
   Store.discover(repo.id, line.id);
   setLineHeader(line); refreshMastery(); updateEval(); renderMoves();
@@ -241,7 +256,7 @@ function beginLine(line) {
       const m = trGame.move(line.moves[0][0]);
       trBoard.setFen(trGame.fen(), { lastMove: m ? { from: m.from, to: m.to } : null });
       drill.ply = 1; updateEval(); renderMoves(); trBoard.lock(false);
-      coach(line.idea || 'Your move.');
+      coach(line.idea || 'Your move.'); trBoard.tryPremove();
     }, 350);
   } else {
     trBoard.lock(false); coach(line.idea || 'Your move — play your repertoire move.');
@@ -282,13 +297,13 @@ function trMove(from, to, promo) {
     trBoard.setFen(trGame.fen(), { lastMove: { from, to } });
     trBoard.flash(to, 'ok'); trBoard.setShapes([]);
     const cm = drill.line.moves[drill.ply][1];
-    coach(coachSay('correct') + (cm ? ' ' + cm : ''), 'ok');
+    coach(coachSay('correct', {}, drill.line.messages) + (cm ? ' ' + cm : ''), 'ok');
     drill.ply++; drill.hinted = false; updateEval(); renderMoves();
     setTimeout(afterUserMove, 360);
   } else {
     trGame.undo(); trBoard.setFen(before, { silent: true }); Sound.error();
     drill.mistake = true; drill.wrong++; $('#trWrong').textContent = drill.wrong;
-    coach(coachSay('wrong', { exp }), 'bad'); trBoard.flash(to, 'bad');
+    coach(coachSay('wrong', { exp }, drill.line.messages), 'bad'); trBoard.flash(to, 'bad');
     if (drill.mode !== 'practice') {           // drill: reveal the move, then continue
       trBoard.lock(true);
       setTimeout(() => {
@@ -308,14 +323,14 @@ function afterUserMove() {
   trBoard.setFen(trGame.fen(), { lastMove: m ? { from: m.from, to: m.to } : null });
   drill.ply++; updateEval(); renderMoves();
   if (drill.ply >= drill.line.moves.length) return finishLine();
-  coach('Your move.');
+  coach('Your move.'); trBoard.tryPremove();
 }
 function finishLine() {
   trBoard.lock(true);
   const ok = !drill.mistake;
   Store.record(repo.id, drill.line.id, ok);
   refreshMastery();
-  coach(coachSay(ok ? 'done' : 'doneMiss'), ok ? 'ok' : 'bad');
+  coach(coachSay(ok ? 'done' : 'doneMiss', {}, drill.line.messages), ok ? 'ok' : 'bad');
   if (ok) Sound.success();
   setTimeout(() => { if (drill.active && drill.mode !== 'learn') nextLine(); }, 1300);
 }
@@ -324,7 +339,7 @@ function finishLine() {
 function startRound() {
   drill.active = true; drill.mode = 'hyper'; drill.mistake = false; drill.hinted = false;
   hyper = { candidates: scopedLines().slice(), ply: 0 };
-  trGame = new Chess(); trBoard.setOrientation(userOrient());
+  trGame = new Chess(); trBoard.setOrientation(userOrient()); trBoard.setUserColor(userColor()); trBoard.clearPremove();
   trBoard.setFen(trGame.fen(), { silent: true }); trBoard.setShapes([]);
   drill.rounds++; $('#trRounds').textContent = drill.rounds;
   $('#trOpName').textContent = repo.name; $('#trLineIdx').textContent = `live game · round ${drill.rounds}`;
@@ -373,7 +388,7 @@ function hyperBotMove() {
   hyper.candidates = cands.filter(l => norm(l.moves[hyper.ply][0]) === norm(bsan));
   hyper.ply++; updateEval(); renderMoves(); trBoard.lock(false);
   if (!hyper.candidates.some(l => l.moves[hyper.ply])) return hyperWin();
-  coach('Your move.');
+  coach('Your move.'); trBoard.tryPremove();
 }
 function hyperWin() {
   trBoard.lock(true);

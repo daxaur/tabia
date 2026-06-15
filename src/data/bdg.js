@@ -88,7 +88,11 @@ export const repertoire = {
 
     // ---------------- RYDER GAMBIT · 5.Qxf3 (aggressive) ----------------
     { id:'ryder-halosar', name:'Ryder — Halosar Trap (5…Qxd4)', group:'ryder', star:true,
-      idea:'Sacrifice a SECOND pawn with 5.Qxf3. If Black grabs d4, the queen is hunted down and trapped. +5.9.',
+      idea:'Sacrifice a SECOND pawn with 5.Qxf3. If Black grabs d4, the queen is hunted until she must give back a whole piece. White wins by force, ≈ +4.',
+      messages:{
+        done:['Halosar nailed — that’s the whole trap. Filed away.','Textbook execution of the Halosar. Beautiful.'],
+        wrong:['Careful — the Halosar only works move-perfect. It was {exp}.','Slip and the queen escapes for free. The move is {exp}.'],
+      },
       moves:[
         ['d4'],['d5'],['e4'],['dxe4'],['Nc3'],['Nf6'],['f3'],['exf3'],
         ['Qxf3','5.Qxf3!? — the Ryder: offer the d4-pawn as bait.'],
@@ -97,7 +101,10 @@ export const repertoire = {
         ['Qf2','7.Qf2 — keep chasing.'],['e5'],
         ['h3','8.h3 — squares running out for Her Majesty.'],['Qg6'],
         ['Bb5+','9.Bb5+ — check, dragging a pawn to c6.'],['c6'],
-        ['Nge2','10.Nge2 — heading Nf4/Ng3; the queen is trapped. +5.9.'],
+        ['Nge2','10.Nge2! — heading for f4; the queen has no safe square.'],
+        ['cxb5','10…cxb5 — the only way to save the queen is to hand back the bishop.'],
+        ['Nxb5','11.Nxb5 — material regained and a crushing attack. ≈ +4.'],['Na6'],
+        ['O-O-O','12.O-O-O — castle into the open files; the double sacrifice paid in full.'],
       ]},
     { id:'ryder-queenraid', name:'Ryder — Queen Raid (5…Bg4)', group:'ryder',
       idea:'The bishop hits your queen; ignore it and dive with Qxb7, snatching the queenside two pawns up.',

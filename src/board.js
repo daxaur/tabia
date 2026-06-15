@@ -21,8 +21,32 @@ export class Board {
     this.selected = null;
     this.lastMove = null;
     this.drag = null;
+    this.userColor = opts.userColor || null;   // the human's side (enables pre-moves)
+    this.premove = null;                        // { from, to, promo } queued for next turn
     this._build();
     this._placeAll(false);
+  }
+
+  setUserColor(c) { this.userColor = c; }
+  clearPremove() { this._clearPremove(); }
+  // can the human make a normal move *right now*?
+  _canMove() { return !this.locked && (!this.userColor || this.chess.turn() === this.userColor); }
+  // if a pre-move is queued and now legal, play it
+  tryPremove() {
+    if (!this.premove) return false;
+    const { from, to, promo } = this.premove;
+    this.premove = null; this._markPremove();
+    if (this._dests(from).includes(to)) { this.onMove(from, to, promo); return true; }
+    return false;
+  }
+  _setPremove(from, to) {
+    const promo = this.chess.get(from)?.type === 'p' && (to[1] === '8' || to[1] === '1') ? 'q' : undefined;
+    this.premove = { from, to, promo }; this._markPremove();
+  }
+  _clearPremove() { this.premove = null; this._markPremove(); }
+  _markPremove() {
+    for (const d of Object.values(this.squares)) d.classList.remove('pre');
+    if (this.premove) { this.squares[this.premove.from]?.classList.add('pre'); this.squares[this.premove.to]?.classList.add('pre'); }
   }
 
   // ---------- geometry ----------
@@ -207,9 +231,15 @@ export class Board {
   _onDown(e) {
     if (!this.interactive) return;
     if (e.button === 2) { e.preventDefault(); this._startDraw(e); return; }   // right-click: draw
-    if (this.locked || e.button !== 0) return;
-    this._clearUser();                                                        // left-click clears annotations
+    if (e.button !== 0) return;
+    this._clearUser(); this._clearPremove();                                  // left-click clears annotations + premove
     const sq = this._pointSquare(e); if (!sq) return;
+    if (!this._canMove()) {                                                   // not our turn → queue a pre-move
+      const pc = this.chess.get(sq);
+      if (this.userColor && pc && pc.color === this.userColor) this._startPremoveDrag(e, sq);
+      else this._clearSel();
+      return;
+    }
     const piece = this.chess.get(sq);
     // click-to-move target
     if (this.selected && sq !== this.selected) {
@@ -230,6 +260,17 @@ export class Board {
     window.addEventListener('pointerup', this._up = ev => this._onUp(ev));
     try { this.pieceLayer.setPointerCapture?.(e.pointerId); } catch {}
   }
+  _startPremoveDrag(e, sq) {
+    e.preventDefault();
+    this._select(sq);
+    const p = this.pieces[sq]; if (!p) return;
+    const rect = this.root.getBoundingClientRect();
+    this.drag = { from: sq, p, rect, moved: false, pre: true };
+    p.el.classList.add('drag');
+    this._moveDragEl(e);
+    window.addEventListener('pointermove', this._mv = ev => this._onMoveDrag(ev));
+    window.addEventListener('pointerup', this._up = ev => this._onUp(ev));
+  }
   _moveDragEl(e) {
     const { rect, p } = this.drag;
     const sz = rect.width / 8;
@@ -249,6 +290,11 @@ export class Board {
     const d = this.drag; this.drag = null; if (!d) return;
     d.p.el.classList.remove('drag');
     const to = this._pointSquare(e);
+    if (d.pre) {                                  // queue a pre-move (any target square)
+      this._snapHome(d.p, d.from); this._clearSel();
+      if (d.moved && to && to !== d.from) this._setPremove(d.from, to);
+      return;
+    }
     const moved = d.moved && to && to !== d.from && this._dests(d.from).includes(to);
     if (moved) { this._snapHome(d.p, d.from); this._tryMove(d.from, to); this._clearSel(); }
     else {

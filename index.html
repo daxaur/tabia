@@ -25,14 +25,8 @@
     <button data-view="train">♟ Study</button>
   </nav>
   <div class="right">
-    <div class="seg" id="pieceSeg" title="Piece set">
-      <button data-piece="cburnett" class="active">lichess</button>
-      <button data-piece="cardinal">cardinal</button>
-      <button data-piece="maestro">maestro</button>
-      <button data-piece="pixel">pixel</button>
-    </div>
-    <button class="ghbtn" id="connectBtn">⚇ Connect</button>
-    <a class="ghbtn" id="ghlink" href="#" target="_blank">★ GitHub</a>
+    <button class="ghbtn" id="connectBtn"><span class="bi" id="connectIcon"></span><span id="connectLabel">Connect</span></button>
+    <a class="ghbtn" id="ghlink" href="#" target="_blank" title="Source on GitHub"><span class="bi" id="ghIcon"></span>GitHub</a>
   </div>
 </header>
 
@@ -128,14 +122,9 @@
             <div class="stat"><div class="n" id="trRounds">0</div><div class="l">rounds</div></div>
           </div>
 
-          <div class="panel">
+          <div class="panel" id="linesPanel">
             <div class="ph"><h3>Lines <span class="disc" id="trDiscovered"></span></h3>
-              <div class="seg mini" id="trScope">
-                <button data-scope="all" class="active">All</button>
-                <button data-scope="accepted">Acc</button>
-                <button data-scope="ryder">Ryd</button>
-                <button data-scope="declined">Dec</button>
-              </div>
+              <div class="seg mini" id="trScope"></div>
             </div>
             <div class="varlist" id="trMastery"></div>
           </div>
@@ -147,15 +136,29 @@
         </aside>
       </div>
 
-      <!-- custom messages drawer -->
+      <!-- settings drawer (board + coach messages) -->
       <div class="msgcfg" id="trMsgCfg" hidden>
         <div class="msgcfg-card">
-          <div class="msgcfg-head"><h3>Coach messages</h3><button class="btn ghost sm" id="trMsgClose">✕ Close</button></div>
-          <p class="small">One message per line. Leave blank to use the defaults. <code>{exp}</code> is replaced with the correct move.</p>
-          <div id="trMsgFields"></div>
-          <div class="msgcfg-actions">
-            <button class="btn primary" id="trMsgSave">Save messages</button>
-            <button class="btn ghost" id="trMsgReset">Reset to defaults</button>
+          <div class="msgcfg-head"><h3>Settings</h3><button class="btn ghost sm" id="trMsgClose">✕ Close</button></div>
+
+          <div class="set-block">
+            <label class="set-lbl">Board pieces</label>
+            <div class="seg" id="pieceSeg">
+              <button data-piece="cburnett" class="active">lichess</button>
+              <button data-piece="cardinal">cardinal</button>
+              <button data-piece="maestro">maestro</button>
+              <button data-piece="pixel">pixel</button>
+            </div>
+          </div>
+
+          <div class="set-block">
+            <label class="set-lbl">Coach messages</label>
+            <p class="small">One message per line. Blank = defaults. <code>{exp}</code> = the correct move.</p>
+            <div id="trMsgFields"></div>
+            <div class="msgcfg-actions">
+              <button class="btn primary" id="trMsgSave">Save messages</button>
+              <button class="btn ghost" id="trMsgReset">Reset to defaults</button>
+            </div>
           </div>
         </div>
       </div>
@@ -171,12 +174,12 @@
     <p class="small">Link a profile to pull your games and stats. Everything stays in this browser — tabia has no server and stores nothing remotely.</p>
 
     <div class="connect-row">
-      <div class="connect-info"><div class="cl-name">♞ Lichess</div><div class="cl-sub">Secure OAuth — no password shared.</div></div>
+      <div class="connect-info"><div class="cl-name"><span class="bi" id="liLogo"></span> Lichess</div><div class="cl-sub">Secure OAuth — no password shared.</div></div>
       <button class="btn primary" id="connectLichess">Connect</button>
     </div>
 
     <div class="connect-row">
-      <div class="connect-info"><div class="cl-name">♟ Chess.com</div><div class="cl-sub">Public profile by username.</div></div>
+      <div class="connect-info"><div class="cl-name"><span class="bi cc" id="ccLogo"></span> Chess.com</div><div class="cl-sub">Public profile by username.</div></div>
       <div class="connect-cc">
         <input id="ccUser" placeholder="username" autocomplete="off" spellcheck="false">
         <button class="btn" id="connectChesscom">Link</button>
