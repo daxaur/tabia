@@ -467,3 +467,33 @@ nav.top .ic-svg{width:14px;height:14px;}
   font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;transition:.13s;}
 .fchip:hover{color:var(--ink);border-color:var(--ink);}
 .fchip.on{background:var(--ink);color:#000;border-color:var(--ink);font-weight:700;}
+
+/* ============ header CTA + cleaner GitHub + sticky footer + heart ============ */
+body{display:flex;flex-direction:column;min-height:100vh;}
+main{flex:1 0 auto;}
+.site-foot{flex-shrink:0;}
+
+/* Create CTA (header right + home) */
+.cta{display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:#000;border:1px solid var(--ink);
+  font-family:var(--mono);font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:8px 13px;
+  transition:transform .14s, box-shadow .14s, background .14s;}
+.cta:hover{transform:translateY(-1px);background:#fff;box-shadow:0 8px 22px -10px rgba(255,255,255,.6);}
+.cta .ic-svg{width:13px;height:13px;}
+.cta.sm{font-size:10px;padding:7px 11px;margin-left:auto;}
+.lib-head{align-items:center;}
+
+/* cleaner GitHub button — subtle shine sweep on hover */
+.ghbtn.gh{position:relative;overflow:hidden;}
+.ghbtn.gh::after{content:"";position:absolute;top:0;left:-70%;width:45%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent);transform:skewX(-20deg);transition:left .55s ease;}
+.ghbtn.gh:hover::after{left:140%;}
+
+/* footer: 3-up donate, animated heart, attention */
+.donate{grid-template-columns:repeat(auto-fit,minmax(132px,1fr));}
+.heart{color:#e0436b;display:inline-block;animation:heartbeat 1.5s ease-in-out infinite;font-style:normal;}
+@keyframes heartbeat{0%,40%,100%{transform:scale(1)}12%{transform:scale(1.3)}24%{transform:scale(1)}}
+.foot-bottom a{color:var(--dim);border-bottom:1px solid var(--line2);} .foot-bottom a:hover{color:var(--ink);border-color:var(--ink);}
+.foot-h{position:relative;display:inline-block;}
+.foot-h::after{content:"";position:absolute;left:0;bottom:-4px;height:2px;width:100%;
+  background:linear-gradient(90deg,#f7d64b,transparent);background-size:200% 100%;animation:footglow 3s linear infinite;}
+@keyframes footglow{to{background-position:-200% 0}}

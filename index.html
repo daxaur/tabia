@@ -9,9 +9,23 @@
 <title>tabia — open chess opening trainer</title>
 <meta name="description" content="Drill your chess opening repertoire with spaced repetition. Browser-local, open source, no account.">
 <link rel="icon" type="image/png" href="assets/favicon.png">
+<!-- social / SEO -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="tabia">
+<meta property="og:title" content="tabia — open-source chess opening drills">
+<meta property="og:description" content="Drill your repertoire until it's muscle memory. Browser-local, no account, no server. Open source.">
+<meta property="og:url" content="https://daxaur.github.io/tabia/">
+<meta property="og:image" content="https://daxaur.github.io/tabia/assets/og.png">
+<meta property="og:image:width" content="1326">
+<meta property="og:image:height" content="1000">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="tabia — open-source chess opening drills">
+<meta name="twitter:description" content="Drill your repertoire until it's muscle memory. Browser-local, no account, open source.">
+<meta name="twitter:image" content="https://daxaur.github.io/tabia/assets/og.png">
+<meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="src/style.css?v=25">
+<link rel="stylesheet" href="src/style.css?v=26">
 <script>
   // network-first service worker so deploys are never masked by stale cache
   if ('serviceWorker' in navigator) {
@@ -28,12 +42,12 @@
   <nav class="top">
     <button data-view="home" class="active"><span class="bi" id="navHomeIcon"></span>Home</button>
     <button data-view="train"><span class="bi" id="navStudyIcon"></span>Study</button>
-    <button data-view="create"><span class="bi" id="navCreateIcon"></span>Create</button>
     <button data-view="saved"><span class="bi" id="navSavedIcon"></span>Saved</button>
   </nav>
   <div class="right">
+    <button class="cta" data-view="create" id="createCta"><span class="bi" id="navCreateIcon"></span>Create</button>
     <button class="ghbtn connect" id="connectBtn"><span class="bi" id="connectIcon"></span><span id="connectLabel">Connect</span></button>
-    <a class="ghbtn" id="ghlink" href="#" target="_blank" title="Source on GitHub"><span class="bi" id="ghIcon"></span>GitHub</a>
+    <a class="ghbtn gh" id="ghlink" href="#" target="_blank" title="Source on GitHub"><span class="bi" id="ghIcon"></span>GitHub</a>
   </div>
 </header>
 
@@ -51,7 +65,8 @@
              No account, no server — your prep lives in this browser.</p>
         </div>
       </div>
-      <div class="lib-head"><h2>Openings</h2><span class="lib-sub" id="libSub"></span></div>
+      <div class="lib-head"><h2>Openings</h2><span class="lib-sub" id="libSub"></span>
+        <button class="cta sm" id="homeCreate"><span class="bi" id="homeCreateIcon"></span>Create your own</button></div>
       <div class="lib-filter" id="libFilter"></div>
       <div class="library" id="library"></div>
       <div class="foot">
@@ -261,7 +276,10 @@
       <div class="donate" id="donate"></div>
     </div>
   </div>
-  <div class="foot-bottom"><span class="wrap">tabia · MIT · built with stockfish + chess.js · made for the love of the game</span></div>
+  <div class="foot-bottom"><span class="wrap">tabia · MIT · built with
+    <a href="https://stockfishchess.org/" target="_blank" rel="noopener">Stockfish</a> +
+    <a href="https://github.com/jhlywa/chess.js" target="_blank" rel="noopener">chess.js</a> ·
+    made with <span class="heart" aria-label="love">♥</span> for the game</span></div>
 </footer>
 
 <!-- connect account drawer -->
@@ -287,6 +305,6 @@
   </div>
 </div>
 
-<script type="module" src="src/app.js?v=25"></script>
+<script type="module" src="src/app.js?v=26"></script>
 </body>
 </html>

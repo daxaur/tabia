@@ -1,13 +1,13 @@
-import { Chess } from './vendor/chess.js?v=25';
-import { Board } from './board.js?v=25';
-import { openings, groupsOf, CATEGORIES } from './data/index.js?v=25';
-import { Store } from './store.js?v=25';
-import { evaluate, winPct, fmtEval } from './eval.js?v=25';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=25';
-import { Sound } from './sound.js?v=25';
-import { Auth } from './auth.js?v=25';
-import { ICON, siteIcon } from './icons.js?v=25';
-import { Engine } from './engine.js?v=25';
+import { Chess } from './vendor/chess.js?v=26';
+import { Board } from './board.js?v=26';
+import { openings, groupsOf, CATEGORIES } from './data/index.js?v=26';
+import { Store } from './store.js?v=26';
+import { evaluate, winPct, fmtEval } from './eval.js?v=26';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=26';
+import { Sound } from './sound.js?v=26';
+import { Auth } from './auth.js?v=26';
+import { ICON, siteIcon } from './icons.js?v=26';
+import { Engine } from './engine.js?v=26';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -31,7 +31,11 @@ $('#ccLogo').innerHTML = ICON.chesscom;
 $('#navHomeIcon').innerHTML = ICON.home;
 $('#navStudyIcon').innerHTML = ICON.study;
 $('#navSavedIcon').innerHTML = ICON.star;
+$('#navCreateIcon').innerHTML = ICON.plus;
+$('#homeCreateIcon').innerHTML = ICON.plus;
 $('#brandHome').onclick = () => showView('home');
+$('#createCta').onclick = () => showView('create');
+$('#homeCreate').onclick = () => showView('create');
 
 // ---------- animated dot-matrix wordmark ----------
 function dotWordmark(canvas, text, dotMax) {
@@ -67,11 +71,10 @@ dotWordmark($('#brandLogo'), 'tabia', 1.55);
 dotWordmark($('#footLogo'), 'tabia', 1.2);
 
 // ---------- crypto donate ----------
-const DONATE = [   // replace with your own wallet addresses
-  { key: 'btc',  name: 'Bitcoin',  logo: 'bitcoin',  addr: 'bc1qexampleexampleexampleexampleexamplexx' },
-  { key: 'eth',  name: 'Ethereum', logo: 'ethereum', addr: '0xExampleExampleExampleExampleExampleExa1' },
-  { key: 'sol',  name: 'Solana',   logo: 'solana',   addr: 'So1anaExampleExampleExampleExampleExampleXx' },
-  { key: 'usdc', name: 'USDC',     logo: 'tether',   addr: '0xExampleExampleExampleExampleExampleExa1' },
+const DONATE = [
+  { key: 'btc', name: 'Bitcoin',  logo: 'bitcoin',  addr: 'bc1q2cc6a8s6lufk662hmjq5ue6myj9x2kuu050rlm' },
+  { key: 'eth', name: 'Ethereum', logo: 'ethereum', addr: '0x8D1D564832B8F56417D8646aE668f4bdf9994949' },
+  { key: 'sol', name: 'Solana',   logo: 'solana',   addr: 'EH25TBYjLacSe95iNFm7o5sY9WH3dJDW9UQNSSDSL72t' },
 ];
 $('#donate').innerHTML = DONATE.map(d =>
   `<button class="dcard" data-addr="${d.addr}" title="Copy ${d.name} address">

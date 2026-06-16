@@ -10,5 +10,5 @@
     "dev": "python3 -m http.server 4173",
     "validate": "node tools/validate.mjs"
   },
-  "keywords": ["chess", "openings", "trainer", "repertoire", "spaced-repetition", "blackmar-diemer", "self-hosted"]
+  "keywords": ["chess", "openings", "trainer", "repertoire", "spaced-repetition", "self-hosted"]
 }
