@@ -1,0 +1,25 @@
+// The French Defence — Black repertoire (1.e4 e6).
+export const repertoire = {
+  id: 'french', name: 'French Defence', color: 'b', eco: 'C00',
+  oneLiner: '1.e4 e6 — solid and combative: a rock-solid chain, then break with …c5 and …f6.',
+  trunk: '1.e4 e6 2.d4 d5',
+  groups: { main: { label: 'Main · 3.Nc3', blurb: 'Winawer & Classical' }, other: { label: 'Other', blurb: 'Advance & Tarrasch' } },
+  lines: [
+    { id: 'winawer', name: 'Winawer (3.Nc3 Bb4)', group: 'main', star: true,
+      idea: 'Pin and trade on c3 to wreck White’s queenside pawns, then besiege the doubled pawns and the centre.',
+      moves: [['e4'], ['e6'], ['d4'], ['d5'], ['Nc3'], ['Bb4', '3…Bb4 — the Winawer.'], ['e5'], ['c5'],
+        ['a3'], ['Bxc3+'], ['bxc3'], ['Ne7', 'Target the doubled c-pawns and e5.']] },
+    { id: 'classical-french', name: 'Classical (3.Nc3 Nf6)', group: 'main',
+      idea: 'Develop classically; after Bg5 trade dark-squared bishops and play against the cramped e5-chain with …c5/…f6.',
+      moves: [['e4'], ['e6'], ['d4'], ['d5'], ['Nc3'], ['Nf6'], ['Bg5'], ['Be7'], ['e5'], ['Nfd7'],
+        ['Bxe7'], ['Qxe7', 'Now …c5 and …f6 strike the chain.']] },
+    { id: 'advance-french', name: 'Advance (3.e5)', group: 'other',
+      idea: 'White grabs space with e5. Undermine the base of the chain with …c5 and …Qb6, hitting d4 and b2.',
+      moves: [['e4'], ['e6'], ['d4'], ['d5'], ['e5', '3.e5 — the Advance.'], ['c5'], ['c3'], ['Nc6'],
+        ['Nf3'], ['Qb6'], ['a3'], ['c4', 'Clamp the queenside and play on the light squares.']] },
+    { id: 'tarrasch-french', name: 'Tarrasch (3.Nd2)', group: 'other',
+      idea: 'Against 3.Nd2, hit the centre at once with …c5; equal, active piece play in an open position.',
+      moves: [['e4'], ['e6'], ['d4'], ['d5'], ['Nd2', '3.Nd2 — the Tarrasch.'], ['c5'], ['exd5'], ['exd5'],
+        ['Ngf3'], ['Nc6'], ['Bb5'], ['Bd6', 'Free, comfortable development.']] },
+  ],
+};
