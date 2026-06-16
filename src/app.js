@@ -1,13 +1,13 @@
-import { Chess } from './vendor/chess.js?v=18';
-import { Board } from './board.js?v=18';
-import { openings, groupsOf } from './data/index.js?v=18';
-import { Store } from './store.js?v=18';
-import { evaluate, winPct, fmtEval } from './eval.js?v=18';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=18';
-import { Sound } from './sound.js?v=18';
-import { Auth } from './auth.js?v=18';
-import { ICON, siteIcon } from './icons.js?v=18';
-import { Engine } from './engine.js?v=18';
+import { Chess } from './vendor/chess.js?v=19';
+import { Board } from './board.js?v=19';
+import { openings, groupsOf, CATEGORIES } from './data/index.js?v=19';
+import { Store } from './store.js?v=19';
+import { evaluate, winPct, fmtEval } from './eval.js?v=19';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=19';
+import { Sound } from './sound.js?v=19';
+import { Auth } from './auth.js?v=19';
+import { ICON, siteIcon } from './icons.js?v=19';
+import { Engine } from './engine.js?v=19';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -168,13 +168,13 @@ const library = () => [...openings, ...Store.customOpenings()];
 function opCardHtml(op, i, pfx) {
   const s = statsFor(op); const pct = s.ids.length ? Math.round(s.mastered / s.ids.length * 100) : 0;
   const starN = op.lines.filter(l => l.star).length;
-  const ribbon = op.tabiaOriginal ? '<div class="op-ribbon">★ tabia original</div>' : op.custom ? '<div class="op-ribbon yours">yours</div>' : '';
+  const ribbon = op.tabiaOriginal ? '<div class="op-ribbon">★ TABIA ORIGINAL</div>' : op.custom ? '<div class="op-ribbon yours">YOURS</div>' : '';
   return `<div class="opcard" data-op="${op.id}" style="animation-delay:${i * 70}ms">
     ${ribbon}
-    <button class="opfav${Store.isFavorite(op.id) ? ' on' : ''}" data-fav="${op.id}" title="Save opening">${ICON.star}</button>
+    <button class="opfav${Store.isFavorite(op.id) ? ' on' : ''}" data-fav="${op.id}" title="Save opening">${ICON.star}<span class="opfav-n">${starN}</span></button>
     <div class="opcard-board"><div id="${pfx}-${op.id}"></div></div>
     <div class="opcard-body">
-      <span class="ct">${op.eco} · ${op.lines.length} lines${starN ? ` · <span class="op-rate" title="${starN} featured line${starN > 1 ? 's' : ''}">${'★'.repeat(starN)}</span>` : ''}${s.due ? ` · <b>${s.due} due</b>` : ''}</span>
+      <span class="ct">${op.eco} · ${op.lines.length} lines${s.due ? ` · <b>${s.due} due</b>` : ''}</span>
       <h3>${op.name}</h3>
       <p>${op.oneLiner || ''}</p>
       <div class="bar"><i style="width:${pct}%"></i></div>
@@ -185,9 +185,19 @@ function wireCards(container) {
   container.querySelectorAll('.opfav').forEach(b => b.onclick = e => { e.stopPropagation(); b.classList.toggle('on', Store.toggleFavorite(b.dataset.fav)); });
   container.querySelectorAll('[data-op]').forEach(c => c.onclick = () => openOpening(c.dataset.op));
 }
+let libCat = 'All';
+function renderFilter() {
+  const present = CATEGORIES.filter(c => library().some(o => o.category === c));
+  const cats = ['All', ...present, ...(Store.customOpenings().length ? ['Yours'] : [])];
+  if (!cats.includes(libCat)) libCat = 'All';
+  $('#libFilter').innerHTML = cats.map(c => `<button class="fchip${c === libCat ? ' on' : ''}" data-cat="${c}">${c}</button>`).join('');
+  $('#libFilter').querySelectorAll('[data-cat]').forEach(b => b.onclick = () => { libCat = b.dataset.cat; renderHome(); });
+}
 function renderHome() {
-  const lib = library().sort((a, b) => (Store.isFavorite(b.id) ? 1 : 0) - (Store.isFavorite(a.id) ? 1 : 0)); // saved first
-  $('#libSub').textContent = `${lib.length} opening${lib.length > 1 ? 's' : ''} · drill any line`;
+  renderFilter();
+  let lib = library().sort((a, b) => (Store.isFavorite(b.id) ? 1 : 0) - (Store.isFavorite(a.id) ? 1 : 0)); // saved first
+  if (libCat !== 'All') lib = lib.filter(o => libCat === 'Yours' ? o.custom : o.category === libCat);
+  $('#libSub').textContent = `${lib.length} opening${lib.length > 1 ? 's' : ''}${libCat !== 'All' ? ' · ' + libCat.toLowerCase() : ' · drill any line'}`;
   $('#library').innerHTML = lib.map((op, i) => opCardHtml(op, i, 'mini')).join('');
   lib.forEach(op => previewBoard(document.getElementById(`mini-${op.id}`), op, 7));
   wireCards($('#library'));
