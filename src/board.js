@@ -1,7 +1,7 @@
 // tabia board — absolutely-positioned pieces that *slide*, buttery pointer-drag,
 // click-to-move, animated programmatic moves, crisp arrows. Dependency-free, chess.js-backed.
-import { Chess } from './vendor/chess.js?v=22';
-import { Sound } from './sound.js?v=22';
+import { Chess } from './vendor/chess.js?v=23';
+import { Sound } from './sound.js?v=23';
 
 const FILES = 'abcdefgh';
 const GLYPH = { p: 'P', n: 'N', b: 'B', r: 'R', q: 'Q', k: 'K' };
@@ -125,7 +125,9 @@ export class Board {
     }
     this.chess.load(fen);
     this.lastMove = lastMove;
-    if (animate && lastMove && prev !== fen) this._animateTo(lastMove);
+    // only slide if the moving piece is actually present on `from`; otherwise just
+    // place every piece from scratch (prevents phantom animations losing pieces)
+    if (animate && lastMove && prev !== fen && this.pieces[lastMove.from]) this._animateTo(lastMove);
     else this._placeAll(false);
     this._markLast();
     this._drawShapes(shapes);
@@ -195,8 +197,10 @@ export class Board {
     const b = this.chess.board();
     const want = {};
     for (let r = 0; r < 8; r++) for (let f = 0; f < 8; f++) { const c = b[r][f]; if (c) want[FILES[f] + (8 - r)] = c; }
-    // if mismatch in count, hard reset (rare edge cases)
-    if (Object.keys(want).length !== Object.keys(this.pieces).length) this._placeAll(false);
+    // self-heal to the EXACT position: hard reset if any square is missing or wrong
+    let bad = Object.keys(want).length !== Object.keys(this.pieces).length;
+    if (!bad) for (const sq in want) { const p = this.pieces[sq]; if (!p || p.type !== want[sq].type || p.color !== want[sq].color) { bad = true; break; } }
+    if (bad) this._placeAll(false);
   }
 
   // ---------- highlights ----------

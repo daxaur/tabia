@@ -199,11 +199,12 @@ select{width:100%;background:#000;color:var(--ink);border:1px solid var(--line2)
 .trainbar .btn.sm{margin-left:auto;}
 .boardrow{display:flex;gap:12px;align-items:stretch;}
 /* eval / "winning" bar */
-.evalbar{width:16px;flex-shrink:0;background:#1a1a1a;border:1px solid var(--line2);position:relative;overflow:hidden;
+.evalbar{width:18px;flex-shrink:0;background:#262421;border:1px solid var(--line2);position:relative;overflow:hidden;
   align-self:stretch;min-height:120px;}
-.evalbar i{position:absolute;left:0;right:0;bottom:0;height:50%;background:#f0f0f0;transition:height .45s cubic-bezier(.2,.7,.2,1);}
-.evread{font-family:var(--mono);font-size:13px;letter-spacing:1px;color:var(--dim);align-self:center;margin-left:auto;}
-.evread.up{color:#cfcfcf;} .evread.down{color:#7a7a7a;}
+.evalbar i{position:absolute;left:0;right:0;bottom:0;height:50%;background:#f0f0f0;transition:height .4s cubic-bezier(.2,.7,.2,1), top 0s, bottom 0s;}
+.evalbar::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(255,255,255,.18);}  /* midline */
+.evread{font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:.5px;color:var(--ink);align-self:center;margin-left:auto;min-width:42px;text-align:right;}
+.evread.up{color:#7bd44a;} .evread.down{color:#e06363;}
 /* coach */
 .coach{display:flex;gap:14px;border:1px solid var(--line2);background:var(--panel);padding:16px;align-items:flex-start;}
 .coach-av{width:52px;height:52px;flex-shrink:0;display:grid;place-items:center;font-size:30px;line-height:1;

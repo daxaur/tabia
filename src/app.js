@@ -1,13 +1,13 @@
-import { Chess } from './vendor/chess.js?v=22';
-import { Board } from './board.js?v=22';
-import { openings, groupsOf, CATEGORIES } from './data/index.js?v=22';
-import { Store } from './store.js?v=22';
-import { evaluate, winPct, fmtEval } from './eval.js?v=22';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=22';
-import { Sound } from './sound.js?v=22';
-import { Auth } from './auth.js?v=22';
-import { ICON, siteIcon } from './icons.js?v=22';
-import { Engine } from './engine.js?v=22';
+import { Chess } from './vendor/chess.js?v=23';
+import { Board } from './board.js?v=23';
+import { openings, groupsOf, CATEGORIES } from './data/index.js?v=23';
+import { Store } from './store.js?v=23';
+import { evaluate, winPct, fmtEval } from './eval.js?v=23';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=23';
+import { Sound } from './sound.js?v=23';
+import { Auth } from './auth.js?v=23';
+import { ICON, siteIcon } from './icons.js?v=23';
+import { Engine } from './engine.js?v=23';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -459,17 +459,23 @@ function coach(text, cls = '') {
   const b = $('#trBubble'); b.textContent = text; b.className = 'coach-bubble' + (cls ? ' ' + cls : '');
   const av = $('#trAvatar'); av.className = 'coach-av' + (cls ? ' ' + cls : '');
 }
-function paintEval(e) {                     // e = pawns, from the trainee's side
-  const pct = Math.max(2, Math.min(98, winPct(e)));
-  $('#trEvalFill').style.height = pct + '%';
+function paintEval(whiteEval) {             // whiteEval = pawns, White's perspective
+  const whitePct = Math.max(2, Math.min(98, winPct(whiteEval)));
+  const fill = $('#trEvalFill');
+  fill.style.height = whitePct + '%';
+  // white's slice sits on white's side of the board (bottom when white-oriented, top when flipped)
+  if (trBoard.orientation === 'black') { fill.style.top = '0'; fill.style.bottom = 'auto'; }
+  else { fill.style.top = 'auto'; fill.style.bottom = '0'; }
+  // readout from YOUR side, with sign (+ = you're better)
+  const e = userColor() === 'w' ? whiteEval : -whiteEval;
   const r = $('#trEvalRead'); r.textContent = fmtEval(e);
   r.className = 'evread ' + (e > 0.4 ? 'up' : e < -0.4 ? 'down' : '');
 }
 function updateEval() {
   const fen = trGame.fen();
-  paintEval(userColor() === 'w' ? evaluate(fen) : -evaluate(fen));   // instant heuristic
-  if (Engine.available) Engine.evaluate(fen, white => {              // real Stockfish, streams as depth climbs
-    if (trGame.fen() === fen) paintEval(userColor() === 'w' ? white : -white);
+  paintEval(evaluate(fen));                                          // instant heuristic (white-relative)
+  if (Engine.available) Engine.evaluate(fen, white => {             // real Stockfish, streams as depth climbs
+    if (trGame.fen() === fen) paintEval(white);
   });
 }
 function setArrows() {

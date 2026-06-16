@@ -1,22 +1,23 @@
 // Opening library. Each opening is a "folder"; its lines are the branches.
 // Add a new opening by importing its module and pushing it here.
-import { repertoire as bdg } from './bdg.js?v=22';
-import { repertoire as jobava } from './jobava.js?v=22';
-import { repertoire as budapest } from './budapest.js?v=22';
-import { repertoire as qg } from './queensgambit.js?v=22';
-import { repertoire as ruylopez } from './ruylopez.js?v=22';
-import { repertoire as italian } from './italian.js?v=22';
-import { repertoire as sicilian } from './sicilian.js?v=22';
-import { repertoire as french } from './french.js?v=22';
-import { repertoire as carokann } from './carokann.js?v=22';
-import { repertoire as alien } from './alien.js?v=22';
-import { repertoire as benoni } from './benoni.js?v=22';
+import { repertoire as bdg } from './bdg.js?v=23';
+import { repertoire as jobava } from './jobava.js?v=23';
+import { repertoire as budapest } from './budapest.js?v=23';
+import { repertoire as qg } from './queensgambit.js?v=23';
+import { repertoire as ruylopez } from './ruylopez.js?v=23';
+import { repertoire as italian } from './italian.js?v=23';
+import { repertoire as sicilian } from './sicilian.js?v=23';
+import { repertoire as french } from './french.js?v=23';
+import { repertoire as carokann } from './carokann.js?v=23';
+import { repertoire as alien } from './alien.js?v=23';
+import { repertoire as benoni } from './benoni.js?v=23';
+import { repertoire as oldbenoni } from './benonigambit.js?v=23';
 
-export const openings = [bdg, jobava, budapest, alien, benoni, qg, ruylopez, italian, sicilian, french, carokann];
+export const openings = [bdg, jobava, budapest, alien, oldbenoni, benoni, qg, ruylopez, italian, sicilian, french, carokann];
 
 // browse-by-category + which ones are tabia originals (curated, aggressive)
 const CATEGORY = {
-  bdg: 'Gambits', budapest: 'Gambits', alien: 'Gambits', jobava: 'Systems',
+  bdg: 'Gambits', budapest: 'Gambits', alien: 'Gambits', jobava: 'Systems', oldbenoni: 'Gambits',
   qg: 'Classical', ruylopez: 'Classical', italian: 'Classical',
   sicilian: 'Defences', french: 'Defences', carokann: 'Defences', benoni: 'Defences',
 };
