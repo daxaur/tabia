@@ -545,9 +545,9 @@ main{flex:1 0 auto;}
 .cardacts .btn.ghost{border-radius:10px;}
 
 /* interactive "study it" rows under the card */
-.recrows{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:760px;margin:0 auto;}
-@media(max-width:680px){.recrows{grid-template-columns:1fr;}}
-.recrow{display:flex;align-items:center;gap:14px;text-align:left;padding:16px 18px;border-radius:14px;
+.recrows{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;max-width:760px;margin:0 auto;}
+@media(max-width:680px){.recrows{grid-template-columns:minmax(0,1fr);}}
+.recrow{min-width:0;display:flex;align-items:center;gap:14px;text-align:left;padding:16px 18px;border-radius:14px;
   border:1px solid var(--line2);background:var(--panel);color:var(--ink);cursor:pointer;transition:.15s;
   animation:cardrise .6s cubic-bezier(.2,.7,.2,1) both;}
 .recrow:nth-child(2){animation-delay:.07s;}
@@ -559,3 +559,43 @@ main{flex:1 0 auto;}
 .recrow-one{font-size:12px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .recrow-go{font-family:var(--mono);font-size:12px;color:var(--dim);white-space:nowrap;}
 .recrow:hover .recrow-go{color:#8b7bff;}
+
+/* ============ Mobile / responsive pass ============ */
+@media(max-width:640px){
+  .wrap{padding:0 14px;}
+  main{padding:18px 0 56px;}
+
+  /* header: icon-only nav, compact brand, drop GitHub (still in footer) */
+  header.top{gap:6px;padding:10px 10px;}
+  .brand{gap:6px;}
+  .brand img{height:22px;width:22px;}
+  #brandLogo{width:66px!important;height:auto;}   /* override inline style set by the wordmark JS */
+  nav.top{margin-left:0;gap:1px;}
+  nav.top button{padding:8px 7px;font-size:0;letter-spacing:0;}
+  nav.top button .bi{margin:0;}
+  nav.top .ic-svg{width:19px;height:19px;}
+  header.top .right{gap:6px;}
+  .ghbtn.gh{display:none;}
+  .right .cta,.right .ghbtn.connect{font-size:0;padding:9px 10px;letter-spacing:0;}
+  .right .cta .ic-svg,.right .ghbtn.connect .ic-svg{width:16px;height:16px;}
+
+  /* study hub: full-width board, comfy tap targets */
+  .boardwrap{min-width:0;width:100%;}
+  .boardwrap.big{max-width:100%;}
+  .modetile{padding:11px 12px;}
+  .modetile .ml{font-size:15px;}
+
+  /* opening detail + library spacing */
+  .op-head{gap:18px;}
+  .coach-hero{padding:22px 8px 4px;}
+
+  /* shareable card: dial back padding so it never clips */
+  .cardacts{gap:8px;}
+}
+
+/* tighter still for very small phones */
+@media(max-width:380px){
+  header.top{gap:6px;padding:10px 9px;}
+  nav.top button{padding:8px 6px;}
+  #brandLogo{width:60px!important;}
+}
