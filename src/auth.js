@@ -1,6 +1,6 @@
 // tabia — connect a Lichess (OAuth2 PKCE public client) or Chess.com (public API)
 // account. No server and no client secret: tokens live only in this browser.
-import { Store } from './store.js?v=37';
+import { Store } from './store.js?v=38';
 
 const LICHESS = 'https://lichess.org';
 const CLIENT_ID = 'tabia.openpaw';   // arbitrary id for a PKCE public client

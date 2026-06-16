@@ -50,21 +50,29 @@ async function fetchChesscom(username, max = 80) {
   return out.slice(0, max);
 }
 
-async function fetchLichess(username, max = 80) {
-  const res = await fetch(`https://lichess.org/api/games/user/${encodeURIComponent(username.trim())}?max=${max}&moves=true&rated=true`,
-    { headers: { Accept: 'application/x-ndjson' } });
-  if (!res.ok) throw new Error('No such Lichess player');
+async function lichessRaw(username, max, rated) {
+  const u = encodeURIComponent(username.trim().replace(/^@/, ''));
+  const url = `https://lichess.org/api/games/user/${u}?max=${max}&moves=true&perfType=ultraBullet,bullet,blitz,rapid,classical${rated ? '&rated=true' : ''}`;
+  const res = await fetch(url, { headers: { Accept: 'application/x-ndjson' } });
+  if (res.status === 404) throw new Error('No Lichess player by that name.');
+  if (res.status === 429) throw new Error('Lichess is busy (rate-limited) — wait a few seconds and retry.');
+  if (!res.ok) throw new Error('Lichess request failed — try again in a moment.');
   const text = await res.text();
-  const out = text.trim().split('\n').filter(Boolean).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean)
-    .map(g => {
-      const white = (g.players?.white?.user?.name || '').toLowerCase();
-      const youWhite = white === username.trim().toLowerCase();
-      const mv = (g.moves || '').split(' ').filter(Boolean);
-      const result = g.winner ? ((g.winner === 'white') === youWhite ? 'win' : 'loss') : 'draw';
-      return { youWhite, d1w: clean(mv[0]), plies: mv.length, result };
-    });
-  if (!out.length) throw new Error('No games found for that player');
-  return out;
+  if (!text.trim()) return [];
+  return text.trim().split('\n').filter(Boolean).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+}
+async function fetchLichess(username, max = 80) {
+  let raw = await lichessRaw(username, max, true);            // rated first — cleanest style signal
+  if (!raw.length) raw = await lichessRaw(username, max, false);  // fall back to casual games
+  if (!raw.length) throw new Error('That account has no standard games to read yet.');
+  const lc = username.trim().toLowerCase().replace(/^@/, '');
+  return raw.map(g => {
+    const white = (g.players?.white?.user?.name || '').toLowerCase();
+    const youWhite = white === lc;
+    const mv = (g.moves || '').split(' ').filter(Boolean);
+    const result = g.winner ? ((g.winner === 'white') === youWhite ? 'win' : 'loss') : 'draw';
+    return { youWhite, d1w: clean(mv[0]), plies: mv.length, result };
+  });
 }
 
 function analyze(games) {
