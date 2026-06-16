@@ -602,7 +602,7 @@ main{flex:1 0 auto;}
 
 /* ============ Coach showcase (empty state) ============ */
 .coach-showcase{display:grid;grid-template-columns:1.05fr .95fr;gap:34px;max-width:940px;margin:10px auto 0;
-  align-items:center;animation:fadeup .5s ease both;}
+  align-items:center;animation:fadeup .5s ease both;overflow-x:clip;}
 .coach-showcase[hidden]{display:none;}
 .coach-showcase.busy{opacity:.35;filter:saturate(.6);pointer-events:none;transition:.2s;}
 .show-card{position:relative;border-radius:20px;padding:1.5px;animation:floaty 6s ease-in-out infinite;}
