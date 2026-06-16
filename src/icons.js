@@ -13,5 +13,6 @@ export const ICON = {
   plus: wrap('0 0 24 24', 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z'),
   trash: wrap('0 0 24 24', 'M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6zM19 4h-3.5l-1-1h-5l-1 1H5v2h14z'),
   star: wrap('0 0 24 24', 'M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z'),
+  spark: wrap('0 0 24 24', 'M12 2l1.8 5.4L19 9l-5.2 1.6L12 16l-1.8-5.4L5 9l5.2-1.6zM19 14l.9 2.6L22 17.5l-2.1.9L19 21l-.9-2.6L16 17.5l2.1-.9z'),
 };
 export const siteIcon = site => site === 'lichess' ? ICON.lichess : site === 'chesscom' ? ICON.chesscom : ICON.link;

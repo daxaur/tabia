@@ -25,7 +25,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="src/style.css?v=27">
+<link rel="stylesheet" href="src/style.css?v=28">
 <script>
   // network-first service worker so deploys are never masked by stale cache
   if ('serviceWorker' in navigator) {
@@ -42,6 +42,7 @@
   <nav class="top">
     <button data-view="home" class="active"><span class="bi" id="navHomeIcon"></span>Home</button>
     <button data-view="train"><span class="bi" id="navStudyIcon"></span>Study</button>
+    <button data-view="coach"><span class="bi" id="navCoachIcon"></span>Coach</button>
     <button data-view="saved"><span class="bi" id="navSavedIcon"></span>Saved</button>
   </nav>
   <div class="right">
@@ -65,6 +66,11 @@
              No account, no server — your prep lives in this browser.</p>
         </div>
       </div>
+      <button class="coach-teaser" id="coachTeaser">
+        <span class="ct-ico">✦</span>
+        <span class="ct-txt"><b>Not sure what to play?</b> Drop your username and we’ll match an opening to your style — free.</span>
+        <span class="ct-go">Try the Coach →</span>
+      </button>
       <div class="lib-head"><h2>Openings</h2><span class="lib-sub" id="libSub"></span>
         <button class="cta sm" id="homeCreate"><span class="bi" id="homeCreateIcon"></span>Create your own</button></div>
       <div class="lib-filter" id="libFilter"></div>
@@ -79,6 +85,22 @@
     <section class="view" id="view-saved">
       <div class="lib-head"><h2 id="savedWho">Your saved openings</h2><span class="lib-sub">★ the openings you starred</span></div>
       <div class="library" id="savedLib"></div>
+    </section>
+
+    <!-- COACH — match an opening to your style (free, from your public games) -->
+    <section class="view" id="view-coach">
+      <div class="coach-hero">
+        <span class="kicker">free · no AI bill · your games never leave the browser</span>
+        <h1>Find the opening that fits <span class="shimmer">your</span> style</h1>
+        <p>Drop your Lichess or Chess.com username. tabia reads your recent games, profiles how you play — sharp or solid, e4 or d4 — and matches an opening to you.</p>
+        <div class="coach-form">
+          <div class="seg" id="coachSite"><button data-site="chesscom" class="active">Chess.com</button><button data-site="lichess">Lichess</button></div>
+          <input id="coachUser" placeholder="your username" autocomplete="off" spellcheck="false">
+          <button class="btn primary big" id="coachGo">✦ Analyse my games</button>
+        </div>
+        <div class="coach-status" id="coachStatus"></div>
+      </div>
+      <div class="coach-result" id="coachResult" hidden></div>
     </section>
 
     <!-- OPENING DETAIL (folders → branches) -->
@@ -305,6 +327,6 @@
   </div>
 </div>
 
-<script type="module" src="src/app.js?v=27"></script>
+<script type="module" src="src/app.js?v=28"></script>
 </body>
 </html>

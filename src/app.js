@@ -1,13 +1,14 @@
-import { Chess } from './vendor/chess.js?v=27';
-import { Board } from './board.js?v=27';
-import { openings, groupsOf, CATEGORIES } from './data/index.js?v=27';
-import { Store } from './store.js?v=27';
-import { evaluate, winPct, fmtEval } from './eval.js?v=27';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=27';
-import { Sound } from './sound.js?v=27';
-import { Auth } from './auth.js?v=27';
-import { ICON, siteIcon } from './icons.js?v=27';
-import { Engine } from './engine.js?v=27';
+import { Chess } from './vendor/chess.js?v=28';
+import { Board } from './board.js?v=28';
+import { openings, groupsOf, CATEGORIES } from './data/index.js?v=28';
+import { Store } from './store.js?v=28';
+import { evaluate, winPct, fmtEval } from './eval.js?v=28';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=28';
+import { Sound } from './sound.js?v=28';
+import { Auth } from './auth.js?v=28';
+import { ICON, siteIcon } from './icons.js?v=28';
+import { Engine } from './engine.js?v=28';
+import { CoachAI } from './coachai.js?v=28';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -138,6 +139,66 @@ $('#connectChesscom').onclick = async () => {
 };
 Auth.handleRedirect().then(acc => { if (acc) { renderAccount(); $('#connectModal').hidden = false; } });
 
+// ---------- Coach: match an opening to your style (free, from your public games) ----------
+$('#navCoachIcon').innerHTML = ICON.spark;
+$('#coachTeaser')?.addEventListener('click', () => showView('coach'));
+let coachSite = 'chesscom';
+document.querySelectorAll('#coachSite button').forEach(b => b.onclick = () => {
+  coachSite = b.dataset.site;
+  document.querySelectorAll('#coachSite button').forEach(x => x.classList.toggle('active', x === b));
+});
+function enterCoach() {
+  const a = Auth.current();
+  if (a && !$('#coachUser').value) {
+    $('#coachUser').value = a.username;
+    coachSite = a.site === 'lichess' ? 'lichess' : 'chesscom';
+    document.querySelectorAll('#coachSite button').forEach(x => x.classList.toggle('active', x.dataset.site === coachSite));
+  }
+}
+function coachStatus(msg, cls) { const s = $('#coachStatus'); s.textContent = msg; s.className = 'coach-status ' + (cls || ''); }
+async function runCoach() {
+  const user = $('#coachUser').value.trim();
+  if (!user) { coachStatus('Enter your username first.', 'err'); return; }
+  coachStatus('Reading your recent games…', 'busy'); $('#coachResult').hidden = true; $('#coachGo').disabled = true;
+  try { const p = await CoachAI.profile(coachSite, user); coachStatus('', ''); renderCoachResult(p); }
+  catch (e) { coachStatus(e.message || 'Couldn’t analyse that account.', 'err'); }
+  $('#coachGo').disabled = false;
+}
+$('#coachGo').onclick = runCoach;
+$('#coachUser').addEventListener('keydown', e => { if (e.key === 'Enter') runCoach(); });
+function recCard(rec, side, why) {
+  if (!rec) return '';
+  const op = library().find(o => o.id === rec.id); if (!op) return '';
+  return `<div class="rec">
+    <div class="rec-side">${side === 'w' ? '♔ as White' : '♚ as Black'}</div>
+    <h3>${op.name} ${op.tabiaOriginal ? '<span class="op-badge">★ original</span>' : ''}</h3>
+    <p>${op.oneLiner || ''}</p>
+    <div class="rec-why">${why}</div>
+    <button class="btn primary sm" data-study="${op.id}">▶ Study it</button>
+  </div>`;
+}
+function renderCoachResult(p) {
+  const styleLabel = p.aggressive ? 'Aggressive' : 'Positional';
+  const wName = library().find(o => o.id === p.rec.white?.id)?.name || '';
+  const whyW = `You open <b>1.${p.rec.wD1}</b> and play like ${p.aggressive ? 'an attacker' : 'a positional player'} — a ${p.rec.wStyle} fit.`;
+  const whyB = `Against <b>1.${p.rec.bVs}</b> this ${p.rec.bStyle} system will feel like home.`;
+  const tweet = encodeURIComponent(`tabia read my games and says I should play the ${wName} ♟️ — find your opening:`);
+  $('#coachResult').hidden = false;
+  $('#coachResult').innerHTML = `
+    <div class="coach-profile">
+      <div class="cp-head">Your profile <span class="cp-sub">${p.n} recent ${p.site === 'lichess' ? 'Lichess' : 'Chess.com'} games</span></div>
+      <div class="cp-stats">
+        <div class="cp"><div class="cp-n">${styleLabel}</div><div class="cp-l">style</div></div>
+        <div class="cp"><div class="cp-n">1.${p.whiteD1}</div><div class="cp-l">you open</div></div>
+        <div class="cp"><div class="cp-n">${p.winRate}%</div><div class="cp-l">win rate</div></div>
+        <div class="cp"><div class="cp-n">${p.avgMoves}</div><div class="cp-l">avg moves</div></div>
+      </div>
+    </div>
+    <div class="recs">${recCard(p.rec.white, 'w', whyW)}${recCard(p.rec.black, 'b', whyB)}</div>
+    <a class="btn share" href="https://twitter.com/intent/tweet?text=${tweet}&url=https%3A%2F%2Fdaxaur.github.io%2Ftabia%2F" target="_blank" rel="noopener">𝕏 Share my result</a>`;
+  $('#coachResult').querySelectorAll('[data-study]').forEach(b => b.onclick = () => openOpening(b.dataset.study));
+}
+
 // ---------- piece set + view nav ----------
 let pieceSet = Store.prefs().pieceSet || 'cburnett';
 function showView(v) {
@@ -148,6 +209,7 @@ function showView(v) {
   if (v === 'opening') renderOpening();
   if (v === 'train') enterTrain();
   if (v === 'create') enterCreate();
+  if (v === 'coach') enterCoach();
   window.scrollTo(0, 0);
 }
 document.querySelectorAll('nav.top button').forEach(b => b.addEventListener('click', () => showView(b.dataset.view)));
@@ -851,6 +913,6 @@ setMode('drill');
 refreshMastery(); renderHome(); heroFx(); updateEval(); renderAccount();
 $('#trSound').textContent = Sound.enabled ? '🔊' : '🔇';
 $('#trSound').classList.toggle('on', Sound.enabled);
-const ROUTES = ['home', 'train', 'create', 'saved'];
+const ROUTES = ['home', 'train', 'create', 'saved', 'coach'];
 window.addEventListener('hashchange', () => { const h = location.hash.slice(1); showView(ROUTES.includes(h) ? h : 'home'); });
 { const h = location.hash.slice(1); showView(ROUTES.includes(h) ? h : 'home'); }
