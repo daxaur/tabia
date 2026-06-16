@@ -1,13 +1,13 @@
-import { Chess } from './vendor/chess.js?v=19';
-import { Board } from './board.js?v=19';
-import { openings, groupsOf, CATEGORIES } from './data/index.js?v=19';
-import { Store } from './store.js?v=19';
-import { evaluate, winPct, fmtEval } from './eval.js?v=19';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=19';
-import { Sound } from './sound.js?v=19';
-import { Auth } from './auth.js?v=19';
-import { ICON, siteIcon } from './icons.js?v=19';
-import { Engine } from './engine.js?v=19';
+import { Chess } from './vendor/chess.js?v=20';
+import { Board } from './board.js?v=20';
+import { openings, groupsOf, CATEGORIES } from './data/index.js?v=20';
+import { Store } from './store.js?v=20';
+import { evaluate, winPct, fmtEval } from './eval.js?v=20';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=20';
+import { Sound } from './sound.js?v=20';
+import { Auth } from './auth.js?v=20';
+import { ICON, siteIcon } from './icons.js?v=20';
+import { Engine } from './engine.js?v=20';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];

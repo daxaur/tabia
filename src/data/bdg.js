@@ -122,7 +122,7 @@ export const repertoire = {
 
     // ---------------- DECLINED ----------------
     { id:'vienna', name:'Declined — Vienna (4…Bf5)', group:'declined', star:true,
-      idea:'Black declines with …Bf5. Recapture e4, then Qf3 hits b7 and f5 and you keep the initiative.',
+      idea:'Black declines with …Bf5. Recapture e4, then the Qf3 double-attack (b7 and the e4-knight) forces …Nd6 and you regain the pawn with the easier game — fully equal and engine-sound (≈ 0.0).',
       moves:[
         ['d4'],['d5'],['e4'],['dxe4'],['Nc3'],['Nf6'],['f3'],
         ['Bf5','4…Bf5 — the BDG Declined / Vienna.'],
