@@ -1,13 +1,13 @@
-import { Chess } from './vendor/chess.js?v=26';
-import { Board } from './board.js?v=26';
-import { openings, groupsOf, CATEGORIES } from './data/index.js?v=26';
-import { Store } from './store.js?v=26';
-import { evaluate, winPct, fmtEval } from './eval.js?v=26';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=26';
-import { Sound } from './sound.js?v=26';
-import { Auth } from './auth.js?v=26';
-import { ICON, siteIcon } from './icons.js?v=26';
-import { Engine } from './engine.js?v=26';
+import { Chess } from './vendor/chess.js?v=27';
+import { Board } from './board.js?v=27';
+import { openings, groupsOf, CATEGORIES } from './data/index.js?v=27';
+import { Store } from './store.js?v=27';
+import { evaluate, winPct, fmtEval } from './eval.js?v=27';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=27';
+import { Sound } from './sound.js?v=27';
+import { Auth } from './auth.js?v=27';
+import { ICON, siteIcon } from './icons.js?v=27';
+import { Engine } from './engine.js?v=27';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -482,9 +482,10 @@ function updateEval() {
   });
 }
 function setArrows() {
-  const learn = drill.mode === 'learn' && drill.active && drill.line;
-  $('#trNext').disabled = !learn || drill.ply >= drill.line.moves.length;
-  $('#trPrev').disabled = !learn || drill.ply === 0;
+  const inLearn = drill.mode === 'learn' && drill.active && drill.line;
+  const floor = userColor() === 'b' ? 1 : 0;   // keep White's opening move for Black repertoires
+  $('#trNext').disabled = !inLearn || drill.ply >= drill.line.moves.length;
+  $('#trPrev').disabled = !drill.active || trGame.history().length <= floor;   // back works in every mode
 }
 function renderMoves() {
   const h = trGame.history({ verbose: true });
@@ -498,6 +499,7 @@ function renderMoves() {
   }
   $('#trMoves').innerHTML = html;
   $('#trMoves .cur')?.scrollIntoView({ block: 'nearest' });
+  setArrows();   // keep the ‹ back button state in sync after every move
 }
 function resetIdle() {
   trGame = new Chess(); trBoard.setOrientation(userOrient()); trBoard.setUserColor(userColor()); trBoard.clearPremove();
@@ -533,7 +535,10 @@ function beginLine(line) {
   trBoard.setFen(trGame.fen(), { silent: true }); trBoard.setShapes([]);
   Store.discover(repo.id, line.id);
   setLineHeader(line); refreshMastery(); updateEval(); renderMoves();
-  if (drill.mode === 'learn') { trBoard.lock(true); coach(coachSay('learn') + ' ' + (line.idea || '')); setArrows(); return; }
+  if (drill.mode === 'learn') {                       // walk the line: drag the next move, or step ‹ ›
+    trBoard.setUserColor(null); trBoard.lock(false);
+    coach(coachSay('learn') + ' ' + (line.idea || '')); setArrows(); return;
+  }
   // practice / drill — if the trainee is Black, the opponent (White) opens
   if (userColor() === 'b') {
     trBoard.lock(true);
@@ -571,10 +576,28 @@ function learnStep(dir) {
   updateEval(); renderMoves(); setArrows();
 }
 
+function learnMove(from, to, promo) {              // Learn mode: drag the next move to advance
+  if (drill.ply >= drill.line.moves.length) return;
+  const exp = drill.line.moves[drill.ply][0], before = trGame.fen();
+  const mv = trGame.move({ from, to, promotion: promo }); if (!mv) return;
+  if (norm(mv.san) === norm(exp)) {
+    const cm = drill.line.moves[drill.ply][1];
+    trBoard.setFen(trGame.fen(), { lastMove: { from, to } }); trBoard.setShapes([]);
+    coach(`${mv.color === 'w' ? '▲' : '▼'} ${mv.san}${cm ? ' — ' + cm : ''}`);
+    drill.ply++; updateEval(); renderMoves(); setArrows();
+    if (drill.ply >= drill.line.moves.length) coach('That’s the whole line. Switch to Practice to play it yourself.', 'ok');
+  } else {
+    trGame.undo(); trBoard.setFen(before, { silent: true }); Sound.error();
+    const m = trGame.move(exp); const f = m.from, t = m.to; trGame.undo();
+    trBoard.setShapes([{ from: f, to: t }]);
+    coach(`Not that one — the next move is ${exp}. Drag it, or press ›.`);
+  }
+}
 function trMove(from, to, promo) {
   if (!drill.active) return;
+  if (drill.mode === 'learn') return learnMove(from, to, promo);
   if (drill.mode === 'hyper') return hyperUserMove(from, to, promo);
-  if (drill.mode === 'learn' || trGame.turn() !== userColor()) return;
+  if (trGame.turn() !== userColor()) return;
   const exp = expectedSan(), before = trGame.fen();
   const mv = trGame.move({ from, to, promotion: promo });
   if (!mv) return;
@@ -729,17 +752,38 @@ $('#trRestart').onclick = startRound;
 $('#trSkip').onclick = () => { if (drill.active && drill.mode !== 'hyper') nextLine(); };
 $('#trFlip').onclick = () => trBoard.flip();
 $('#trNext').onclick = () => learnStep(1);
-$('#trPrev').onclick = () => learnStep(-1);
+$('#trPrev').onclick = goBack;
 $('#trHint').onclick = doHint;
 $('#trSound').onclick = () => {
   Sound.enabled = !Sound.enabled; Store.setPref('sound', Sound.enabled);
   const b = $('#trSound'); b.classList.toggle('on', Sound.enabled); b.textContent = Sound.enabled ? '🔊' : '🔇';
   if (Sound.enabled) Sound.move();
 };
+// step back to your previous move — works in Learn, Practice, Drill and Hyper
+function goBack() {
+  if (!drill.active) return;
+  if (drill.mode === 'learn') return learnStep(-1);
+  const floor = userColor() === 'b' ? 1 : 0;     // keep White's opening move for Black repertoires
+  if (trGame.history().length <= floor) return;
+  trGame.undo();                                  // undo the opponent's reply…
+  if (trGame.turn() !== userColor() && trGame.history().length > floor) trGame.undo();  // …and your move
+  drill.ply = trGame.history().length; drill.mistake = false; drill.hinted = false;
+  if (drill.mode === 'hyper' && hyper) {          // re-widen the bot's candidate lines from the new history
+    const hist = trGame.history();
+    hyper.ply = hist.length;
+    hyper.candidates = scopedLines().filter(l => hist.every((s, i) => l.moves[i] && norm(l.moves[i][0]) === norm(s)));
+    if (!hyper.candidates.length) hyper.candidates = scopedLines().slice();
+  }
+  const h = trGame.history({ verbose: true });
+  trBoard.clearPremove(); trBoard.lock(false);
+  trBoard.setFen(trGame.fen(), { lastMove: h.length ? { from: h[h.length - 1].from, to: h[h.length - 1].to } : null, silent: true });
+  trBoard.setShapes([]); updateEval(); renderMoves(); setArrows();
+  coach('⟲ Rewound — your move.');
+}
 document.addEventListener('keydown', e => {
-  if (!$('#view-train').classList.contains('active') || drill.mode !== 'learn' || !drill.active) return;
-  if (e.key === 'ArrowRight') learnStep(1);
-  if (e.key === 'ArrowLeft') learnStep(-1);
+  if (!$('#view-train').classList.contains('active') || !drill.active) return;
+  if (e.key === 'ArrowRight' && drill.mode === 'learn') learnStep(1);
+  if (e.key === 'ArrowLeft') goBack();
 });
 
 // ---- custom coach messages ----
