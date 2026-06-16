@@ -1,7 +1,7 @@
 // tabia board — absolutely-positioned pieces that *slide*, buttery pointer-drag,
 // click-to-move, animated programmatic moves, crisp arrows. Dependency-free, chess.js-backed.
-import { Chess } from './vendor/chess.js?v=30';
-import { Sound } from './sound.js?v=30';
+import { Chess } from './vendor/chess.js?v=31';
+import { Sound } from './sound.js?v=31';
 
 const FILES = 'abcdefgh';
 const GLYPH = { p: 'P', n: 'N', b: 'B', r: 'R', q: 'Q', k: 'K' };
@@ -130,6 +130,7 @@ export class Board {
     if (animate && lastMove && prev !== fen && this.pieces[lastMove.from]) this._animateTo(lastMove);
     else this._placeAll(false);
     this._markLast();
+    this._markPremove();   // keep a queued pre-move highlighted across the opponent's reply
     this._drawShapes(shapes);
     if (snd) {
       const inChk = (this.chess.isCheck?.() || this.chess.inCheck?.()) ?? false;
@@ -242,6 +243,9 @@ export class Board {
     const sq = this._pointSquare(e); if (!sq) return;
     if (!this._canMove()) {                                                   // not our turn → queue a pre-move
       const pc = this.chess.get(sq);
+      if (this.selected && sq !== this.selected) {                            // click-to-move premove (2nd click)
+        this._setPremove(this.selected, sq); this._clearSel(); return;
+      }
       if (this.userColor && pc && pc.color === this.userColor) this._startPremoveDrag(e, sq);
       else this._clearSel();
       return;
@@ -299,8 +303,9 @@ export class Board {
     d.p.el.classList.remove('drag');
     const to = this._pointSquare(e);
     if (d.pre) {                                  // queue a pre-move (any target square)
-      this._snapHome(d.p, d.from); this._clearSel();
-      if (d.moved && to && to !== d.from) this._setPremove(d.from, to);
+      this._snapHome(d.p, d.from);
+      if (d.moved && to && to !== d.from) { this._setPremove(d.from, to); this._clearSel(); }
+      // a plain click (no drag): keep the piece selected so a 2nd click can target it
       return;
     }
     const moved = d.moved && to && to !== d.from && this._dests(d.from).includes(to);
