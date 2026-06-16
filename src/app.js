@@ -1,13 +1,13 @@
-import { Chess } from './vendor/chess.js?v=16';
-import { Board } from './board.js?v=16';
-import { openings, groupsOf } from './data/index.js?v=16';
-import { Store } from './store.js?v=16';
-import { evaluate, winPct, fmtEval } from './eval.js?v=16';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=16';
-import { Sound } from './sound.js?v=16';
-import { Auth } from './auth.js?v=16';
-import { ICON, siteIcon } from './icons.js?v=16';
-import { Engine } from './engine.js?v=16';
+import { Chess } from './vendor/chess.js?v=17';
+import { Board } from './board.js?v=17';
+import { openings, groupsOf } from './data/index.js?v=17';
+import { Store } from './store.js?v=17';
+import { evaluate, winPct, fmtEval } from './eval.js?v=17';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=17';
+import { Sound } from './sound.js?v=17';
+import { Auth } from './auth.js?v=17';
+import { ICON, siteIcon } from './icons.js?v=17';
+import { Engine } from './engine.js?v=17';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -30,6 +30,7 @@ $('#liLogo').innerHTML = ICON.lichess;
 $('#ccLogo').innerHTML = ICON.chesscom;
 $('#navHomeIcon').innerHTML = ICON.home;
 $('#navStudyIcon').innerHTML = ICON.study;
+$('#navSavedIcon').innerHTML = ICON.star;
 $('#brandHome').onclick = () => showView('home');
 
 // ---------- animated dot-matrix wordmark ----------
@@ -140,6 +141,7 @@ function showView(v) {
   document.querySelectorAll('.view').forEach(s => s.classList.toggle('active', s.id === 'view-' + v));
   document.querySelectorAll('nav.top button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
   if (v === 'home') renderHome();
+  if (v === 'saved') renderSaved();
   if (v === 'opening') renderOpening();
   if (v === 'train') enterTrain();
   if (v === 'create') enterCreate();
@@ -163,28 +165,43 @@ function previewBoard(el, op, plies, interactive = false) {
   return b;
 }
 const library = () => [...openings, ...Store.customOpenings()];
+function opCardHtml(op, i, pfx) {
+  const s = statsFor(op); const pct = s.ids.length ? Math.round(s.mastered / s.ids.length * 100) : 0;
+  const starN = op.lines.filter(l => l.star).length;
+  const ribbon = op.tabiaOriginal ? '<div class="op-ribbon">★ tabia original</div>' : op.custom ? '<div class="op-ribbon yours">yours</div>' : '';
+  return `<div class="opcard" data-op="${op.id}" style="animation-delay:${i * 70}ms">
+    ${ribbon}
+    <button class="opfav${Store.isFavorite(op.id) ? ' on' : ''}" data-fav="${op.id}" title="Save opening">${ICON.star}</button>
+    <div class="opcard-board"><div id="${pfx}-${op.id}"></div></div>
+    <div class="opcard-body">
+      <span class="ct">${op.eco} · ${op.lines.length} lines${starN ? ` · <span class="op-rate" title="${starN} featured line${starN > 1 ? 's' : ''}">${'★'.repeat(starN)}</span>` : ''}${s.due ? ` · <b>${s.due} due</b>` : ''}</span>
+      <h3>${op.name}</h3>
+      <p>${op.oneLiner || ''}</p>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <span class="go">${pct ? `${pct}% mastered` : 'Start training'} →</span>
+    </div></div>`;
+}
+function wireCards(container) {
+  container.querySelectorAll('.opfav').forEach(b => b.onclick = e => { e.stopPropagation(); b.classList.toggle('on', Store.toggleFavorite(b.dataset.fav)); });
+  container.querySelectorAll('[data-op]').forEach(c => c.onclick = () => openOpening(c.dataset.op));
+}
 function renderHome() {
   const lib = library().sort((a, b) => (Store.isFavorite(b.id) ? 1 : 0) - (Store.isFavorite(a.id) ? 1 : 0)); // saved first
   $('#libSub').textContent = `${lib.length} opening${lib.length > 1 ? 's' : ''} · drill any line`;
-  $('#library').innerHTML = lib.map((op, i) => {
-    const s = statsFor(op); const pct = s.ids.length ? Math.round(s.mastered / s.ids.length * 100) : 0;
-    const tag = op.tabiaOriginal ? '<span class="op-badge">★ tabia original</span>' : op.custom ? '<span class="op-badge yours">yours</span>' : '';
-    return `<div class="opcard" data-op="${op.id}" style="animation-delay:${i * 70}ms">
-      <button class="opfav${Store.isFavorite(op.id) ? ' on' : ''}" data-fav="${op.id}" title="Save opening">${ICON.star}</button>
-      <div class="opcard-board"><div id="mini-${op.id}"></div></div>
-      <div class="opcard-body">
-        <span class="ct">${op.eco} · ${op.lines.length} lines${s.due ? ` · <b>${s.due} due</b>` : ''}</span>
-        <h3>${op.name} ${tag}</h3>
-        <p>${op.oneLiner || ''}</p>
-        <div class="bar"><i style="width:${pct}%"></i></div>
-        <span class="go">${pct ? `${pct}% mastered` : 'Start training'} →</span>
-      </div></div>`;
-  }).join('');
+  $('#library').innerHTML = lib.map((op, i) => opCardHtml(op, i, 'mini')).join('');
   lib.forEach(op => previewBoard(document.getElementById(`mini-${op.id}`), op, 7));
-  $('#library').querySelectorAll('.opfav').forEach(b => b.onclick = e => { e.stopPropagation(); b.classList.toggle('on', Store.toggleFavorite(b.dataset.fav)); });
-  $('#library').querySelectorAll('[data-op]').forEach(c => c.onclick = () => openOpening(c.dataset.op));
+  wireCards($('#library'));
   const s0 = statsFor(repo);
   $('#footStats').textContent = `${s0.reps} reps logged · ${s0.mastered}/${s0.ids.length} lines mastered`;
+}
+function renderSaved() {
+  const a = Auth.current();
+  $('#savedWho').textContent = a ? `${a.username}’s openings` : 'Your saved openings';
+  const favs = library().filter(o => Store.isFavorite(o.id));
+  $('#savedLib').innerHTML = favs.length ? favs.map((op, i) => opCardHtml(op, i, 'smini')).join('')
+    : '<div class="saved-empty">No saved openings yet. Tap the ★ on any opening to keep it here.</div>';
+  favs.forEach(op => previewBoard(document.getElementById(`smini-${op.id}`), op, 7));
+  wireCards($('#savedLib'));
 }
 
 // ============================== OPENING DETAIL (folders → branches) ==============================
@@ -770,6 +787,6 @@ setMode('drill');
 refreshMastery(); renderHome(); heroFx(); updateEval(); renderAccount();
 $('#trSound').textContent = Sound.enabled ? '🔊' : '🔇';
 $('#trSound').classList.toggle('on', Sound.enabled);
-const ROUTES = ['home', 'train', 'create'];
+const ROUTES = ['home', 'train', 'create', 'saved'];
 window.addEventListener('hashchange', () => { const h = location.hash.slice(1); showView(ROUTES.includes(h) ? h : 'home'); });
 { const h = location.hash.slice(1); showView(ROUTES.includes(h) ? h : 'home'); }

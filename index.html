@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="src/style.css?v=16">
+<link rel="stylesheet" href="src/style.css?v=17">
 <script>
   // network-first service worker so deploys are never masked by stale cache
   if ('serviceWorker' in navigator) {
@@ -29,6 +29,7 @@
     <button data-view="home" class="active"><span class="bi" id="navHomeIcon"></span>Home</button>
     <button data-view="train"><span class="bi" id="navStudyIcon"></span>Study</button>
     <button data-view="create"><span class="bi" id="navCreateIcon"></span>Create</button>
+    <button data-view="saved"><span class="bi" id="navSavedIcon"></span>Saved</button>
   </nav>
   <div class="right">
     <button class="ghbtn connect" id="connectBtn"><span class="bi" id="connectIcon"></span><span id="connectLabel">Connect</span></button>
@@ -56,6 +57,12 @@
         <span>tabia · MIT · your data never leaves this browser</span>
         <span id="footStats"></span>
       </div>
+    </section>
+
+    <!-- SAVED — the user's starred openings -->
+    <section class="view" id="view-saved">
+      <div class="lib-head"><h2 id="savedWho">Your saved openings</h2><span class="lib-sub">★ the openings you starred</span></div>
+      <div class="library" id="savedLib"></div>
     </section>
 
     <!-- OPENING DETAIL (folders → branches) -->
@@ -279,6 +286,6 @@
   </div>
 </div>
 
-<script type="module" src="src/app.js?v=16"></script>
+<script type="module" src="src/app.js?v=17"></script>
 </body>
 </html>
