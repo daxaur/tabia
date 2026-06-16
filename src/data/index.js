@@ -1,14 +1,14 @@
 // Opening library. Each opening is a "folder"; its lines are the branches.
 // Add a new opening by importing its module and pushing it here.
-import { repertoire as bdg } from './bdg.js?v=15';
-import { repertoire as jobava } from './jobava.js?v=15';
-import { repertoire as budapest } from './budapest.js?v=15';
-import { repertoire as qg } from './queensgambit.js?v=15';
-import { repertoire as ruylopez } from './ruylopez.js?v=15';
-import { repertoire as italian } from './italian.js?v=15';
-import { repertoire as sicilian } from './sicilian.js?v=15';
-import { repertoire as french } from './french.js?v=15';
-import { repertoire as carokann } from './carokann.js?v=15';
+import { repertoire as bdg } from './bdg.js?v=16';
+import { repertoire as jobava } from './jobava.js?v=16';
+import { repertoire as budapest } from './budapest.js?v=16';
+import { repertoire as qg } from './queensgambit.js?v=16';
+import { repertoire as ruylopez } from './ruylopez.js?v=16';
+import { repertoire as italian } from './italian.js?v=16';
+import { repertoire as sicilian } from './sicilian.js?v=16';
+import { repertoire as french } from './french.js?v=16';
+import { repertoire as carokann } from './carokann.js?v=16';
 
 export const openings = [qg, ruylopez, italian, sicilian, french, carokann, bdg, jobava, budapest];
 
