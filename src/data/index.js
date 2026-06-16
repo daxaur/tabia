@@ -3,8 +3,9 @@
 import { repertoire as bdg } from './bdg.js?v=12';
 import { repertoire as jobava } from './jobava.js?v=12';
 import { repertoire as budapest } from './budapest.js?v=12';
+import { repertoire as qg } from './queensgambit.js?v=12';
 
-export const openings = [bdg, jobava, budapest];
+export const openings = [qg, bdg, jobava, budapest];
 
 // fallback labels for openings that don't carry their own group metadata
 export const groupMeta = {
