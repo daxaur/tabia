@@ -53,11 +53,11 @@ export const repertoire = {
         ['dxc5'], ['Qxd1'], ['Rxd1'], ['Bxc5'], ['Nbd2', '9.Nbd2 — a pleasant edge in a queenless middlegame.'],
       ] },
     { id: 'qga-central', name: 'QGA Central (3.e4)', group: 'accepted',
-      idea: 'The ambitious 3.e4 grabs a big centre at once. If Black hits it with …e5, recapture and stand better.',
+      idea: 'The ambitious 3.e4 grabs a big centre at once. If Black hits it with …e5, don’t rush to regain d4 — develop and hit f7/b7 with Qb3, standing clearly better (≈ +1.1).',
       moves: [
         ['d4'], ['d5'], ['c4'], ['dxc4'], ['e4', '3.e4 — the central QGA, a broad pawn front.'],
         ['e5', '3…e5 — the principled strike.'], ['Nf3'], ['exd4'], ['Bxc4'], ['Nc6'],
-        ['O-O'], ['Be7'], ['Nxd4', '7.Nxd4 — regain the pawn with a fine lead in development.'],
+        ['O-O'], ['Be7'], ['Qb3', '7.Qb3! — hit f7 and b7. Not 7.Nxd4?? Qxd4 (the d4-knight has two attackers, one defender — Black wins a piece). White is clearly better.'],
       ] },
 
     // ---------------- SLAV / SEMI-SLAV ----------------
@@ -85,7 +85,7 @@ export const repertoire = {
         ['Nf6'], ['Bg2'], ['Be7'], ['O-O'], ['O-O'], ['Bg5', '9.Bg5 — pile up on the isolated d5-pawn.'],
       ] },
     { id: 'chigorin', name: 'Chigorin (2…Nc6)', group: 'sideline',
-      idea: 'Black’s offbeat …Nc6. Take the bishop pair, prop the centre with e3 (note: e4? drops d4 to …Nxd4), and the doubled f-pawns are a small price (≈ +0.8).',
+      idea: 'Black’s offbeat …Nc6. Take the bishop pair, prop the centre with e3 (note: e4? drops d4 to …Nxd4), and the doubled f-pawns are a small price (≈ +0.5).',
       moves: [
         ['d4'], ['d5'], ['c4'], ['Nc6', '2…Nc6 — the Chigorin, piece play over structure.'], ['Nf3'], ['Bg4'],
         ['cxd5'], ['Bxf3'], ['gxf3', '5.gxf3 — grab the bishop pair; the doubled f-pawns are fine.'], ['Qxd5'],

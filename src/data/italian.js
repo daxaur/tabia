@@ -10,7 +10,7 @@ export const repertoire = {
       moves: [['e4'], ['e5'], ['Nf3'], ['Nc6'], ['Bc4'], ['Bc5'], ['c3', '4.c3 — prepare d4 and a slow build.'], ['Nf6'],
         ['d3'], ['d6'], ['O-O'], ['O-O'], ['Re1'], ['a6'], ['Nbd2', '8.Nbd2 — heading Nf1–g3.']] },
     { id: 'two-knights', name: 'Two Knights (3…Nf6 4.Ng5)', group: 'sharp',
-      idea: 'The aggressive 4.Ng5 hits f7. After …d5 you snatch a pawn and weather Black’s initiative a pawn up.',
+      idea: 'The aggressive 4.Ng5 hits f7. After …d5 you snatch a pawn and hold the extra pawn against Black’s initiative (≈ equal — Black has real compensation).',
       moves: [['e4'], ['e5'], ['Nf3'], ['Nc6'], ['Bc4'], ['Nf6', '3…Nf6 — the Two Knights.'], ['Ng5', '4.Ng5!? — straight at f7.'], ['d5'],
         ['exd5'], ['Na5'], ['Bb5+'], ['c6'], ['dxc6'], ['bxc6'], ['Be2'], ['h6'], ['Nf3'], ['e4'], ['Ne5', '10.Ne5 — hold the extra pawn.']] },
     { id: 'evans', name: 'Evans Gambit (4.b4)', group: 'sharp',

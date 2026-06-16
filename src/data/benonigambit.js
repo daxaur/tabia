@@ -41,7 +41,7 @@ export const repertoire = {
         ['c3'], ['Qxc5'], ['e4'], ['Nf6'], ['Bd3'], ['Qc7', 'Pawn back, a slightly passive but solid game.'],
       ] },
     { id: 'czech', name: 'Declined — Locked Centre (2.d5 e5)', group: 'declined',
-      idea: 'If White declines with 2.d5, bolt the centre with …e5 (a Czech-Benoni shape). Honest: White gets a real space edge here (≈ +1.4 with the h4–h5 push) — an offbeat surprise weapon, not an equalizer.',
+      idea: 'If White declines with 2.d5, bolt the centre with …e5 (a Czech-Benoni shape). Honest: White gets a real space edge here (≈ +0.8 with the h4–h5 push) — an offbeat surprise weapon, not an equalizer.',
       moves: [
         ['d4'], ['c5'], ['d5', '2.d5 — declined; the Old Benoni.'], ['e5', '2…e5 — clamp the centre.'],
         ['e4'], ['d6'], ['Nc3'], ['g6'], ['Nf3'], ['Bg7'], ['Be2'], ['Ne7', '6…Ne7 — heading …Ng6 and the …f5 lever.'],

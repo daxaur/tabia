@@ -16,7 +16,7 @@ export const repertoire = {
   lines: [
     // ---------------- ACCEPTED · 4...exf3 5.Nxf3 ----------------
     { id:'teichmann', name:'Teichmann (5…Bg4)', group:'accepted', star:true,
-      idea:'The main line. Black pins the knight; trade it off, develop Be3/O-O-O and play the open lines. With best defence it’s only a small, lasting pull for the pawn (≈ +0.5) — that is the honest BDG edge, not a knockout.',
+      idea:'The main line. Black pins the knight; trade it off, develop Be3/O-O-O and play the open lines. With best defence it’s fully equal (≈ 0.0) — you’re playing for the open f-file and practical chances, not a material edge.',
       moves:[
         ['d4'],['d5'],['e4','The gambit move — challenge d5 at once.'],['dxe4'],
         ['Nc3'],['Nf6'],['f3','4.f3 — offer the pawn to open the f-file.'],['exf3'],
@@ -29,7 +29,7 @@ export const repertoire = {
         ['Nd5','9…Nd5 — Black’s best: blockade and offer trades (9…Bd6? 10.g4 is already +3).'],
         ['Bd2','10.Bd2 — keep the bishop, invite the trade on c3.'],['Nxc3'],
         ['Qxc3','11.Qxc3 — recapture; open lines and a lead in development.'],['Nd7'],
-        ['Kb1','12.Kb1 — tuck the king away; a steady initiative for the pawn (≈ +0.5).'],
+        ['Kb1','12.Kb1 — tuck the king away; a steady initiative for the pawn (≈ equal).'],
       ]},
     { id:'teichmann-bh5', name:'Teichmann — 6…Bh5', group:'accepted',
       idea:'If Black keeps the bishop, chase it with g4 and plant a knight on e5.',
@@ -116,7 +116,7 @@ export const repertoire = {
       moves:[
         ['d4'],['d5'],['e4'],['dxe4'],['Nc3'],['Nf6'],['f3'],['exf3'],['Qxf3'],
         ['Bg4','5…Bg4 — attacking the queen.'],
-        ['Qxb7','6.Qxb7! — the raid. Snatch b7, eye the a8-rook. +0.19, sound.'],['Nbd7'],
+        ['Qxb7','6.Qxb7! — the raid. Snatch b7, eye the a8-rook. ≈ +0.3, sound.'],['Nbd7'],
         ['Nf3','7.Nf3 — calm development; the queen has escape squares.'],['Rb8'],
         ['Qxa7','8.Qxa7 — the queen strolls out two pawns up. 70%.'],
       ]},
