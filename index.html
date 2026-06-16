@@ -25,7 +25,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="src/style.css?v=34">
+<link rel="stylesheet" href="src/style.css?v=35">
 <script>
   // network-first service worker so deploys are never masked by stale cache
   if ('serviceWorker' in navigator) {
@@ -90,33 +90,31 @@
     <!-- COACH — match an opening to your style (free, from your public games) -->
     <section class="view" id="view-coach">
       <div class="coach-hero">
-        <span class="kicker">free · client-side · your games stay in your browser</span>
+        <span class="kicker">free · no sign-in · your games stay in your browser</span>
         <h1>The opening that fits <em>you</em></h1>
-        <p>Drop your username — tabia reads your recent games and hands you a card worth sharing.</p>
         <div class="coach-form">
           <div class="seg seg-logo" id="coachSite">
             <button data-site="chesscom" class="active"><span class="bi" id="csCcLogo"></span>Chess.com</button>
             <button data-site="lichess"><span class="bi" id="csLiLogo"></span>Lichess</button>
           </div>
           <input id="coachUser" placeholder="your username" autocomplete="off" spellcheck="false">
-          <button class="btn primary big" id="coachGo">✦ Analyse my games</button>
+          <button class="btn primary big" id="coachGo">✦ Analyse</button>
         </div>
         <div class="coach-status" id="coachStatus"></div>
+        <div class="coach-steps">
+          <span><b>1</b> Drop your handle</span><i>→</i>
+          <span><b>2</b> Read your last ~80 games</span><i>→</i>
+          <span><b>3</b> Get your card</span>
+        </div>
       </div>
 
-      <!-- empty-state showcase: what Coach does -->
+      <!-- empty-state showcase: a live preview of the card you get -->
       <div class="coach-showcase" id="coachShowcase">
         <div class="show-card">
           <div class="show-glow"></div>
           <canvas id="sampleCanvas" aria-label="example tabia style card"></canvas>
-          <div class="show-tag">live preview · this is what you get</div>
         </div>
-        <div class="show-steps">
-          <div class="show-step"><span class="ss-n">1</span><div><b>Drop your handle</b><span>Lichess or Chess.com — no sign-in.</span></div></div>
-          <div class="show-step"><span class="ss-n">2</span><div><b>We read your last ~80 games</b><span>Right here in your browser. Nothing is uploaded.</span></div></div>
-          <div class="show-step"><span class="ss-n">3</span><div><b>Get your style + opening</b><span>A card matched to how you actually play — share it on X.</span></div></div>
-          <div class="show-feats"><span>⚡ sharp vs solid</span><span>♟ e4 / d4 read</span><span>✦ matched repertoire</span><span>𝕏 shareable</span></div>
-        </div>
+        <div class="show-tag">live preview · this is what you get</div>
       </div>
 
       <div class="coach-result" id="coachResult" hidden></div>
@@ -340,6 +338,6 @@
   </div>
 </div>
 
-<script type="module" src="src/app.js?v=34"></script>
+<script type="module" src="src/app.js?v=35"></script>
 </body>
 </html>
