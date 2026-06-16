@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="src/style.css?v=14">
+<link rel="stylesheet" href="src/style.css?v=15">
 <script>
   // network-first service worker so deploys are never masked by stale cache
   if ('serviceWorker' in navigator) {
@@ -79,6 +79,15 @@
     <section class="view" id="view-create">
       <div class="crumbs"><a id="crCrumbHome">Home</a> <span>›</span> <b id="crTitle">Create an opening</b></div>
 
+      <div class="cr-gate" id="crGate" hidden>
+        <div class="cr-gate-card">
+          <h2>Sign in to create openings</h2>
+          <p>Connect a Lichess or Chess.com account so your openings are saved to you. Free, and it stays in this browser.</p>
+          <button class="btn primary big" id="crGateConnect">⚇ Connect an account</button>
+        </div>
+      </div>
+
+      <div id="crBuilder">
       <div class="cr-meta">
         <input id="crName" placeholder="Opening name — e.g. My Catalan" autocomplete="off">
         <div class="seg" id="crColor" title="Which side you play"><button data-c="w" class="active">Play White</button><button data-c="b">Play Black</button></div>
@@ -94,8 +103,9 @@
             <button class="btn ghost" id="crResetLine">Reset line</button>
             <button class="btn ghost" id="crFlip">⇅ Flip</button>
           </div>
-          <div class="hintbar">Play the moves of this line on the board. Both sides — your repertoire move and the opponent’s reply.</div>
-          <div class="movelist icons" id="crMoves">—</div>
+          <div class="hintbar">Play the moves of this line. Click any move to give it a comment and its own correct/wrong coach lines.</div>
+          <div class="movelist icons clickable" id="crMoves">—</div>
+          <div class="cr-step" id="crStep" hidden></div>
         </div>
 
         <aside class="cr-line">
@@ -103,7 +113,7 @@
           <input id="crLineName" placeholder="Line name — e.g. Main line" autocomplete="off">
           <input id="crLineGroup" placeholder="Group — e.g. Main, Sidelines" autocomplete="off">
           <input id="crLineIdea" placeholder="The idea / plan (optional)" autocomplete="off">
-          <button class="btn ghost sm" id="crMsgToggle">＋ Custom coach messages</button>
+          <button class="btn ghost sm" id="crMsgToggle">＋ Line-wide coach messages</button>
           <div id="crMsgBox" hidden></div>
           <button class="btn primary" id="crAddLine">＋ Add this line</button>
 
@@ -117,6 +127,7 @@
         <button class="btn ghost" id="crCancel">Cancel</button>
         <span class="cr-status" id="crStatus"></span>
       </div>
+      </div><!-- /crBuilder -->
     </section>
 
     <!-- STUDY HUB (board + chessreps-style mode panel) -->
@@ -268,6 +279,6 @@
   </div>
 </div>
 
-<script type="module" src="src/app.js?v=14"></script>
+<script type="module" src="src/app.js?v=15"></script>
 </body>
 </html>

@@ -1,13 +1,13 @@
-import { Chess } from './vendor/chess.js?v=14';
-import { Board } from './board.js?v=14';
-import { openings, groupsOf } from './data/index.js?v=14';
-import { Store } from './store.js?v=14';
-import { evaluate, winPct, fmtEval } from './eval.js?v=14';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=14';
-import { Sound } from './sound.js?v=14';
-import { Auth } from './auth.js?v=14';
-import { ICON, siteIcon } from './icons.js?v=14';
-import { Engine } from './engine.js?v=14';
+import { Chess } from './vendor/chess.js?v=15';
+import { Board } from './board.js?v=15';
+import { openings, groupsOf } from './data/index.js?v=15';
+import { Store } from './store.js?v=15';
+import { evaluate, winPct, fmtEval } from './eval.js?v=15';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=15';
+import { Sound } from './sound.js?v=15';
+import { Auth } from './auth.js?v=15';
+import { ICON, siteIcon } from './icons.js?v=15';
+import { Engine } from './engine.js?v=15';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -73,13 +73,15 @@ const DONATE = [   // replace with your own wallet addresses
   { key: 'usdc', name: 'USDC',     logo: 'tether',   addr: '0xExampleExampleExampleExampleExampleExa1' },
 ];
 $('#donate').innerHTML = DONATE.map(d =>
-  `<button class="dchip" data-addr="${d.addr}" title="Copy ${d.name} address">
-     <img class="dlogo" src="assets/logos/${d.logo}.svg" alt=""><span>${d.name}</span><span class="dcopy">${ICON.copy}</span>
+  `<button class="dcard" data-addr="${d.addr}" title="Copy ${d.name} address">
+     <img class="dlogo" src="assets/logos/${d.logo}.svg" alt="">
+     <span class="dinfo"><span class="dname">${d.name}</span><span class="daddr">${d.addr.slice(0, 6)}…${d.addr.slice(-4)}</span></span>
+     <span class="dcopy">${ICON.copy}</span><span class="dok">${ICON.check} copied</span>
    </button>`).join('');
-$('#donate').querySelectorAll('.dchip').forEach(b => b.onclick = async () => {
+$('#donate').querySelectorAll('.dcard').forEach(b => b.onclick = async () => {
   try { await navigator.clipboard.writeText(b.dataset.addr); } catch {}
-  const c = b.querySelector('.dcopy'); c.innerHTML = ICON.check; b.classList.add('copied');
-  setTimeout(() => { c.innerHTML = ICON.copy; b.classList.remove('copied'); }, 1400);
+  b.classList.add('copied');
+  setTimeout(() => b.classList.remove('copied'), 1500);
 });
 
 // ---------- settings: piece previews, move method, sound ----------
@@ -162,21 +164,24 @@ function previewBoard(el, op, plies, interactive = false) {
 }
 const library = () => [...openings, ...Store.customOpenings()];
 function renderHome() {
-  const lib = library();
+  const lib = library().sort((a, b) => (Store.isFavorite(b.id) ? 1 : 0) - (Store.isFavorite(a.id) ? 1 : 0)); // saved first
   $('#libSub').textContent = `${lib.length} opening${lib.length > 1 ? 's' : ''} · drill any line`;
   $('#library').innerHTML = lib.map((op, i) => {
     const s = statsFor(op); const pct = s.ids.length ? Math.round(s.mastered / s.ids.length * 100) : 0;
-    return `<div class="opcard" data-op="${op.id}" style="animation-delay:${i * 80}ms">
+    const tag = op.tabiaOriginal ? '<span class="op-badge">★ tabia original</span>' : op.custom ? '<span class="op-badge yours">yours</span>' : '';
+    return `<div class="opcard" data-op="${op.id}" style="animation-delay:${i * 70}ms">
+      <button class="opfav${Store.isFavorite(op.id) ? ' on' : ''}" data-fav="${op.id}" title="Save opening">${ICON.star}</button>
       <div class="opcard-board"><div id="mini-${op.id}"></div></div>
       <div class="opcard-body">
-        <span class="ct">${op.eco} · ${op.lines.length} lines${op.custom ? ' · <b>yours</b>' : ''}${s.due ? ` · <b>${s.due} due</b>` : ''}</span>
-        <h3>${op.name}</h3>
+        <span class="ct">${op.eco} · ${op.lines.length} lines${s.due ? ` · <b>${s.due} due</b>` : ''}</span>
+        <h3>${op.name} ${tag}</h3>
         <p>${op.oneLiner || ''}</p>
         <div class="bar"><i style="width:${pct}%"></i></div>
         <span class="go">${pct ? `${pct}% mastered` : 'Start training'} →</span>
       </div></div>`;
   }).join('');
   lib.forEach(op => previewBoard(document.getElementById(`mini-${op.id}`), op, 7));
+  $('#library').querySelectorAll('.opfav').forEach(b => b.onclick = e => { e.stopPropagation(); b.classList.toggle('on', Store.toggleFavorite(b.dataset.fav)); });
   $('#library').querySelectorAll('[data-op]').forEach(c => c.onclick = () => openOpening(c.dataset.op));
   const s0 = statsFor(repo);
   $('#footStats').textContent = `${s0.reps} reps logged · ${s0.mastered}/${s0.ids.length} lines mastered`;
@@ -189,12 +194,15 @@ function openOpening(id) { currentOpening = openingById2(id) || openings[0]; sho
 function renderOpening() {
   const op = currentOpening;
   $('#crumbName').textContent = op.name;
-  $('#opEco').textContent = `${op.custom ? 'your opening' : 'opening'} · ${op.eco} · plays ${op.color === 'b' ? 'Black' : 'White'}`;
+  $('#opEco').innerHTML = `${op.tabiaOriginal ? '<span class="op-badge">★ tabia original</span> ' : op.custom ? '<span class="op-badge yours">yours</span> ' : ''}${op.eco} · plays ${op.color === 'b' ? 'Black' : 'White'}`;
   $('#opName').textContent = op.name;
   $('#opOneliner').textContent = op.oneLiner || '';
+  const fav = Store.isFavorite(op.id);
   $('.op-actions').innerHTML = `<button class="btn primary" id="opTrain">▶ Study this opening</button>` +
+    `<button class="btn${fav ? ' saved' : ''}" id="opFav">${fav ? '★ Saved' : '☆ Save'}</button>` +
     (op.custom ? `<button class="btn" id="opEdit">✎ Edit</button><button class="btn ghost" id="opDelete">🗑 Delete</button>` : '');
   $('#opTrain').onclick = () => showView('train');
+  $('#opFav').onclick = () => { const on = Store.toggleFavorite(op.id); $('#opFav').textContent = on ? '★ Saved' : '☆ Save'; $('#opFav').classList.toggle('saved', on); };
   if (op.custom) {
     $('#opEdit').onclick = () => loadIntoBuilder(op);
     $('#opDelete').onclick = () => { Store.deleteCustomOpening(op.id); showView('home'); };
@@ -225,17 +233,22 @@ const CB_MSGS = [
   { key: 'done',     label: 'Line finished clean' },
   { key: 'doneMiss', label: 'Line finished with a slip' },
 ];
-const cb = { board: null, game: new Chess(), color: 'w', lines: [], editingId: null };
+const cb = { board: null, game: new Chess(), color: 'w', lines: [], editingId: null, stepMeta: {}, selStep: null };
 
 function enterCreate() {
+  // gate behind a connected account
+  const authed = !!Auth.current();
+  $('#crGate').hidden = authed;
+  $('#crBuilder').style.display = authed ? '' : 'none';
+  if (!authed) return;
   if (!cb.board) {
     cb.board = new Board($('#crBoard'), { pieceSet, onMove: cbMove });
     $('#crMsgBox').innerHTML = CB_MSGS.map(f =>
       `<div class="mf"><label>${f.label}</label><textarea data-cm="${f.key}" rows="2" placeholder="one message per line"></textarea></div>`).join('');
-    $('#crMsgToggle').onclick = () => { const b = $('#crMsgBox'); b.hidden = !b.hidden; $('#crMsgToggle').textContent = b.hidden ? '＋ Custom coach messages' : '− Hide messages'; };
+    $('#crMsgToggle').onclick = () => { const b = $('#crMsgBox'); b.hidden = !b.hidden; $('#crMsgToggle').textContent = b.hidden ? '＋ Line-wide coach messages' : '− Hide line messages'; };
     document.querySelectorAll('#crColor button').forEach(b => b.onclick = () => setCbColor(b.dataset.c));
-    $('#crUndo').onclick = () => { cb.game.undo(); cbSetBoard(); };
-    $('#crResetLine').onclick = () => { cb.game = new Chess(); cbSetBoard(); };
+    $('#crUndo').onclick = () => { delete cb.stepMeta[cb.game.history().length - 1]; cb.game.undo(); cb.selStep = null; cbSetBoard(); };
+    $('#crResetLine').onclick = () => { cb.game = new Chess(); cb.stepMeta = {}; cb.selStep = null; cbSetBoard(); };
     $('#crFlip').onclick = () => cb.board.flip();
     $('#crAddLine').onclick = cbAddLine;
     $('#crSave').onclick = cbSave;
@@ -244,6 +257,7 @@ function enterCreate() {
   cb.board.setPieceSet(pieceSet);
   setCbColor(cb.color); cbSetBoard(); cbRenderLines();
 }
+$('#crGateConnect').onclick = () => { $('#connectModal').hidden = false; renderAccount(); };
 function setCbColor(c) {
   cb.color = c;
   document.querySelectorAll('#crColor button').forEach(b => b.classList.toggle('active', b.dataset.c === c));
@@ -262,15 +276,43 @@ function cbSetBoard() {
 }
 function cbRenderMoves() {
   const h = cb.game.history({ verbose: true });
-  if (!h.length) { $('#crMoves').innerHTML = '<span class="mvempty">play the moves on the board…</span>'; return; }
+  if (!h.length) { $('#crMoves').innerHTML = '<span class="mvempty">play the moves on the board…</span>'; $('#crStep').hidden = true; return; }
   let html = '';
   for (let i = 0; i < h.length; i++) {
     const m = h[i];
     if (i % 2 === 0) html += `<span class="mvno">${i / 2 + 1}.</span>`;
     const ic = m.piece === 'p' ? '' : `<img class="mvpc" src="src/pieces/${pieceSet}/${m.color}${GLYPH[m.piece]}.svg" alt="">`;
-    html += `<span class="mv${i === h.length - 1 ? ' cur' : ''}">${ic}${m.san}</span>`;
+    const tagged = cb.stepMeta[i] ? ' tagged' : '';
+    const sel = cb.selStep === i ? ' cur' : '';
+    html += `<span class="mv${tagged}${sel}" data-step="${i}">${ic}${m.san}</span>`;
   }
   $('#crMoves').innerHTML = html;
+  $('#crMoves').querySelectorAll('[data-step]').forEach(el => el.onclick = () => openStep(+el.dataset.step));
+}
+function openStep(i) {
+  cb.selStep = i;
+  const san = cb.game.history()[i];
+  const sm = cb.stepMeta[i] || {};
+  $('#crStep').hidden = false;
+  $('#crStep').innerHTML = `
+    <div class="cr-step-head">Move ${Math.floor(i / 2) + 1}${i % 2 ? '…' : '.'} <b>${san}</b> — this step
+      <button class="cr-step-x" id="crStepX">✕</button></div>
+    <input id="crStepComment" placeholder="Comment shown when this move is played" value="${(sm.comment || '').replace(/"/g, '&quot;')}">
+    <label>Custom “correct” lines (one per line)</label>
+    <textarea id="crStepCorrect" rows="2" placeholder="overrides the line/global message">${(sm.correct || []).join('\n')}</textarea>
+    <label>Custom “wrong” lines (one per line)</label>
+    <textarea id="crStepWrong" rows="2" placeholder="overrides the line/global message">${(sm.wrong || []).join('\n')}</textarea>
+    <div class="cr-step-act"><button class="btn primary sm" id="crStepSave">Save this step</button><button class="btn ghost sm" id="crStepClear">Clear</button></div>`;
+  $('#crStepX').onclick = () => { cb.selStep = null; $('#crStep').hidden = true; cbRenderMoves(); };
+  $('#crStepSave').onclick = () => {
+    const meta = {};
+    const c = $('#crStepComment').value.trim(); if (c) meta.comment = c;
+    const ok = $('#crStepCorrect').value.split('\n').map(s => s.trim()).filter(Boolean); if (ok.length) meta.correct = ok;
+    const wr = $('#crStepWrong').value.split('\n').map(s => s.trim()).filter(Boolean); if (wr.length) meta.wrong = wr;
+    if (Object.keys(meta).length) cb.stepMeta[i] = meta; else delete cb.stepMeta[i];
+    cb.selStep = null; $('#crStep').hidden = true; cbRenderMoves(); cbStatus('Step saved.', 'ok');
+  };
+  $('#crStepClear').onclick = () => { delete cb.stepMeta[i]; cb.selStep = null; $('#crStep').hidden = true; cbRenderMoves(); };
 }
 function cbStatus(msg, cls = '') { const s = $('#crStatus'); s.textContent = msg; s.className = 'cr-status ' + cls; }
 function cbAddLine() {
@@ -283,10 +325,18 @@ function cbAddLine() {
   $('#crMsgBox').querySelectorAll('textarea').forEach(t => {
     const ls = t.value.split('\n').map(s => s.trim()).filter(Boolean); if (ls.length) messages[t.dataset.cm] = ls;
   });
-  const line = { id: 'l' + Date.now().toString(36) + Math.floor(Math.random() * 1e4), name, group, idea, moves: moves.map(s => [s]) };
+  // bake per-step comments + messages into each move tuple: [san] | [san,comment] | [san,comment,{correct,wrong}]
+  const lineMoves = moves.map((san, i) => {
+    const sm = cb.stepMeta[i]; if (!sm) return [san];
+    const msgs = {}; if (sm.correct) msgs.correct = sm.correct; if (sm.wrong) msgs.wrong = sm.wrong;
+    const tuple = [san, sm.comment || ''];
+    if (Object.keys(msgs).length) tuple.push(msgs);
+    return tuple;
+  });
+  const line = { id: 'l' + Date.now().toString(36) + Math.floor(Math.random() * 1e4), name, group, idea, moves: lineMoves };
   if (Object.keys(messages).length) line.messages = messages;
   cb.lines.push(line);
-  cb.game = new Chess(); cbSetBoard();
+  cb.game = new Chess(); cb.stepMeta = {}; cb.selStep = null; cbSetBoard();
   $('#crLineName').value = ''; $('#crLineIdea').value = '';
   $('#crMsgBox').querySelectorAll('textarea').forEach(t => t.value = '');
   cbRenderLines(); cbStatus(`Added “${name}”.`, 'ok');
@@ -311,8 +361,9 @@ function cbSave() {
   currentOpening = op; showView('opening');
 }
 function cbReset() {
-  cb.game = new Chess(); cb.lines = []; cb.editingId = null;
+  cb.game = new Chess(); cb.lines = []; cb.editingId = null; cb.stepMeta = {}; cb.selStep = null;
   ['crName', 'crEco', 'crOne', 'crLineName', 'crLineGroup', 'crLineIdea'].forEach(id => { const e = $('#' + id); if (e) e.value = ''; });
+  if ($('#crStep')) $('#crStep').hidden = true;
   setCbColor('w'); if (cb.board) cbSetBoard(); cbRenderLines(); cbStatus('');
   $('#crTitle').textContent = 'Create an opening';
 }
@@ -494,14 +545,17 @@ function trMove(from, to, promo) {
     drill.correct += drill.hinted ? 0 : 1; $('#trCorrect').textContent = drill.correct;
     trBoard.setFen(trGame.fen(), { lastMove: { from, to } });
     trBoard.flash(to, 'ok'); trBoard.setShapes([]);
-    const cm = drill.line.moves[drill.ply][1];
-    coach(coachSay('correct', {}, drill.line.messages) + (cm ? ' ' + cm : ''), 'ok');
+    const step = drill.line.moves[drill.ply];
+    const cm = step[1];
+    const ov = step[2]?.correct ? { correct: step[2].correct } : drill.line.messages;   // per-step > per-line > global
+    coach(coachSay('correct', {}, ov) + (cm ? ' ' + cm : ''), 'ok');
     drill.ply++; drill.hinted = false; updateEval(); renderMoves();
     setTimeout(afterUserMove, 360);
   } else {
     trGame.undo(); trBoard.setFen(before, { silent: true }); Sound.error();
     drill.mistake = true; drill.wrong++; $('#trWrong').textContent = drill.wrong;
-    coach(coachSay('wrong', { exp }, drill.line.messages), 'bad'); trBoard.flash(to, 'bad');
+    const wov = drill.line.moves[drill.ply]?.[2]?.wrong ? { wrong: drill.line.moves[drill.ply][2].wrong } : drill.line.messages;
+    coach(coachSay('wrong', { exp }, wov), 'bad'); trBoard.flash(to, 'bad');
     if (drill.mode !== 'practice') {           // drill: reveal the move, then continue
       trBoard.lock(true);
       setTimeout(() => {

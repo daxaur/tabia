@@ -404,3 +404,46 @@ nav.top .ic-svg{width:14px;height:14px;}
 .cr-actions{display:flex;align-items:center;gap:12px;margin-top:24px;}
 .cr-status{font-family:var(--mono);font-size:12px;}
 .cr-status.ok{color:#9fe07a;} .cr-status.err{color:#ef9a9a;}
+
+/* ============ create gate + per-step + favourites + donate v2 ============ */
+.cr-gate{display:grid;place-items:center;padding:60px 20px;}
+.cr-gate-card{max-width:440px;text-align:center;border:1px solid var(--line2);background:var(--panel);padding:40px 34px;}
+.cr-gate-card h2{margin:0 0 10px;font-size:24px;}
+.cr-gate-card p{color:var(--dim);margin:0 0 22px;font-size:15px;}
+
+.movelist.clickable .mv{cursor:pointer;border:1px solid transparent;}
+.movelist.clickable .mv:hover{border-color:var(--line2);}
+.movelist .mv.tagged{box-shadow:inset 0 -2px 0 var(--ok);}
+.cr-step{margin-top:12px;border:1px solid var(--line2);background:var(--panel);padding:14px;display:flex;flex-direction:column;gap:8px;}
+.cr-step-head{display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.5px;color:var(--dim);}
+.cr-step-head b{color:var(--ink);}
+.cr-step-x{background:transparent;border:0;color:var(--faint);font-size:13px;} .cr-step-x:hover{color:var(--ink);}
+.cr-step input,.cr-step textarea{background:#0c0c0c;color:var(--ink);border:1px solid var(--line2);padding:8px 10px;font-family:var(--mono);font-size:12px;}
+.cr-step input:focus,.cr-step textarea:focus{outline:none;border-color:var(--ink);}
+.cr-step label{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--faint);}
+.cr-step-act{display:flex;gap:8px;}
+
+/* favourite stars + badges */
+.opcard{position:relative;}
+.opfav{position:absolute;top:8px;right:8px;z-index:3;background:rgba(0,0,0,.5);border:1px solid var(--line2);color:var(--faint);
+  width:30px;height:30px;display:grid;place-items:center;transition:.13s;}
+.opfav:hover{color:var(--ink);border-color:var(--ink);}
+.opfav.on{color:#f7d64b;border-color:#f7d64b;}
+.opfav .ic-svg{width:15px;height:15px;}
+.op-badge{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#f7d64b;border:1px solid #5a4d18;padding:2px 6px;vertical-align:middle;}
+.op-badge.yours{color:#9fe07a;border-color:#33502a;}
+.btn.saved{color:#f7d64b;border-color:#f7d64b;}
+
+/* donate v2 — clean cards */
+.donate{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.dcard{display:flex;align-items:center;gap:11px;padding:11px 13px;background:var(--panel);border:1px solid var(--line2);color:var(--ink);transition:.14s;position:relative;overflow:hidden;text-align:left;}
+.dcard:hover{border-color:var(--ink);transform:translateY(-2px);}
+.dcard .dlogo{width:22px;height:22px;flex-shrink:0;}
+.dinfo{display:flex;flex-direction:column;line-height:1.2;min-width:0;}
+.dname{font-size:13px;font-weight:600;}
+.daddr{font-family:var(--mono);font-size:10px;color:var(--faint);}
+.dcard .dcopy{margin-left:auto;display:inline-flex;opacity:.5;} .dcard .dcopy .ic-svg{width:14px;height:14px;}
+.dcard:hover .dcopy{opacity:1;}
+.dok{position:absolute;inset:0;display:none;align-items:center;justify-content:center;gap:6px;background:#0c0c0c;color:#9fe07a;font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;}
+.dok .ic-svg{width:14px;height:14px;}
+.dcard.copied .dok{display:flex;}

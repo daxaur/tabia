@@ -9,6 +9,7 @@ export const repertoire = {
   name: 'Blackmar-Diemer Gambit',
   color: 'w',
   eco: 'D00',
+  tabiaOriginal: true,
   oneLiner: '1.d4 d5 2.e4!? — sacrifice a pawn, rip open the f-file, and hunt the king.',
   trunk: '1.d4 d5 2.e4 dxe4 3.Nc3 Nf6 4.f3',
   lines: [

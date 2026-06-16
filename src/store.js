@@ -33,6 +33,17 @@ export const Store = {
   },
   deleteCustomOpening(id) { this.s.custom = (this.s.custom || []).filter(o => o.id !== id); this._flush(); },
 
+  // ---- saved / favourite openings ----
+  favorites() { return this.s.favs || []; },
+  isFavorite(id) { return (this.s.favs || []).includes(id); },
+  toggleFavorite(id) {
+    this.s.favs ||= [];
+    const i = this.s.favs.indexOf(id);
+    if (i >= 0) this.s.favs.splice(i, 1); else this.s.favs.push(id);
+    this._flush();
+    return this.isFavorite(id);
+  },
+
   _rep(repId) { this.s.reps ||= {}; this.s.reps[repId] ||= { lines: {} }; return this.s.reps[repId]; },
   line(repId, lineId) {
     const r = this._rep(repId);
