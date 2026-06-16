@@ -25,7 +25,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="src/style.css?v=28">
+<link rel="stylesheet" href="src/style.css?v=29">
 <script>
   // network-first service worker so deploys are never masked by stale cache
   if ('serviceWorker' in navigator) {
@@ -210,8 +210,8 @@
 
           <div class="modegrid" id="trModes">
             <button class="modetile" data-mode="learn"><span class="mi">📖</span><span class="ml">Learn</span><span class="ms" id="ms-learn">walk the lines</span></button>
-            <button class="modetile" data-mode="practice"><span class="mi">🎯</span><span class="ml">Practice</span><span class="ms">forgiving reps</span></button>
-            <button class="modetile active" data-mode="drill"><span class="mi">🥁</span><span class="ml">Drill</span><span class="ms" id="ms-drill">spaced repetition</span></button>
+            <button class="modetile" data-mode="practice"><span class="mi">🎯</span><span class="ml">Practice</span><span class="ms">free play · no score</span></button>
+            <button class="modetile active" data-mode="drill"><span class="mi">🥁</span><span class="ml">Drill</span><span class="ms" id="ms-drill">scored · spaced reps</span></button>
             <button class="modetile" data-mode="hyper"><span class="mi">⚡</span><span class="ml">Hyper</span><span class="ms">bot plays a line</span></button>
           </div>
 
@@ -299,9 +299,9 @@
     </div>
   </div>
   <div class="foot-bottom"><span class="wrap">tabia · MIT · built with
-    <a href="https://stockfishchess.org/" target="_blank" rel="noopener">Stockfish</a> +
-    <a href="https://github.com/jhlywa/chess.js" target="_blank" rel="noopener">chess.js</a> ·
-    made with <span class="heart" aria-label="love">♥</span> for the game</span></div>
+    <a class="credit" href="https://stockfishchess.org/" target="_blank" rel="noopener"><span class="bi" id="sfLogo"></span>Stockfish</a>
+    <a class="credit" href="https://github.com/jhlywa/chess.js" target="_blank" rel="noopener"><span class="bi" id="cjsLogo"></span>chess.js</a>
+    · made with <span class="heart" aria-label="love">♥</span> for the game</span></div>
 </footer>
 
 <!-- connect account drawer -->
@@ -327,6 +327,6 @@
   </div>
 </div>
 
-<script type="module" src="src/app.js?v=28"></script>
+<script type="module" src="src/app.js?v=29"></script>
 </body>
 </html>

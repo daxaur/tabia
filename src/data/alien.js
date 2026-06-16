@@ -3,6 +3,7 @@
 export const repertoire = {
   id: 'alien', name: 'Alien Gambit', color: 'w', eco: 'B10', tabiaOriginal: true,
   oneLiner: '1.e4 c6 … 6.Nxf7!? — sacrifice the knight on f7 and hunt the king. 👽 Engine says no, the 1500s say yes.',
+  offBook: ['The hunt only works on the rails — {exp} keeps the king cornered.', 'Drift here and Black consolidates. {exp} keeps the fire lit.', 'Off the abduction route 👽 — {exp} is the move.'],
   trunk: '1.e4 c6 2.d4 d5 3.Nd2 dxe4 4.Nxe4 Nf6 5.Ng5 h6 6.Nxf7',
   groups: { hunt: { label: 'The Sacrifice', blurb: '6.Nxf7 and the king-hunt' } },
   lines: [

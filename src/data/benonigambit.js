@@ -4,6 +4,7 @@
 export const repertoire = {
   id: 'oldbenoni', name: 'Benoni Gambit', color: 'b', eco: 'A43', tabiaOriginal: true,
   oneLiner: '1.d4 c5!? — offer the c-pawn. Take it back cleanly after 2.dxc5, spring a piece-winning trap if White clings to it, or get the sharp Old Benoni after 2.d5.',
+  offBook: ['The trap only springs on the right move-order — {exp}.', 'Grab it back the clean way: {exp}.', 'Off the gambit script — {exp} is the move.'],
   trunk: '1.d4 c5',
   groups: {
     accepted: { label: 'Accepted · 2.dxc5', blurb: 'White takes — you regain it (with a trap)' },

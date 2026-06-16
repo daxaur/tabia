@@ -9,6 +9,7 @@ export const repertoire = {
   eco: 'A52',
   tabiaOriginal: true,
   oneLiner: '1.d4 Nf6 2.c4 e5!? — sac a pawn for fast, active piece play and tricks on the dark squares.',
+  offBook: ['The e5-pawn comes back by force — {exp} is how.', 'Lose the tempo and the gambit fizzles. {exp} keeps the pieces buzzing.', 'Off the dark-square plan — play {exp}.'],
   trunk: '1.d4 Nf6 2.c4 e5 3.dxe5 Ng4',
   groups: {
     adler:  { label: 'Accepted · Ng4', blurb: 'The main road — win the pawn back' },

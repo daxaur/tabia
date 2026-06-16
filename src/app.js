@@ -1,15 +1,15 @@
-import { Chess } from './vendor/chess.js?v=28';
-import { Board } from './board.js?v=28';
-import { openings, groupsOf, CATEGORIES } from './data/index.js?v=28';
-import { Store } from './store.js?v=28';
-import { evaluate, winPct, fmtEval } from './eval.js?v=28';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=28';
-import { Sound } from './sound.js?v=28';
-import { Auth } from './auth.js?v=28';
-import { ICON, siteIcon } from './icons.js?v=28';
-import { Engine } from './engine.js?v=28';
-import { CoachAI } from './coachai.js?v=28';
-import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=28';
+import { Chess } from './vendor/chess.js?v=29';
+import { Board } from './board.js?v=29';
+import { openings, groupsOf, CATEGORIES } from './data/index.js?v=29';
+import { Store } from './store.js?v=29';
+import { evaluate, winPct, fmtEval } from './eval.js?v=29';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=29';
+import { Sound } from './sound.js?v=29';
+import { Auth } from './auth.js?v=29';
+import { ICON, siteIcon } from './icons.js?v=29';
+import { Engine } from './engine.js?v=29';
+import { CoachAI } from './coachai.js?v=29';
+import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=29';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -28,6 +28,8 @@ $('#footGh').href = REPO_URL;
 $('#ghIcon').innerHTML = ICON.github;
 $('#footGhIcon').innerHTML = ICON.github;
 $('#connectIcon').innerHTML = ICON.link;
+$('#sfLogo').innerHTML = ICON.fish;
+$('#cjsLogo').innerHTML = ICON.knight;
 $('#liLogo').innerHTML = ICON.lichess;
 $('#ccLogo').innerHTML = ICON.chesscom;
 $('#navHomeIcon').innerHTML = ICON.home;
@@ -495,8 +497,8 @@ function loadIntoBuilder(op) {                 // edit an existing custom openin
 const GLYPH = { p: 'P', n: 'N', b: 'B', r: 'R', q: 'Q', k: 'K' };
 const MODE_META = {
   learn:    { icon: '📖', name: 'Learn',    intro: 'Learn mode — I’ll walk you through each line. Press Start, then use › / ‹ (or arrow keys) to step.' },
-  practice: { icon: '🎯', name: 'Practice', intro: 'Practice mode — play the moves yourself. Slip up as many times as you like; nothing is penalised.' },
-  drill:    { icon: '🥁', name: 'Drill',    intro: 'Drill mode — spaced repetition. Get a line clean and it won’t come back for a while.' },
+  practice: { icon: '🎯', name: 'Practice', intro: 'Practice mode — free play, nothing is scored or scheduled. Slip up as many times as you like; just rehearse.' },
+  drill:    { icon: '🥁', name: 'Drill',    intro: 'Drill mode — the scored one. Spaced repetition: get a line clean and it won’t come back for a while.' },
   hyper:    { icon: '⚡', name: 'Hyper',    intro: 'Hyper mode — I become your opponent and play a random line. Hold your repertoire, then start another round.' },
 };
 
@@ -764,7 +766,10 @@ function hyperUserMove(from, to, promo) {
   if (!matching.length) {
     trGame.undo(); trBoard.setFen(before, { silent: true }); Sound.error();
     const exp = hyperExpected();
-    coach(`That leaves the book${exp ? ` — the move is ${exp}` : ''}.`, 'bad'); trBoard.flash(to, 'bad');
+    // per-opening custom off-book line if the repertoire defines one, else the global default
+    const ov = repo.offBook?.length ? { offBook: repo.offBook } : null;
+    coach(exp ? coachSay('offBook', { exp }, ov) : 'That leaves your repertoire.', 'bad');
+    trBoard.flash(to, 'bad');
     return;
   }
   hyper.candidates = matching; hyper.ply++;

@@ -11,6 +11,7 @@ export const repertoire = {
   eco: 'D00',
   tabiaOriginal: true,
   oneLiner: '1.d4 d5 2.e4!? — sacrifice a pawn, rip open the f-file, and hunt the king.',
+  offBook: ['You sacked the pawn for the initiative — {exp} keeps it screaming.', 'No half-measures in the BDG. {exp} keeps the f-file open.', 'That hands the pawn back for nothing — {exp} is the move.'],
   trunk: '1.d4 d5 2.e4 dxe4 3.Nc3 Nf6 4.f3',
   lines: [
     // ---------------- ACCEPTED · 4...exf3 5.Nxf3 ----------------

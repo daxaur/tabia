@@ -9,6 +9,7 @@ export const repertoire = {
   eco: 'D00',
   tabiaOriginal: true,
   oneLiner: '1.d4 d5 2.Nc3 Nf6 3.Bf4 — the London with teeth: Nb5 jumps, h4 storms, no dull symmetry.',
+  offBook: ['The teeth are in the plan — {exp} keeps Nb5 and h4 live.', 'Play it straight and it’s just a dull London. {exp} keeps the bite.', 'Off the storm — {exp} is the move.'],
   trunk: '1.d4 d5 2.Nc3 Nf6 3.Bf4',
   groups: {
     main:   { label: 'Main · 3…e6', blurb: 'The classical centre' },
