@@ -1,13 +1,13 @@
-import { Chess } from './vendor/chess.js?v=12';
-import { Board } from './board.js?v=12';
-import { openings, groupsOf } from './data/index.js?v=12';
-import { Store } from './store.js?v=12';
-import { evaluate, winPct, fmtEval } from './eval.js?v=12';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=12';
-import { Sound } from './sound.js?v=12';
-import { Auth } from './auth.js?v=12';
-import { ICON, siteIcon } from './icons.js?v=12';
-import { Engine } from './engine.js?v=12';
+import { Chess } from './vendor/chess.js?v=13';
+import { Board } from './board.js?v=13';
+import { openings, groupsOf } from './data/index.js?v=13';
+import { Store } from './store.js?v=13';
+import { evaluate, winPct, fmtEval } from './eval.js?v=13';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=13';
+import { Sound } from './sound.js?v=13';
+import { Auth } from './auth.js?v=13';
+import { ICON, siteIcon } from './icons.js?v=13';
+import { Engine } from './engine.js?v=13';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -140,6 +140,7 @@ function showView(v) {
   if (v === 'home') renderHome();
   if (v === 'opening') renderOpening();
   if (v === 'train') enterTrain();
+  if (v === 'create') enterCreate();
   window.scrollTo(0, 0);
 }
 document.querySelectorAll('nav.top button').forEach(b => b.addEventListener('click', () => showView(b.dataset.view)));
@@ -151,28 +152,31 @@ function statsFor(op) {
     reps: ids.reduce((a, id) => a + Store.line(op.id, id).seen, 0) };
 }
 function previewBoard(el, op, plies, interactive = false) {
+  if (!el) return null;
   const b = new Board(el, { interactive, pieceSet, orientation: op.color === 'b' ? 'black' : 'white' });
   const g = new Chess(); const main = op.lines.find(l => l.star) || op.lines[0];
-  for (const [san] of main.moves.slice(0, plies)) g.move(san);
+  try { for (const [san] of (main?.moves || []).slice(0, plies)) g.move(san); } catch {}
   const h = g.history({ verbose: true });
   b.setFen(g.fen(), { lastMove: h.length ? { from: h[h.length - 1].from, to: h[h.length - 1].to } : null, silent: true });
   return b;
 }
+const library = () => [...openings, ...Store.customOpenings()];
 function renderHome() {
-  $('#libSub').textContent = `${openings.length} opening${openings.length > 1 ? 's' : ''} · drill any line`;
-  $('#library').innerHTML = openings.map((op, i) => {
-    const s = statsFor(op); const pct = Math.round(s.mastered / s.ids.length * 100);
+  const lib = library();
+  $('#libSub').textContent = `${lib.length} opening${lib.length > 1 ? 's' : ''} · drill any line`;
+  $('#library').innerHTML = lib.map((op, i) => {
+    const s = statsFor(op); const pct = s.ids.length ? Math.round(s.mastered / s.ids.length * 100) : 0;
     return `<div class="opcard" data-op="${op.id}" style="animation-delay:${i * 80}ms">
       <div class="opcard-board"><div id="mini-${op.id}"></div></div>
       <div class="opcard-body">
-        <span class="ct">${op.eco} · ${op.lines.length} lines${s.due ? ` · <b>${s.due} due</b>` : ''}</span>
+        <span class="ct">${op.eco} · ${op.lines.length} lines${op.custom ? ' · <b>yours</b>' : ''}${s.due ? ` · <b>${s.due} due</b>` : ''}</span>
         <h3>${op.name}</h3>
-        <p>${op.oneLiner}</p>
+        <p>${op.oneLiner || ''}</p>
         <div class="bar"><i style="width:${pct}%"></i></div>
         <span class="go">${pct ? `${pct}% mastered` : 'Start training'} →</span>
       </div></div>`;
   }).join('');
-  openings.forEach(op => previewBoard(document.getElementById(`mini-${op.id}`), op, 7));
+  lib.forEach(op => previewBoard(document.getElementById(`mini-${op.id}`), op, 7));
   $('#library').querySelectorAll('[data-op]').forEach(c => c.onclick = () => openOpening(c.dataset.op));
   const s0 = statsFor(repo);
   $('#footStats').textContent = `${s0.reps} reps logged · ${s0.mastered}/${s0.ids.length} lines mastered`;
@@ -180,13 +184,21 @@ function renderHome() {
 
 // ============================== OPENING DETAIL (folders → branches) ==============================
 let opPreview = null;
-function openOpening(id) { currentOpening = openings.find(o => o.id === id) || openings[0]; showView('opening'); }
+function openingById2(id) { return library().find(o => o.id === id); }
+function openOpening(id) { currentOpening = openingById2(id) || openings[0]; showView('opening'); }
 function renderOpening() {
   const op = currentOpening;
   $('#crumbName').textContent = op.name;
-  $('#opEco').textContent = `opening · ${op.eco}`;
+  $('#opEco').textContent = `${op.custom ? 'your opening' : 'opening'} · ${op.eco} · plays ${op.color === 'b' ? 'Black' : 'White'}`;
   $('#opName').textContent = op.name;
-  $('#opOneliner').textContent = op.oneLiner;
+  $('#opOneliner').textContent = op.oneLiner || '';
+  $('.op-actions').innerHTML = `<button class="btn primary" id="opTrain">▶ Study this opening</button>` +
+    (op.custom ? `<button class="btn" id="opEdit">✎ Edit</button><button class="btn ghost" id="opDelete">🗑 Delete</button>` : '');
+  $('#opTrain').onclick = () => showView('train');
+  if (op.custom) {
+    $('#opEdit').onclick = () => loadIntoBuilder(op);
+    $('#opDelete').onclick = () => { Store.deleteCustomOpening(op.id); showView('home'); };
+  }
   $('#opBoard').innerHTML = ''; opPreview = previewBoard($('#opBoard'), op, 9);
   $('#opTree').innerHTML = groupsOf(op).map(grp => `
     <div class="folder" data-folder="${grp.key}">
@@ -203,7 +215,115 @@ function renderOpening() {
   $('#opTree').querySelectorAll('.branch').forEach(b => b.onclick = () => { showView('train'); trSelectLine(b.dataset.line); });
 }
 $('#crumbHome').onclick = () => showView('home');
-$('#opTrain').onclick = () => showView('train');
+
+// ============================== CREATE (opening builder) ==============================
+$('#navCreateIcon').innerHTML = ICON.plus;
+$('#crCrumbHome').onclick = () => showView('home');
+const CB_MSGS = [
+  { key: 'correct',  label: 'On a correct move' },
+  { key: 'wrong',    label: 'On a wrong move  ({exp} = the right move)' },
+  { key: 'done',     label: 'Line finished clean' },
+  { key: 'doneMiss', label: 'Line finished with a slip' },
+];
+const cb = { board: null, game: new Chess(), color: 'w', lines: [], editingId: null };
+
+function enterCreate() {
+  if (!cb.board) {
+    cb.board = new Board($('#crBoard'), { pieceSet, onMove: cbMove });
+    $('#crMsgBox').innerHTML = CB_MSGS.map(f =>
+      `<div class="mf"><label>${f.label}</label><textarea data-cm="${f.key}" rows="2" placeholder="one message per line"></textarea></div>`).join('');
+    $('#crMsgToggle').onclick = () => { const b = $('#crMsgBox'); b.hidden = !b.hidden; $('#crMsgToggle').textContent = b.hidden ? '＋ Custom coach messages' : '− Hide messages'; };
+    document.querySelectorAll('#crColor button').forEach(b => b.onclick = () => setCbColor(b.dataset.c));
+    $('#crUndo').onclick = () => { cb.game.undo(); cbSetBoard(); };
+    $('#crResetLine').onclick = () => { cb.game = new Chess(); cbSetBoard(); };
+    $('#crFlip').onclick = () => cb.board.flip();
+    $('#crAddLine').onclick = cbAddLine;
+    $('#crSave').onclick = cbSave;
+    $('#crCancel').onclick = () => { cbReset(); showView('home'); };
+  }
+  cb.board.setPieceSet(pieceSet);
+  setCbColor(cb.color); cbSetBoard(); cbRenderLines();
+}
+function setCbColor(c) {
+  cb.color = c;
+  document.querySelectorAll('#crColor button').forEach(b => b.classList.toggle('active', b.dataset.c === c));
+  cb.board?.setOrientation(c === 'b' ? 'black' : 'white');
+}
+function cbMove(from, to, promo) {
+  const m = cb.game.move({ from, to, promotion: promo }); if (!m) return;
+  cb.board.setFen(cb.game.fen(), { lastMove: { from, to } });
+  cbRenderMoves();
+}
+function cbSetBoard() {
+  const h = cb.game.history({ verbose: true });
+  const lm = h.length ? { from: h[h.length - 1].from, to: h[h.length - 1].to } : null;
+  cb.board.setFen(cb.game.fen(), { lastMove: lm, silent: true });
+  cbRenderMoves();
+}
+function cbRenderMoves() {
+  const h = cb.game.history({ verbose: true });
+  if (!h.length) { $('#crMoves').innerHTML = '<span class="mvempty">play the moves on the board…</span>'; return; }
+  let html = '';
+  for (let i = 0; i < h.length; i++) {
+    const m = h[i];
+    if (i % 2 === 0) html += `<span class="mvno">${i / 2 + 1}.</span>`;
+    const ic = m.piece === 'p' ? '' : `<img class="mvpc" src="src/pieces/${pieceSet}/${m.color}${GLYPH[m.piece]}.svg" alt="">`;
+    html += `<span class="mv${i === h.length - 1 ? ' cur' : ''}">${ic}${m.san}</span>`;
+  }
+  $('#crMoves').innerHTML = html;
+}
+function cbStatus(msg, cls = '') { const s = $('#crStatus'); s.textContent = msg; s.className = 'cr-status ' + cls; }
+function cbAddLine() {
+  const moves = cb.game.history();
+  if (!moves.length) { cbStatus('Play at least one move for this line.', 'err'); return; }
+  const name = $('#crLineName').value.trim() || `Line ${cb.lines.length + 1}`;
+  const group = $('#crLineGroup').value.trim() || 'Main';
+  const idea = $('#crLineIdea').value.trim();
+  const messages = {};
+  $('#crMsgBox').querySelectorAll('textarea').forEach(t => {
+    const ls = t.value.split('\n').map(s => s.trim()).filter(Boolean); if (ls.length) messages[t.dataset.cm] = ls;
+  });
+  const line = { id: 'l' + Date.now().toString(36) + Math.floor(Math.random() * 1e4), name, group, idea, moves: moves.map(s => [s]) };
+  if (Object.keys(messages).length) line.messages = messages;
+  cb.lines.push(line);
+  cb.game = new Chess(); cbSetBoard();
+  $('#crLineName').value = ''; $('#crLineIdea').value = '';
+  $('#crMsgBox').querySelectorAll('textarea').forEach(t => t.value = '');
+  cbRenderLines(); cbStatus(`Added “${name}”.`, 'ok');
+}
+function cbRenderLines() {
+  $('#crLineCount').textContent = cb.lines.length;
+  $('#crLines').innerHTML = cb.lines.length ? cb.lines.map((l, i) =>
+    `<div class="cr-li"><div class="cr-li-info"><b>${l.name}</b> <span class="cr-li-g">${l.group}</span>
+       <div class="cr-li-m">${l.moves.map((m, j) => (j % 2 ? '' : (j / 2 | 0) + 1 + '.') + m[0]).join(' ')}</div></div>
+     <button class="cr-del" data-i="${i}" title="Remove line">${ICON.trash}</button></div>`).join('')
+    : '<div class="cr-empty">No lines yet — build one on the board, then “Add this line”.</div>';
+  $('#crLines').querySelectorAll('.cr-del').forEach(b => b.onclick = () => { cb.lines.splice(+b.dataset.i, 1); cbRenderLines(); });
+}
+function cbSave() {
+  const name = $('#crName').value.trim();
+  if (!name) { cbStatus('Give your opening a name.', 'err'); return; }
+  if (!cb.lines.length) { cbStatus('Add at least one line first.', 'err'); return; }
+  const id = cb.editingId || ('custom-' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 22) + '-' + Date.now().toString(36));
+  const op = { id, name, color: cb.color, eco: ($('#crEco').value.trim() || 'CUST'), oneLiner: $('#crOne').value.trim(), custom: true, lines: cb.lines };
+  Store.saveCustomOpening(op);
+  cbReset();
+  currentOpening = op; showView('opening');
+}
+function cbReset() {
+  cb.game = new Chess(); cb.lines = []; cb.editingId = null;
+  ['crName', 'crEco', 'crOne', 'crLineName', 'crLineGroup', 'crLineIdea'].forEach(id => { const e = $('#' + id); if (e) e.value = ''; });
+  setCbColor('w'); if (cb.board) cbSetBoard(); cbRenderLines(); cbStatus('');
+  $('#crTitle').textContent = 'Create an opening';
+}
+function loadIntoBuilder(op) {                 // edit an existing custom opening
+  cb.editingId = op.id; cb.lines = JSON.parse(JSON.stringify(op.lines));
+  cb.game = new Chess();
+  $('#crName').value = op.name; $('#crEco').value = op.eco === 'CUST' ? '' : (op.eco || ''); $('#crOne').value = op.oneLiner || '';
+  setCbColor(op.color || 'w');
+  $('#crTitle').textContent = 'Edit · ' + op.name;
+  showView('create');
+}
 
 // ============================== STUDY HUB (modes + bot + eval + sound) ==============================
 const GLYPH = { p: 'P', n: 'N', b: 'B', r: 'R', q: 'Q', k: 'K' };
@@ -596,5 +716,6 @@ setMode('drill');
 refreshMastery(); renderHome(); heroFx(); updateEval(); renderAccount();
 $('#trSound').textContent = Sound.enabled ? '🔊' : '🔇';
 $('#trSound').classList.toggle('on', Sound.enabled);
-window.addEventListener('hashchange', () => showView(location.hash.slice(1) || 'home'));
-showView(location.hash.slice(1) === 'train' ? 'train' : 'home');
+const ROUTES = ['home', 'train', 'create'];
+window.addEventListener('hashchange', () => { const h = location.hash.slice(1); showView(ROUTES.includes(h) ? h : 'home'); });
+{ const h = location.hash.slice(1); showView(ROUTES.includes(h) ? h : 'home'); }

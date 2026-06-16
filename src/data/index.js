@@ -1,9 +1,9 @@
 // Opening library. Each opening is a "folder"; its lines are the branches.
 // Add a new opening by importing its module and pushing it here.
-import { repertoire as bdg } from './bdg.js?v=12';
-import { repertoire as jobava } from './jobava.js?v=12';
-import { repertoire as budapest } from './budapest.js?v=12';
-import { repertoire as qg } from './queensgambit.js?v=12';
+import { repertoire as bdg } from './bdg.js?v=13';
+import { repertoire as jobava } from './jobava.js?v=13';
+import { repertoire as budapest } from './budapest.js?v=13';
+import { repertoire as qg } from './queensgambit.js?v=13';
 
 export const openings = [qg, bdg, jobava, budapest];
 

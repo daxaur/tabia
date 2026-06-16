@@ -23,6 +23,16 @@ export const Store = {
   setAccount(a) { this.s.account = a; this._flush(); },
   clearAccount() { delete this.s.account; this._flush(); },
 
+  // ---- user-created openings (live only in this browser) ----
+  customOpenings() { return this.s.custom || []; },
+  saveCustomOpening(op) {
+    this.s.custom ||= [];
+    const i = this.s.custom.findIndex(o => o.id === op.id);
+    if (i >= 0) this.s.custom[i] = op; else this.s.custom.push(op);
+    this._flush();
+  },
+  deleteCustomOpening(id) { this.s.custom = (this.s.custom || []).filter(o => o.id !== id); this._flush(); },
+
   _rep(repId) { this.s.reps ||= {}; this.s.reps[repId] ||= { lines: {} }; return this.s.reps[repId]; },
   line(repId, lineId) {
     const r = this._rep(repId);

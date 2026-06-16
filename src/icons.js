@@ -10,5 +10,7 @@ export const ICON = {
   study: wrap('0 0 24 24', 'M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z'),
   copy: wrap('0 0 24 24', 'M16 1H4a2 2 0 0 0-2 2v14h2V3h12zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2m0 16H8V7h11z'),
   check: wrap('0 0 24 24', 'M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'),
+  plus: wrap('0 0 24 24', 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z'),
+  trash: wrap('0 0 24 24', 'M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6zM19 4h-3.5l-1-1h-5l-1 1H5v2h14z'),
 };
 export const siteIcon = site => site === 'lichess' ? ICON.lichess : site === 'chesscom' ? ICON.chesscom : ICON.link;

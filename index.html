@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="src/style.css?v=12">
+<link rel="stylesheet" href="src/style.css?v=13">
 <script>
   // network-first service worker so deploys are never masked by stale cache
   if ('serviceWorker' in navigator) {
@@ -28,6 +28,7 @@
   <nav class="top">
     <button data-view="home" class="active"><span class="bi" id="navHomeIcon"></span>Home</button>
     <button data-view="train"><span class="bi" id="navStudyIcon"></span>Study</button>
+    <button data-view="create"><span class="bi" id="navCreateIcon"></span>Create</button>
   </nav>
   <div class="right">
     <button class="ghbtn connect" id="connectBtn"><span class="bi" id="connectIcon"></span><span id="connectLabel">Connect</span></button>
@@ -72,6 +73,50 @@
         <div class="op-preview"><div id="opBoard"></div></div>
       </div>
       <div class="tree" id="opTree"></div>
+    </section>
+
+    <!-- CREATE — opening builder -->
+    <section class="view" id="view-create">
+      <div class="crumbs"><a id="crCrumbHome">Home</a> <span>›</span> <b id="crTitle">Create an opening</b></div>
+
+      <div class="cr-meta">
+        <input id="crName" placeholder="Opening name — e.g. My Catalan" autocomplete="off">
+        <div class="seg" id="crColor" title="Which side you play"><button data-c="w" class="active">Play White</button><button data-c="b">Play Black</button></div>
+        <input id="crEco" placeholder="ECO" maxlength="6" autocomplete="off">
+        <input id="crOne" placeholder="One-line description (optional)" autocomplete="off">
+      </div>
+
+      <div class="cr-grid">
+        <div class="cr-board-col">
+          <div class="boardwrap"><div id="crBoard"></div></div>
+          <div class="bctrls">
+            <button class="btn" id="crUndo">↶ Undo move</button>
+            <button class="btn ghost" id="crResetLine">Reset line</button>
+            <button class="btn ghost" id="crFlip">⇅ Flip</button>
+          </div>
+          <div class="hintbar">Play the moves of this line on the board. Both sides — your repertoire move and the opponent’s reply.</div>
+          <div class="movelist icons" id="crMoves">—</div>
+        </div>
+
+        <aside class="cr-line">
+          <h3>This line</h3>
+          <input id="crLineName" placeholder="Line name — e.g. Main line" autocomplete="off">
+          <input id="crLineGroup" placeholder="Group — e.g. Main, Sidelines" autocomplete="off">
+          <input id="crLineIdea" placeholder="The idea / plan (optional)" autocomplete="off">
+          <button class="btn ghost sm" id="crMsgToggle">＋ Custom coach messages</button>
+          <div id="crMsgBox" hidden></div>
+          <button class="btn primary" id="crAddLine">＋ Add this line</button>
+
+          <div class="cr-lines-head">Lines added · <span id="crLineCount">0</span></div>
+          <div class="cr-lines" id="crLines"></div>
+        </aside>
+      </div>
+
+      <div class="cr-actions">
+        <button class="btn primary big" id="crSave">✓ Save opening</button>
+        <button class="btn ghost" id="crCancel">Cancel</button>
+        <span class="cr-status" id="crStatus"></span>
+      </div>
     </section>
 
     <!-- STUDY HUB (board + chessreps-style mode panel) -->
@@ -223,6 +268,6 @@
   </div>
 </div>
 
-<script type="module" src="src/app.js?v=12"></script>
+<script type="module" src="src/app.js?v=13"></script>
 </body>
 </html>
