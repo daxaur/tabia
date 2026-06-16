@@ -1,15 +1,15 @@
-import { Chess } from './vendor/chess.js?v=35';
-import { Board } from './board.js?v=35';
-import { openings, groupsOf, CATEGORIES } from './data/index.js?v=35';
-import { Store } from './store.js?v=35';
-import { evaluate, winPct, fmtEval } from './eval.js?v=35';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=35';
-import { Sound } from './sound.js?v=35';
-import { Auth } from './auth.js?v=35';
-import { ICON, siteIcon } from './icons.js?v=35';
-import { Engine } from './engine.js?v=35';
-import { CoachAI } from './coachai.js?v=35';
-import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=35';
+import { Chess } from './vendor/chess.js?v=36';
+import { Board } from './board.js?v=36';
+import { openings, groupsOf, CATEGORIES } from './data/index.js?v=36';
+import { Store } from './store.js?v=36';
+import { evaluate, winPct, fmtEval } from './eval.js?v=36';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=36';
+import { Sound } from './sound.js?v=36';
+import { Auth } from './auth.js?v=36';
+import { ICON, siteIcon } from './icons.js?v=36';
+import { Engine } from './engine.js?v=36';
+import { CoachAI } from './coachai.js?v=36';
+import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=36';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
