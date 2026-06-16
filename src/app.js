@@ -1,13 +1,13 @@
-import { Chess } from './vendor/chess.js?v=20';
-import { Board } from './board.js?v=20';
-import { openings, groupsOf, CATEGORIES } from './data/index.js?v=20';
-import { Store } from './store.js?v=20';
-import { evaluate, winPct, fmtEval } from './eval.js?v=20';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=20';
-import { Sound } from './sound.js?v=20';
-import { Auth } from './auth.js?v=20';
-import { ICON, siteIcon } from './icons.js?v=20';
-import { Engine } from './engine.js?v=20';
+import { Chess } from './vendor/chess.js?v=21';
+import { Board } from './board.js?v=21';
+import { openings, groupsOf, CATEGORIES } from './data/index.js?v=21';
+import { Store } from './store.js?v=21';
+import { evaluate, winPct, fmtEval } from './eval.js?v=21';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=21';
+import { Sound } from './sound.js?v=21';
+import { Auth } from './auth.js?v=21';
+import { ICON, siteIcon } from './icons.js?v=21';
+import { Engine } from './engine.js?v=21';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -529,8 +529,9 @@ function beginLine(line) {
   if (userColor() === 'b') {
     trBoard.lock(true);
     setTimeout(() => {
-      const m = trGame.move(line.moves[0][0]);
-      trBoard.setFen(trGame.fen(), { lastMove: m ? { from: m.from, to: m.to } : null });
+      if (drill.line !== line || drill.ply !== 0) return;   // a new line/opening took over — drop this stale move
+      const m = trGame.move(line.moves[0][0]); if (!m) return;
+      trBoard.setFen(trGame.fen(), { lastMove: { from: m.from, to: m.to } });
       drill.ply = 1; updateEval(); renderMoves(); trBoard.lock(false);
       coach(line.idea || 'Your move.'); trBoard.tryPremove();
     }, 350);

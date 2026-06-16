@@ -27,10 +27,12 @@ it's just HTML, CSS and ES modules.
 ## What it does
 
 - **Spaced-repetition drilling** — clean a line and it won't come back for a while; miss it and it returns soon.
-- **Openings as folders, lines as branches** — each opening is a folder holding a tree of named variations you can browse and drill.
-- **Explore** — step through any line with the plan annotated move by move, or branch off and try your own ideas.
-- **Train** — the trainer plays the opponent; you play your move and get instant ✓ / ✗ feedback, with a hint when you're stuck.
-- **Buttery board** — big, fast, smooth drag-and-drop with animated piece slides. Multiple swappable piece sets.
+- **Openings → folders → branch lines** — browse by category (gambits, classical, defences, systems), star and save your favourites.
+- **Four study modes** — **Learn** (walk the line), **Practice** (forgiving reps), **Drill** (SRS-scored), and **Hyper** (the bot plays a random line and you must hold your repertoire, round after round).
+- **Live Stockfish eval** — a real engine runs in your browser (single-thread WASM) and drives the "winning" bar; an instant heuristic fills in while it spins up.
+- **Build your own openings** — a visual builder: play the moves on a board, name your lines, and add custom coach messages per line *and* per move.
+- **Connect an account** — Lichess (OAuth) or Chess.com (public profile); your saved openings are kept locally, tied to you.
+- **Buttery board** — big, fast drag *and* click-to-move, lichess-style pieces, right-click arrows/highlights, pre-moves, and synthesized sounds.
 - **Browser-local** — no sign-up, no server call, your data never leaves the tab.
 - **Verified data** — every bundled line is replayed through `chess.js` (`npm run validate`); illegal moves can't ship.
 
@@ -57,26 +59,26 @@ opening shows up on the home page. Run `npm run validate` to legality-check ever
 ## Project layout
 
 ```
-index.html          app shell (Home / Explore / Train)
-src/style.css       theme + board styling
-src/board.js        dependency-free interactive board (drag + animation), chess.js-backed
-src/app.js          views + spaced-repetition drill engine
-src/store.js        localStorage persistence + SRS scheduling
-src/data/*          openings (folders) and their branch lines
-src/vendor/chess.js chess.js (move legality), vendored
-src/pieces/*        piece sets (SVG)
-tools/validate.mjs  legality check for every line
+index.html            app shell (Home / Study / Create / Saved)
+src/style.css         theme + board styling
+src/board.js          dependency-free interactive board (drag, click, arrows, pre-moves)
+src/app.js            views + spaced-repetition drill engine + opening builder
+src/store.js          localStorage persistence + SRS scheduling
+src/engine.js         in-browser Stockfish eval wrapper
+src/eval.js           instant heuristic eval (engine-free fallback)
+src/coach.js          coach messages (defaults + user overrides)
+src/auth.js           Lichess OAuth (PKCE) / Chess.com profile connect
+src/data/*            openings (folders) and their branch lines
+src/vendor/chess.js   chess.js (move legality), vendored
+src/vendor/stockfish.js  Stockfish (asm.js), vendored
+src/pieces/*          piece sets (SVG)
+sw.js                 service worker (network-first, always-fresh)
+tools/validate.mjs    legality check for every line
 ```
-
-## Roadmap
-
-- [ ] Import / export openings as PGN / JSON
-- [ ] Publish & share openings (peer-to-peer, no server)
-- [ ] Per-position SRS (not just per-line)
-- [ ] Community opening library
 
 ## Credits & license
 
-Code: **MIT** © 2026. Move legality by [chess.js](https://github.com/jhlywa/chess.js) (BSD).
-Piece sets are sourced from the [Lichess / lila](https://github.com/lichess-org/lila) project
-under their original licenses. Contributions welcome — open an issue or PR.
+Code: **MIT**. Move legality by [chess.js](https://github.com/jhlywa/chess.js) (BSD),
+engine evaluation by [Stockfish](https://stockfishchess.org/) (GPL, vendored as a Web Worker).
+Piece sets and the Lichess/Chess.com brand marks are from their respective projects under
+their original licenses. Contributions welcome — open an issue or PR.
