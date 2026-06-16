@@ -31,6 +31,7 @@ it's just HTML, CSS and ES modules.
 - **Four study modes** — **Learn** (walk the line), **Practice** (forgiving reps), **Drill** (SRS-scored), and **Hyper** (the bot plays a random line and you must hold your repertoire, round after round).
 - **Live Stockfish eval** — a real engine runs in your browser (single-thread WASM) and drives the "winning" bar; an instant heuristic fills in while it spins up.
 - **Build your own openings** — a visual builder: play the moves on a board, name your lines, and add custom coach messages per line *and* per move.
+- **Coach** — drop your Lichess/Chess.com username and tabia reads your recent games *in the browser*, profiles your style (sharp vs positional, e4 vs d4), and matches an opening to you — rendered as a shareable card you can post to X. No AI bill, no server: just stats over your own game history.
 - **Connect an account** — Lichess (OAuth) or Chess.com (public profile); your saved openings are kept locally, tied to you.
 - **Buttery board** — big, fast drag *and* click-to-move, lichess-style pieces, right-click arrows/highlights, pre-moves, and synthesized sounds.
 - **Browser-local** — no sign-up, no server call, your data never leaves the tab.
@@ -59,7 +60,7 @@ opening shows up on the home page. Run `npm run validate` to legality-check ever
 ## Project layout
 
 ```
-index.html            app shell (Home / Study / Create / Saved)
+index.html            app shell (Home / Study / Coach / Create / Saved)
 src/style.css         theme + board styling
 src/board.js          dependency-free interactive board (drag, click, arrows, pre-moves)
 src/app.js            views + spaced-repetition drill engine + opening builder
@@ -68,6 +69,8 @@ src/engine.js         in-browser Stockfish eval wrapper
 src/eval.js           instant heuristic eval (engine-free fallback)
 src/coach.js          coach messages (defaults + user overrides)
 src/auth.js           Lichess OAuth (PKCE) / Chess.com profile connect
+src/coachai.js        Coach — reads your public games, profiles style, matches an opening
+src/sharecard.js      renders the Coach result to a shareable PNG (canvas)
 src/data/*            openings (folders) and their branch lines
 src/vendor/chess.js   chess.js (move legality), vendored
 src/vendor/stockfish.js  Stockfish (asm.js), vendored
