@@ -9,6 +9,7 @@ import { Auth } from './auth.js?v=28';
 import { ICON, siteIcon } from './icons.js?v=28';
 import { Engine } from './engine.js?v=28';
 import { CoachAI } from './coachai.js?v=28';
+import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=28';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -166,37 +167,59 @@ async function runCoach() {
 }
 $('#coachGo').onclick = runCoach;
 $('#coachUser').addEventListener('keydown', e => { if (e.key === 'Enter') runCoach(); });
-function recCard(rec, side, why) {
+// a compact, interactive "study this" row beneath the share card
+function recRow(rec, side) {
   if (!rec) return '';
   const op = library().find(o => o.id === rec.id); if (!op) return '';
-  return `<div class="rec">
-    <div class="rec-side">${side === 'w' ? '♔ as White' : '♚ as Black'}</div>
-    <h3>${op.name} ${op.tabiaOriginal ? '<span class="op-badge">★ original</span>' : ''}</h3>
-    <p>${op.oneLiner || ''}</p>
-    <div class="rec-why">${why}</div>
-    <button class="btn primary sm" data-study="${op.id}">▶ Study it</button>
-  </div>`;
+  return `<button class="recrow" data-study="${op.id}">
+    <span class="recrow-side">${side === 'w' ? '♔' : '♚'}</span>
+    <span class="recrow-body">
+      <span class="recrow-label">As ${side === 'w' ? 'White' : 'Black'}${op.tabiaOriginal ? ' · ★ original' : ''}</span>
+      <span class="recrow-name">${op.name}</span>
+      <span class="recrow-one">${op.oneLiner || ''}</span>
+    </span>
+    <span class="recrow-go">Study ▸</span>
+  </button>`;
 }
+
+const STYLE_SUB = {
+  aggressive: 'You go for the throat — sharp lines, quick contact.',
+  positional: 'You build slowly and grind — structure over fireworks.',
+};
 function renderCoachResult(p) {
   const styleLabel = p.aggressive ? 'Aggressive' : 'Positional';
-  const wName = library().find(o => o.id === p.rec.white?.id)?.name || '';
-  const whyW = `You open <b>1.${p.rec.wD1}</b> and play like ${p.aggressive ? 'an attacker' : 'a positional player'} — a ${p.rec.wStyle} fit.`;
-  const whyB = `Against <b>1.${p.rec.bVs}</b> this ${p.rec.bStyle} system will feel like home.`;
-  const tweet = encodeURIComponent(`tabia read my games and says I should play the ${wName} ♟️ — find your opening:`);
+  const wOp = library().find(o => o.id === p.rec.white?.id);
+  const bOp = library().find(o => o.id === p.rec.black?.id);
+  const tweet = encodeURIComponent(`tabia read my games — I play ${styleLabel.toLowerCase()}, so it picked the ${wOp?.name || 'right opening'} for me ♟️`);
+
   $('#coachResult').hidden = false;
   $('#coachResult').innerHTML = `
-    <div class="coach-profile">
-      <div class="cp-head">Your profile <span class="cp-sub">${p.n} recent ${p.site === 'lichess' ? 'Lichess' : 'Chess.com'} games</span></div>
-      <div class="cp-stats">
-        <div class="cp"><div class="cp-n">${styleLabel}</div><div class="cp-l">style</div></div>
-        <div class="cp"><div class="cp-n">1.${p.whiteD1}</div><div class="cp-l">you open</div></div>
-        <div class="cp"><div class="cp-n">${p.winRate}%</div><div class="cp-l">win rate</div></div>
-        <div class="cp"><div class="cp-n">${p.avgMoves}</div><div class="cp-l">avg moves</div></div>
-      </div>
+    <div class="cardwrap">
+      <div class="sharecard"><canvas id="coachCanvas" aria-label="Your tabia style card"></canvas></div>
     </div>
-    <div class="recs">${recCard(p.rec.white, 'w', whyW)}${recCard(p.rec.black, 'b', whyB)}</div>
-    <a class="btn share" href="https://twitter.com/intent/tweet?text=${tweet}&url=https%3A%2F%2Fdaxaur.github.io%2Ftabia%2F" target="_blank" rel="noopener">𝕏 Share my result</a>`;
+    <div class="cardacts">
+      <button class="btn share" id="coachShare">𝕏 Share on X</button>
+      <button class="btn ghost" id="coachDl">⤓ Download card</button>
+    </div>
+    <div class="recrows">${recRow(p.rec.white, 'w')}${recRow(p.rec.black, 'b')}</div>`;
+
   $('#coachResult').querySelectorAll('[data-study]').forEach(b => b.onclick = () => openOpening(b.dataset.study));
+
+  const canvas = $('#coachCanvas');
+  const cardData = {
+    handle: p.username, site: p.site, styleLabel, styleSub: STYLE_SUB[styleLabel.toLowerCase()],
+    d1: p.whiteD1, winRate: p.winRate, avgMoves: p.avgMoves, n: p.n,
+    white: wOp ? { label: 'As White', name: wOp.name } : null,
+    black: bOp ? { label: 'As Black', name: bOp.name } : null,
+  };
+  renderShareCard(canvas, cardData);
+
+  const tweetUrl = `https://twitter.com/intent/tweet?text=${tweet}&url=https%3A%2F%2Fdaxaur.github.io%2Ftabia%2F`;
+  $('#coachShare').onclick = async () => {
+    const shared = await shareCardImage(canvas, decodeURIComponent(tweet), p.username);
+    if (!shared) window.open(tweetUrl, '_blank', 'noopener');
+  };
+  $('#coachDl').onclick = () => downloadCard(canvas, p.username);
 }
 
 // ---------- piece set + view nav ----------
