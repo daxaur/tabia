@@ -1,15 +1,15 @@
-import { Chess } from './vendor/chess.js?v=36';
-import { Board } from './board.js?v=36';
-import { openings, groupsOf, CATEGORIES } from './data/index.js?v=36';
-import { Store } from './store.js?v=36';
-import { evaluate, winPct, fmtEval } from './eval.js?v=36';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=36';
-import { Sound } from './sound.js?v=36';
-import { Auth } from './auth.js?v=36';
-import { ICON, siteIcon } from './icons.js?v=36';
-import { Engine } from './engine.js?v=36';
-import { CoachAI } from './coachai.js?v=36';
-import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=36';
+import { Chess } from './vendor/chess.js?v=37';
+import { Board } from './board.js?v=37';
+import { openings, groupsOf, CATEGORIES } from './data/index.js?v=37';
+import { Store } from './store.js?v=37';
+import { evaluate, winPct, fmtEval } from './eval.js?v=37';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=37';
+import { Sound } from './sound.js?v=37';
+import { Auth } from './auth.js?v=37';
+import { ICON, siteIcon } from './icons.js?v=37';
+import { Engine } from './engine.js?v=37';
+import { CoachAI } from './coachai.js?v=37';
+import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=37';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -173,15 +173,15 @@ async function runCoach() {
   const user = $('#coachUser').value.trim();
   if (!user) { coachStatus('Enter your username first.', 'err'); return; }
   coachStatus('Reading your recent games…', 'busy'); $('#coachResult').hidden = true; $('#coachGo').disabled = true;
-  $('#coachShowcase').classList.add('busy');
-  try { const p = await CoachAI.profile(coachSite, user); coachStatus('', ''); $('#coachShowcase').hidden = true; renderCoachResult(p); }
+  $('#coachWizard').classList.add('busy');
+  try { const p = await CoachAI.profile(coachSite, user); coachStatus('', ''); $('#coachWizard').hidden = true; renderCoachResult(p); }
   catch (e) { coachStatus(e.message || 'Couldn’t analyse that account.', 'err'); }
-  $('#coachShowcase').classList.remove('busy');
+  $('#coachWizard').classList.remove('busy');
   $('#coachGo').disabled = false;
 }
 function coachReset() {
   $('#coachResult').hidden = true; $('#coachResult').innerHTML = '';
-  $('#coachShowcase').hidden = false; coachStatus('', '');
+  $('#coachWizard').hidden = false; coachStatus('', '');
   $('#coachUser').focus();
 }
 $('#coachGo').onclick = runCoach;

@@ -25,7 +25,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="src/style.css?v=36">
+<link rel="stylesheet" href="src/style.css?v=37">
 <script>
   // network-first service worker so deploys are never masked by stale cache
   if ('serviceWorker' in navigator) {
@@ -42,8 +42,8 @@
   <nav class="top">
     <button data-view="home" class="active"><span class="bi" id="navHomeIcon"></span>Home</button>
     <button data-view="train"><span class="bi" id="navStudyIcon"></span>Study</button>
-    <button data-view="coach"><span class="bi" id="navCoachIcon"></span>Coach</button>
     <button data-view="saved"><span class="bi" id="navSavedIcon"></span>Saved</button>
+    <button data-view="coach" class="nav-ai"><span class="bi" id="navCoachIcon"></span>AI</button>
   </nav>
   <div class="right">
     <button class="cta" data-view="create" id="createCta"><span class="bi" id="navCreateIcon"></span>Create</button>
@@ -66,10 +66,10 @@
              No account, no server — your prep lives in this browser.</p>
         </div>
       </div>
-      <button class="coach-teaser" id="coachTeaser">
+      <button class="coach-teaser ai" id="coachTeaser">
         <span class="ct-ico">✦</span>
-        <span class="ct-txt"><b>Not sure what to play?</b> Drop your username and we’ll match an opening to your style — free.</span>
-        <span class="ct-go">Try the Coach →</span>
+        <span class="ct-txt"><b>Not sure what to play?</b> <span class="ct-ai">tabia AI</span> reads your games and matches an opening to your style — free, no sign-in.</span>
+        <span class="ct-go">Try it →</span>
       </button>
       <div class="lib-head"><h2>Openings</h2><span class="lib-sub" id="libSub"></span>
         <button class="cta sm" id="homeCreate"><span class="bi" id="homeCreateIcon"></span>Create your own</button></div>
@@ -87,34 +87,34 @@
       <div class="library" id="savedLib"></div>
     </section>
 
-    <!-- COACH — match an opening to your style (free, from your public games) -->
+    <!-- AI — match an opening to your style (free, from your public games) -->
     <section class="view" id="view-coach">
-      <div class="coach-hero">
-        <span class="kicker">free · no sign-in · your games stay in your browser</span>
-        <h1>The opening that fits <em>you</em></h1>
-        <div class="coach-form">
-          <div class="seg seg-logo" id="coachSite">
+      <!-- wizard: fill-out on the left, live preview on the right -->
+      <div class="coach-wizard" id="coachWizard">
+        <div class="cw-left">
+          <span class="cw-badge">✦ tabia AI · free · no sign-in</span>
+          <h1>The opening<br>that fits <em>you</em></h1>
+          <p class="cw-lead">We read your recent games and match an opening to how you actually play — right here in your browser.</p>
+
+          <label class="cw-label" for="coachUser">1 · Your username</label>
+          <input id="coachUser" class="cw-input" placeholder="e.g. magnuscarlsen" autocomplete="off" spellcheck="false">
+
+          <label class="cw-label">2 · Where you play</label>
+          <div class="seg seg-logo seg-big" id="coachSite">
             <button data-site="chesscom" class="active"><span class="bi" id="csCcLogo"></span>Chess.com</button>
             <button data-site="lichess"><span class="bi" id="csLiLogo"></span>Lichess</button>
           </div>
-          <input id="coachUser" placeholder="your username" autocomplete="off" spellcheck="false">
-          <button class="btn primary big" id="coachGo">✦ Analyse</button>
-        </div>
-        <div class="coach-status" id="coachStatus"></div>
-        <div class="coach-steps">
-          <span><b>1</b> Drop your handle</span><i>→</i>
-          <span><b>2</b> Read your last ~80 games</span><i>→</i>
-          <span><b>3</b> Get your card</span>
-        </div>
-      </div>
 
-      <!-- empty-state showcase: a live preview of the card you get -->
-      <div class="coach-showcase" id="coachShowcase">
-        <div class="show-card">
-          <div class="show-glow"></div>
-          <canvas id="sampleCanvas" aria-label="example tabia style card"></canvas>
+          <button class="btn primary cw-go" id="coachGo">✦ Analyse my games</button>
+          <div class="coach-status" id="coachStatus"></div>
         </div>
-        <div class="show-tag">live preview · this is what you get</div>
+
+        <div class="cw-right">
+          <div class="show-card">
+            <canvas id="sampleCanvas" aria-label="example tabia style card"></canvas>
+          </div>
+          <div class="show-tag">live preview · this is the card you get</div>
+        </div>
       </div>
 
       <div class="coach-result" id="coachResult" hidden></div>
@@ -338,6 +338,6 @@
   </div>
 </div>
 
-<script type="module" src="src/app.js?v=36"></script>
+<script type="module" src="src/app.js?v=37"></script>
 </body>
 </html>
