@@ -3,7 +3,10 @@ export const repertoire = {
   id: 'sicilian', name: 'Sicilian Defence', color: 'b', eco: 'B20',
   oneLiner: '1.e4 c5 — the fighting answer to 1.e4: unbalance the game and play for the win as Black.',
   trunk: '1.e4 c5 2.Nf3 d6 3.d4 cxd4 4.Nxd4 Nf6 5.Nc3',
-  groups: { open: { label: 'Open Sicilian', blurb: 'Najdorf, Dragon, Sveshnikov' } },
+  groups: {
+    open: { label: 'Open Sicilian', blurb: 'Najdorf, Dragon, Sveshnikov' },
+    anti: { label: 'Anti-Sicilians', blurb: 'Alapin & Moscow — what most opponents play' },
+  },
   lines: [
     { id: 'najdorf', name: 'Najdorf (5…a6)', group: 'open', star: true,
       idea: 'The Najdorf: …a6 keeps options flexible, prepares …e5/…e6 and …b5, and fights for the centre and the dark squares.',
@@ -17,5 +20,14 @@ export const repertoire = {
       idea: 'Accept a backward d-pawn and the d5-hole for huge piece activity and the bishop pair after …e5 and …b5.',
       moves: [['e4'], ['c5'], ['Nf3'], ['Nc6'], ['d4'], ['cxd4'], ['Nxd4'], ['Nf6'], ['Nc3'], ['e5', '5…e5 — the Sveshnikov.'],
         ['Ndb5'], ['d6'], ['Bg5'], ['a6'], ['Na3'], ['b5', 'Active pieces for the d5 weakness.']] },
+    { id: 'alapin', name: 'vs Alapin (2.c3)', group: 'anti',
+      idea: 'Against 2.c3 hit the centre with …Nf6 and …d6/…d5. You trade off White’s extra centre pawn and reach a comfortable, near-equal game. (≈ +0.2)',
+      moves: [['e4'], ['c5'], ['c3', '2.c3 — the Alapin, building a big centre.'], ['Nf6', '2…Nf6 — attack e4 at once.'],
+        ['e5'], ['Nd5'], ['Nf3'], ['Nc6'], ['d4'], ['cxd4'], ['cxd4'], ['d6', 'Chip at the e5-pawn.'],
+        ['Bc4'], ['Nb6'], ['Bb5'], ['dxe5'], ['Nxe5'], ['Bd7'], ['Nxd7'], ['Qxd7', 'Pieces traded, structure healthy — fully playable for Black.']] },
+    { id: 'moscow', name: 'vs Moscow (3.Bb5+)', group: 'anti',
+      idea: 'After 3.Bb5+ Bd7, trade the bishop and play a solid, equal middlegame with …Nc6, …Nf6 and a timely …d5. (≈ =)',
+      moves: [['e4'], ['c5'], ['Nf3'], ['d6'], ['Bb5+', '3.Bb5+ — the Moscow.'], ['Bd7'], ['Bxd7+'], ['Qxd7'],
+        ['O-O'], ['Nc6'], ['c3'], ['Nf6'], ['Re1'], ['e6'], ['d4'], ['cxd4'], ['cxd4'], ['d5', 'Strike the centre — comfortable equality.']] },
   ],
 };

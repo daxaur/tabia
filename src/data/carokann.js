@@ -17,5 +17,9 @@ export const repertoire = {
       idea: 'White takes on d5 and plays c4 for an IQP game. Blockade d5, develop actively, and target the isolated pawn.',
       moves: [['e4'], ['c6'], ['d4'], ['d5'], ['exd5'], ['cxd5'], ['c4', '4.c4 — the Panov.'], ['Nf6'],
         ['Nc3'], ['e6'], ['Nf3'], ['Be7', 'Blockade and pressure the IQP.']] },
+    { id: 'exchange-ck', name: 'Exchange (3.exd5)', group: 'other',
+      idea: 'The quiet Exchange. Get the bishop out to g4, meet Qb3 with …Qd7, and reach a comfortable, symmetrical game with no weaknesses. (≈ =)',
+      moves: [['e4'], ['c6'], ['d4'], ['d5'], ['exd5', '3.exd5 — the Exchange.'], ['cxd5'], ['Bd3'], ['Nc6'],
+        ['c3'], ['Nf6'], ['Bf4'], ['Bg4', 'Pin the knight before …e6.'], ['Qb3'], ['Qd7', 'Calmly defend b7 — equal and solid.']] },
   ],
 };

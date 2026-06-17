@@ -16,7 +16,7 @@ export const repertoire = {
   lines: [
     // ---------------- ACCEPTED · 4...exf3 5.Nxf3 ----------------
     { id:'teichmann', name:'Teichmann (5…Bg4)', group:'accepted', star:true,
-      idea:'The main line. Black pins the knight; trade it off, develop Be3/O-O-O and play the open lines. With best defence it’s fully equal (≈ 0.0) — you’re playing for the open f-file and practical chances, not a material edge.',
+      idea:'The main line. Black pins the knight; you take it off, develop Be3/O-O-O and play the open f-file. Black is a pawn up (≈ −0.5) but you have the bishop pair, the open f-file and a big lead in development — textbook BDG compensation, not a knockout.',
       moves:[
         ['d4'],['d5'],['e4','The gambit move — challenge d5 at once.'],['dxe4'],
         ['Nc3'],['Nf6'],['f3','4.f3 — offer the pawn to open the f-file.'],['exf3'],
@@ -25,11 +25,7 @@ export const repertoire = {
         ['h3','6.h3 — question the bishop immediately.'],['Bxf3'],
         ['Qxf3','7.Qxf3 — recapture toward the kingside; the queen eyes f7 and b7.'],['c6'],
         ['Be3','8.Be3 — develop, prepare O-O-O.'],['e6'],
-        ['O-O-O','9.O-O-O — connect rooks; pressure down the d-file.'],
-        ['Nd5','9…Nd5 — Black’s best: blockade and offer trades (9…Bd6? 10.g4 is already +3).'],
-        ['Bd2','10.Bd2 — keep the bishop, invite the trade on c3.'],['Nxc3'],
-        ['Qxc3','11.Qxc3 — recapture; open lines and a lead in development.'],['Nd7'],
-        ['Kb1','12.Kb1 — tuck the king away; a steady initiative for the pawn (≈ equal).'],
+        ['O-O-O','9.O-O-O — your tabia: castled long, bishop pair, open f-file and a development lead for the pawn. This is the BDG you want.'],
       ]},
     { id:'teichmann-bh5', name:'Teichmann — 6…Bh5', group:'accepted',
       idea:'If Black keeps the bishop, chase it with g4 and plant a knight on e5.',
