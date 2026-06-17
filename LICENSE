@@ -19,10 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Piece sets in src/pieces/ (maestro, pixel, fresca) originate from the
-Lichess / lila project (https://github.com/lichess-org/lila) and remain under
-their respective original licenses. chess.js (src/vendor/chess.js) is
-distributed under the BSD-2-Clause license, © Jeff Hlywa.

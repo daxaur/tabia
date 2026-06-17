@@ -1,0 +1,11 @@
+tabia — third-party components
+
+This project (MIT, see LICENSE) bundles the following under their own licenses:
+
+- chess.js (src/vendor/chess.js) — move legality. BSD-2-Clause, © Jeff Hlywa.
+  https://github.com/jhlywa/chess.js
+- Stockfish (src/vendor/stockfish.js) — engine evaluation, vendored as a Web
+  Worker. GPL. https://stockfishchess.org/
+- Piece sets in src/pieces/ (e.g. cburnett, maestro, pixel) originate from the
+  Lichess / lila project and remain under their respective original licenses.
+  https://github.com/lichess-org/lila
