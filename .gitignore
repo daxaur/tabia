@@ -5,3 +5,6 @@ node_modules/
 .cache/
 dist/
 *.tmp
+
+# private launch notes (not for the public repo)
+LAUNCH.md
