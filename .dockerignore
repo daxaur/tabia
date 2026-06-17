@@ -1,0 +1,6 @@
+.git
+.github
+LAUNCH.md
+.playwright-mcp
+*.log
+node_modules

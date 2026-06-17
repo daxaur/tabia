@@ -25,7 +25,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="src/style.css?v=42">
+<link rel="stylesheet" href="src/style.css?v=43">
 <script>
   // network-first service worker so deploys are never masked by stale cache
   if ('serviceWorker' in navigator) {
@@ -197,14 +197,14 @@
       <div class="hub">
         <div class="hub-board">
           <div class="boardrow">
-            <div class="evalbar" id="trEvalBar"><i id="trEvalFill"></i></div>
+            <div class="evalbar" id="trEvalBar" title="Stockfish evaluation, from White's point of view. In a drill your opponent plays the book move — not always the engine's top choice — so the bar can swing."><i id="trEvalFill"></i></div>
             <div class="boardwrap big"><div id="trBoard"></div></div>
           </div>
           <div class="hub-controls">
             <button class="ic" id="trSettings" title="Coach messages">⚙</button>
             <button class="ic on" id="trSound" title="Sound on/off">🔊</button>
             <button class="ic" id="trFlip" title="Flip board">⇅</button>
-            <span class="evread" id="trEvalRead">+0.0</span>
+            <span class="evread" id="trEvalRead" title="Stockfish eval, White's point of view">+0.0</span>
             <span class="sp"></span>
             <button class="btn ghost" id="trHint">💡 Hint</button>
             <button class="ic" id="trPrev" title="Step back" disabled>‹</button>
@@ -338,7 +338,7 @@
   </div>
 </div>
 
-<script type="module" src="src/app.js?v=42"></script>
+<script type="module" src="src/app.js?v=43"></script>
 <!-- privacy-first analytics (GoatCounter): no cookies, no personal data.
      Claim the code "tabia" at goatcounter.com for this to start collecting. -->
 <script data-goatcounter="https://tabia.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>

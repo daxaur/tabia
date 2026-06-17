@@ -1,7 +1,7 @@
 // tabia — lightweight, engine-free position eval. Runs in the browser, no server.
 // Not Stockfish — a fast heuristic (material + mobility + development + king safety)
 // so the "winning" bar moves honestly and shows gambit compensation, instantly.
-import { Chess } from './vendor/chess.js?v=42';
+import { Chess } from './vendor/chess.js?v=43';
 
 const VAL = { p: 1, n: 3, b: 3.25, r: 5, q: 9, k: 0 };
 const HOME_MINOR = { w: ['b1', 'c1', 'f1', 'g1'], b: ['b8', 'c8', 'f8', 'g8'] };

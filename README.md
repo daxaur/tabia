@@ -50,6 +50,13 @@ python3 -m http.server 4173    # or: npm run dev
 
 Deploys to **GitHub Pages** / any static host as-is.
 
+Or with **Docker**:
+
+```bash
+docker build -t tabia .
+docker run -p 8080:80 tabia    # open http://localhost:8080
+```
+
 ## Add your own opening
 
 An opening is a plain data module: a folder name and a list of lines, each an array of
