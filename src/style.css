@@ -408,6 +408,7 @@ nav.top .ic-svg{width:14px;height:14px;}
 
 /* ============ create gate + per-step + favourites + donate v2 ============ */
 .cr-gate{display:grid;place-items:center;padding:60px 20px;}
+.cr-gate[hidden]{display:none;}   /* the hidden attr must win over the display rule */
 .cr-gate-card{max-width:440px;text-align:center;border:1px solid var(--line2);background:var(--panel);padding:40px 34px;}
 .cr-gate-card h2{margin:0 0 10px;font-size:24px;}
 .cr-gate-card p{color:var(--dim);margin:0 0 22px;font-size:15px;}
