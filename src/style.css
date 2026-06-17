@@ -694,3 +694,21 @@ main{flex:1 0 auto;}
 @keyframes cardpop{0%{opacity:0;transform:scale(.9) translateY(10px)}60%{opacity:1}100%{opacity:1;transform:none}}
 .connect-note{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);color:var(--dim);}
 @media(prefers-reduced-motion:reduce){.show-card,.show-card::before,.show-glow{animation:none;}}
+
+/* ============ homepage opening search ============ */
+.lib-search-row{margin:0 0 14px;}
+.lib-search{width:100%;max-width:520px;background:#0c0c0c;color:var(--ink);border:1px solid var(--line2);
+  border-radius:10px;padding:12px 15px;font-family:var(--mono);font-size:14px;}
+.lib-search::placeholder{color:var(--faint);}
+.lib-search:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(255,255,255,.05);}
+.lib-search::-webkit-search-cancel-button{filter:invert(.6);cursor:pointer;}
+.lib-empty{border:1px dashed var(--line2);border-radius:12px;padding:34px 20px;text-align:center;color:var(--dim);font-size:15px;}
+
+/* ============ Create: import from PGN ============ */
+.cr-pgn{margin-top:14px;border-top:1px solid var(--line);padding-top:14px;}
+.cr-pgn-box{margin-top:10px;display:flex;flex-direction:column;gap:10px;}
+#crPgnText{width:100%;background:#0c0c0c;color:var(--ink);border:1px solid var(--line2);border-radius:10px;
+  padding:12px 14px;font-family:var(--mono);font-size:13px;line-height:1.5;resize:vertical;min-height:110px;}
+#crPgnText:focus{outline:none;border-color:#8b7bff;box-shadow:0 0 0 3px rgba(139,123,255,.14);}
+.cr-pgn-act{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.cr-pgn-hint{font-size:12px;color:var(--faint);}

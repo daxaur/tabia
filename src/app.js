@@ -1,15 +1,15 @@
-import { Chess } from './vendor/chess.js?v=43';
-import { Board } from './board.js?v=43';
-import { openings, groupsOf, CATEGORIES } from './data/index.js?v=43';
-import { Store } from './store.js?v=43';
-import { evaluate, winPct, fmtEval } from './eval.js?v=43';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=43';
-import { Sound } from './sound.js?v=43';
-import { Auth } from './auth.js?v=43';
-import { ICON, siteIcon } from './icons.js?v=43';
-import { Engine } from './engine.js?v=43';
-import { CoachAI } from './coachai.js?v=43';
-import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=43';
+import { Chess } from './vendor/chess.js?v=44';
+import { Board } from './board.js?v=44';
+import { openings, groupsOf, CATEGORIES } from './data/index.js?v=44';
+import { Store } from './store.js?v=44';
+import { evaluate, winPct, fmtEval } from './eval.js?v=44';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=44';
+import { Sound } from './sound.js?v=44';
+import { Auth } from './auth.js?v=44';
+import { ICON, siteIcon } from './icons.js?v=44';
+import { Engine } from './engine.js?v=44';
+import { CoachAI } from './coachai.js?v=44';
+import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=44';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -306,16 +306,32 @@ function renderFilter() {
   $('#libFilter').innerHTML = cats.map(c => `<button class="fchip${c === libCat ? ' on' : ''}" data-cat="${c}">${c}</button>`).join('');
   $('#libFilter').querySelectorAll('[data-cat]').forEach(b => b.onclick = () => { libCat = b.dataset.cat; renderHome(); });
 }
+let libSearch = '';
+function matchesSearch(op, q) {
+  if (!q) return true;
+  const hay = `${op.name} ${op.eco || ''} ${op.oneLiner || ''} ${(op.lines || []).map(l => l.name).join(' ')}`.toLowerCase();
+  return q.split(/\s+/).every(term => hay.includes(term));   // all terms must match
+}
 function renderHome() {
   renderFilter();
   let lib = library().sort((a, b) => (Store.isFavorite(b.id) ? 1 : 0) - (Store.isFavorite(a.id) ? 1 : 0)); // saved first
   if (libCat !== 'All') lib = lib.filter(o => libCat === 'Yours' ? o.custom : o.category === libCat);
-  $('#libSub').textContent = `${lib.length} opening${lib.length > 1 ? 's' : ''}${libCat !== 'All' ? ' · ' + libCat.toLowerCase() : ' · drill any line'}`;
+  const q = libSearch.trim().toLowerCase();
+  if (q) lib = lib.filter(o => matchesSearch(o, q));
+  const label = q ? `${lib.length} match${lib.length === 1 ? '' : 'es'} for “${libSearch.trim()}”`
+                  : `${lib.length} opening${lib.length === 1 ? '' : 's'}${libCat !== 'All' ? ' · ' + libCat.toLowerCase() : ' · drill any line'}`;
+  $('#libSub').textContent = label;
   $('#library').innerHTML = lib.map((op, i) => opCardHtml(op, i, 'mini')).join('');
   lib.forEach(op => previewBoard(document.getElementById(`mini-${op.id}`), op, 7));
   wireCards($('#library'));
+  const empty = $('#libEmpty');
+  if (empty) { empty.hidden = lib.length > 0; empty.textContent = lib.length ? '' : (q ? `No openings match “${libSearch.trim()}”. Try a different term — or create your own.` : 'No openings here yet.'); }
   const s0 = statsFor(repo);
   $('#footStats').textContent = `${s0.reps} reps logged · ${s0.mastered}/${s0.ids.length} lines mastered`;
+}
+{
+  const si = $('#libSearch');
+  if (si) si.addEventListener('input', () => { libSearch = si.value; renderHome(); });
 }
 function renderSaved() {
   const a = Auth.current();
@@ -393,6 +409,8 @@ function enterCreate() {
     $('#crAddLine').onclick = cbAddLine;
     $('#crSave').onclick = cbSave;
     $('#crCancel').onclick = () => { cbReset(); showView('home'); };
+    $('#crPgnToggle').onclick = () => { const b = $('#crPgnBox'); b.hidden = !b.hidden; $('#crPgnToggle').textContent = b.hidden ? '⇪ Import from PGN' : '− Hide PGN import'; if (!b.hidden) $('#crPgnText').focus(); };
+    $('#crPgnImport').onclick = cbImportPgn;
   }
   cb.board.setPieceSet(pieceSet);
   setCbColor(cb.color); cbSetBoard(); cbRenderLines();
@@ -481,6 +499,44 @@ function cbAddLine() {
   $('#crMsgBox').querySelectorAll('textarea').forEach(t => t.value = '');
   cbRenderLines(); cbStatus(`Added “${name}”.`, 'ok');
 }
+// ---- import lines from a pasted PGN (one game = one line) ----
+function splitPgnGames(text) {
+  const t = (text || '').trim();
+  if (!t) return [];
+  // each game begins at an [Event ...] tag; movetext-only PGNs are a single game
+  const parts = t.split(/(?=\[Event\s)/g).map(s => s.trim()).filter(Boolean);
+  return parts.length ? parts : [t];
+}
+function pgnLineName(pgn, n) {
+  const tag = re => (pgn.match(re) || [])[1];
+  const opening = tag(/\[Opening\s+"([^"]+)"/) || tag(/\[ECO\s+"([^"]+)"/);
+  if (opening && opening !== '?') return opening;
+  const w = tag(/\[White\s+"([^"]+)"/), b = tag(/\[Black\s+"([^"]+)"/);
+  if ((w && w !== '?') || (b && b !== '?')) return `${w || '?'} – ${b || '?'}`;
+  return `Imported line ${n}`;
+}
+function cbImportPgn() {
+  const raw = $('#crPgnText').value;
+  const games = splitPgnGames(raw);
+  if (!games.length) { cbStatus('Paste a PGN first.', 'err'); return; }
+  let added = 0, skipped = 0;
+  for (const g of games) {
+    let hist;
+    try { const c = new Chess(); c.loadPgn(g, { strict: false }); hist = c.history(); }
+    catch { skipped++; continue; }
+    if (!hist || !hist.length) { skipped++; continue; }
+    const moves = hist.map(san => [san]);   // same tuple shape as the manual builder
+    const name = pgnLineName(g, cb.lines.length + 1);
+    cb.lines.push({ id: 'l' + Date.now().toString(36) + Math.floor(Math.random() * 1e4) + added, name, group: 'Imported', idea: '', moves });
+    added++;
+  }
+  cbRenderLines();
+  if (added) {
+    $('#crPgnText').value = '';
+    cbStatus(`Imported ${added} line${added > 1 ? 's' : ''}${skipped ? ` (${skipped} skipped)` : ''}.`, 'ok');
+  } else cbStatus('Couldn’t read any games from that PGN — check the format.', 'err');
+}
+
 function cbRenderLines() {
   $('#crLineCount').textContent = cb.lines.length;
   $('#crLines').innerHTML = cb.lines.length ? cb.lines.map((l, i) =>

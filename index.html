@@ -25,7 +25,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="src/style.css?v=43">
+<link rel="stylesheet" href="src/style.css?v=44">
 <script>
   // network-first service worker so deploys are never masked by stale cache
   if ('serviceWorker' in navigator) {
@@ -73,8 +73,10 @@
       </button>
       <div class="lib-head"><h2>Openings</h2><span class="lib-sub" id="libSub"></span>
         <button class="cta sm" id="homeCreate"><span class="bi" id="homeCreateIcon"></span>Create your own</button></div>
+      <div class="lib-search-row"><input id="libSearch" class="lib-search" type="search" placeholder="🔍  Search openings — name, ECO, idea…" autocomplete="off" spellcheck="false"></div>
       <div class="lib-filter" id="libFilter"></div>
       <div class="library" id="library"></div>
+      <div class="lib-empty" id="libEmpty" hidden></div>
       <div class="foot">
         <span>tabia · MIT · your data never leaves this browser</span>
         <span id="footStats"></span>
@@ -165,9 +167,20 @@
             <button class="btn ghost" id="crResetLine">Reset line</button>
             <button class="btn ghost" id="crFlip">⇅ Flip</button>
           </div>
-          <div class="hintbar">Play the moves of this line. Click any move to give it a comment and its own correct/wrong coach lines.</div>
+          <div class="hintbar">Play the moves on the board, or import a PGN below. Click any move to give it a comment and its own correct/wrong coach lines.</div>
           <div class="movelist icons clickable" id="crMoves">—</div>
           <div class="cr-step" id="crStep" hidden></div>
+
+          <div class="cr-pgn">
+            <button class="btn ghost sm" id="crPgnToggle">⇪ Import from PGN</button>
+            <div class="cr-pgn-box" id="crPgnBox" hidden>
+              <textarea id="crPgnText" rows="5" placeholder="Paste a PGN here. One game → one line. Multiple games → multiple lines. Headers and comments are fine."></textarea>
+              <div class="cr-pgn-act">
+                <button class="btn primary sm" id="crPgnImport">＋ Build line(s) from PGN</button>
+                <span class="cr-pgn-hint">Tip: export a game from Lichess/Chess.com and paste it here.</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         <aside class="cr-line">
@@ -338,7 +351,7 @@
   </div>
 </div>
 
-<script type="module" src="src/app.js?v=43"></script>
+<script type="module" src="src/app.js?v=44"></script>
 <!-- privacy-first analytics (GoatCounter): no cookies, no personal data.
      Claim the code "tabia" at goatcounter.com for this to start collecting. -->
 <script data-goatcounter="https://tabia.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
