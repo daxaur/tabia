@@ -1,7 +1,7 @@
 // tabia board — absolutely-positioned pieces that *slide*, buttery pointer-drag,
 // click-to-move, animated programmatic moves, crisp arrows. Dependency-free, chess.js-backed.
-import { Chess } from './vendor/chess.js?v=40';
-import { Sound } from './sound.js?v=40';
+import { Chess } from './vendor/chess.js?v=41';
+import { Sound } from './sound.js?v=41';
 
 const FILES = 'abcdefgh';
 const GLYPH = { p: 'P', n: 'N', b: 'B', r: 'R', q: 'Q', k: 'K' };
@@ -91,7 +91,7 @@ export class Board {
       const sq = this._sqAt(col, row);
       const f = FILES.indexOf(sq[0]), r = +sq[1];
       const d = document.createElement('div');
-      d.className = 'tb-sq ' + ((f + r) % 2 ? 'lt' : 'dk');
+      d.className = 'tb-sq ' + ((f + r) % 2 ? 'dk' : 'lt');   // a1 dark, h1 light ("light on the right")
       d.dataset.sq = sq;
       if (row === 7) d.insertAdjacentHTML('beforeend', `<span class="tb-cf">${sq[0]}</span>`);
       if (col === 0) d.insertAdjacentHTML('beforeend', `<span class="tb-cr">${r}</span>`);
