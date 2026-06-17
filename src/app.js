@@ -1,15 +1,15 @@
-import { Chess } from './vendor/chess.js?v=41';
-import { Board } from './board.js?v=41';
-import { openings, groupsOf, CATEGORIES } from './data/index.js?v=41';
-import { Store } from './store.js?v=41';
-import { evaluate, winPct, fmtEval } from './eval.js?v=41';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=41';
-import { Sound } from './sound.js?v=41';
-import { Auth } from './auth.js?v=41';
-import { ICON, siteIcon } from './icons.js?v=41';
-import { Engine } from './engine.js?v=41';
-import { CoachAI } from './coachai.js?v=41';
-import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=41';
+import { Chess } from './vendor/chess.js?v=42';
+import { Board } from './board.js?v=42';
+import { openings, groupsOf, CATEGORIES } from './data/index.js?v=42';
+import { Store } from './store.js?v=42';
+import { evaluate, winPct, fmtEval } from './eval.js?v=42';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=42';
+import { Sound } from './sound.js?v=42';
+import { Auth } from './auth.js?v=42';
+import { ICON, siteIcon } from './icons.js?v=42';
+import { Engine } from './engine.js?v=42';
+import { CoachAI } from './coachai.js?v=42';
+import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=42';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -608,7 +608,8 @@ function renderMoves() {
     html += `<span class="mv${i === h.length - 1 ? ' cur' : ''}">${ic}${m.san}</span>`;
   }
   $('#trMoves').innerHTML = html;
-  $('#trMoves .cur')?.scrollIntoView({ block: 'nearest' });
+  // NOTE: do NOT scrollIntoView here — the move list wraps and isn't a scroll
+  // container, so it would scroll the whole PAGE (jumped mobile to the bottom on every move).
   setArrows();   // keep the ‹ back button state in sync after every move
 }
 function resetIdle() {

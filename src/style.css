@@ -597,8 +597,26 @@ main{flex:1 0 auto;}
   /* study hub: full-width board, comfy tap targets */
   .boardwrap{min-width:0;width:100%;}
   .boardwrap.big{max-width:100%;}
-  .modetile{padding:11px 12px;}
+
+  /* declutter the hub on phones */
+  .hub{gap:16px;}
+  .hub-panel{gap:12px;position:static;}        /* sticky is pointless when stacked */
+  .hub-board .boardrow{gap:8px;}
+  .evalbar{width:14px;}
+  .hub-controls{justify-content:center;gap:6px;margin-top:10px;}
+  .hub-controls .sp{display:none;}             /* kill the flex spacer → no orphaned ‹ › */
+  .hub-controls .ic{padding:9px 11px;}
+  .hub-controls .btn.ghost{padding:9px 13px;letter-spacing:.5px;}
+  .hub-controls .evread{display:none;}         /* the eval BAR already shows this — frees a clean single row */
+  .coach{gap:10px;}
+  .coach-av{width:38px;height:38px;font-size:20px;}
+  .coach-bubble{font-size:14.5px;}
+  .modegrid{gap:6px;}
+  .modetile{padding:10px 11px;}
   .modetile .ml{font-size:15px;}
+  .modetile .ms{font-size:8px;}
+  .stats.compact .n{font-size:20px;}
+  .stats.compact .stat{padding:9px 4px;}
 
   /* opening detail + library spacing */
   .op-head{gap:18px;}
