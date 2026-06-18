@@ -165,7 +165,8 @@ select{width:100%;background:#000;color:var(--ink);border:1px solid var(--line2)
 .library{display:grid;grid-template-columns:repeat(auto-fill,minmax(460px,1fr));gap:16px;}
 @media(max-width:560px){.library{grid-template-columns:1fr;}}
 .opcard{display:flex;gap:0;border:1px solid var(--line);background:var(--bg);cursor:pointer;overflow:hidden;
-  opacity:0;animation:cardin .55s cubic-bezier(.2,.7,.2,1) forwards;transition:border-color .15s,transform .15s,background .15s;}
+  opacity:0;animation:cardin .55s cubic-bezier(.2,.7,.2,1) forwards;transition:border-color .15s,transform .15s,background .15s;
+  content-visibility:auto;contain-intrinsic-size:auto 232px;}   /* skip painting off-screen cards — smooth scroll with many boards */
 .opcard:hover{border-color:var(--line2);transform:translateY(-3px);background:var(--panel2);}
 @keyframes cardin{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 .opcard-board{width:190px;flex-shrink:0;padding:14px;border-right:1px solid var(--line);display:flex;align-items:center;}

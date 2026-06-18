@@ -1,15 +1,15 @@
-import { Chess } from './vendor/chess.js?v=48';
-import { Board } from './board.js?v=48';
-import { openings, groupsOf, CATEGORIES } from './data/index.js?v=48';
-import { Store } from './store.js?v=48';
-import { evaluate, winPct, fmtEval } from './eval.js?v=48';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=48';
-import { Sound } from './sound.js?v=48';
-import { Auth } from './auth.js?v=48';
-import { ICON, siteIcon } from './icons.js?v=48';
-import { Engine } from './engine.js?v=48';
-import { CoachAI } from './coachai.js?v=48';
-import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=48';
+import { Chess } from './vendor/chess.js?v=49';
+import { Board } from './board.js?v=49';
+import { openings, groupsOf, CATEGORIES } from './data/index.js?v=49';
+import { Store } from './store.js?v=49';
+import { evaluate, winPct, fmtEval } from './eval.js?v=49';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=49';
+import { Sound } from './sound.js?v=49';
+import { Auth } from './auth.js?v=49';
+import { ICON, siteIcon } from './icons.js?v=49';
+import { Engine } from './engine.js?v=49';
+import { CoachAI } from './coachai.js?v=49';
+import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=49';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -1012,8 +1012,9 @@ function heroFx() {
   let last = 0;
   function frame(now) {
     requestAnimationFrame(frame);
-    // idle when tab hidden or the home view isn't on screen, cap ~30fps
+    // idle when tab hidden, home view off, scrolled past the hero, or faster than ~30fps
     if (document.hidden || !$('#view-home').classList.contains('active') || now - last < 33) return;
+    if (c.getBoundingClientRect().bottom < 0) return;   // hero scrolled out of view — stop drawing
     last = now; t += 0.03; ctx.clearRect(0, 0, w, h);
     for (const d of dots) {
       const amp = d.disp * d.disp * 15 * DPR;
