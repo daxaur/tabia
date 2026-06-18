@@ -25,6 +25,12 @@ header.top{display:flex;align-items:center;gap:20px;padding:12px 22px;border-bot
   background:#000;position:sticky;top:0;z-index:40;}   /* solid bg — no backdrop blur (kills scroll jank) */
 .brand{display:flex;align-items:center;gap:10px;}
 .brandword{display:none;}   /* shown only on mobile, where the canvas wordmark is hidden */
+.nav-count{display:inline-grid;place-items:center;min-width:16px;height:16px;padding:0 4px;margin-left:6px;
+  border-radius:8px;background:var(--hl);color:#000;font-size:10px;font-weight:700;font-family:var(--mono);
+  line-height:1;vertical-align:middle;}
+.nav-count[hidden]{display:none;}
+nav.top button{position:relative;}
+@media(max-width:640px){.nav-count{position:absolute;top:1px;right:1px;margin:0;min-width:14px;height:14px;font-size:9px;}}
 .brand img{height:30px;width:30px;}
 .brand img{height:26px;width:26px;image-rendering:auto;}
 .brand .logo{font-family:var(--mono);font-weight:700;font-size:20px;letter-spacing:3px;text-transform:lowercase;}

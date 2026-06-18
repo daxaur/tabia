@@ -25,7 +25,7 @@
 <meta name="theme-color" content="#000000">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="src/style.css?v=47">
+<link rel="stylesheet" href="src/style.css?v=48">
 <script>
   // network-first service worker so deploys are never masked by stale cache
   if ('serviceWorker' in navigator) {
@@ -43,7 +43,7 @@
   <nav class="top">
     <button data-view="home" class="active"><span class="bi" id="navHomeIcon"></span>Home</button>
     <button data-view="train"><span class="bi" id="navStudyIcon"></span>Study</button>
-    <button data-view="saved"><span class="bi" id="navSavedIcon"></span>Saved</button>
+    <button data-view="saved"><span class="bi" id="navSavedIcon"></span>Saved<span class="nav-count" id="savedCount" hidden>0</span></button>
     <button data-view="coach" class="nav-ai"><span class="bi" id="navCoachIcon"></span>AI</button>
   </nav>
   <div class="right">
@@ -352,7 +352,7 @@
   </div>
 </div>
 
-<script type="module" src="src/app.js?v=47"></script>
+<script type="module" src="src/app.js?v=48"></script>
 <!-- privacy-first analytics (GoatCounter): no cookies, no personal data.
      Claim the code "tabia" at goatcounter.com for this to start collecting. -->
 <script data-goatcounter="https://tabia.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>

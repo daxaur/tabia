@@ -1,15 +1,15 @@
-import { Chess } from './vendor/chess.js?v=47';
-import { Board } from './board.js?v=47';
-import { openings, groupsOf, CATEGORIES } from './data/index.js?v=47';
-import { Store } from './store.js?v=47';
-import { evaluate, winPct, fmtEval } from './eval.js?v=47';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=47';
-import { Sound } from './sound.js?v=47';
-import { Auth } from './auth.js?v=47';
-import { ICON, siteIcon } from './icons.js?v=47';
-import { Engine } from './engine.js?v=47';
-import { CoachAI } from './coachai.js?v=47';
-import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=47';
+import { Chess } from './vendor/chess.js?v=48';
+import { Board } from './board.js?v=48';
+import { openings, groupsOf, CATEGORIES } from './data/index.js?v=48';
+import { Store } from './store.js?v=48';
+import { evaluate, winPct, fmtEval } from './eval.js?v=48';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=48';
+import { Sound } from './sound.js?v=48';
+import { Auth } from './auth.js?v=48';
+import { ICON, siteIcon } from './icons.js?v=48';
+import { Engine } from './engine.js?v=48';
+import { CoachAI } from './coachai.js?v=48';
+import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=48';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -297,8 +297,16 @@ function opCardHtml(op, i, pfx) {
       <span class="go">${pct ? `${pct}% mastered` : 'Start training'} →</span>
     </div></div>`;
 }
+function updateSavedCount() {
+  const n = Store.favorites().length, el = $('#savedCount');
+  if (el) { el.textContent = n; el.hidden = n === 0; }
+}
 function wireCards(container) {
-  container.querySelectorAll('.opfav').forEach(b => b.onclick = e => { e.stopPropagation(); b.classList.toggle('on', Store.toggleFavorite(b.dataset.fav)); });
+  container.querySelectorAll('.opfav').forEach(b => b.onclick = e => {
+    e.stopPropagation();
+    b.classList.toggle('on', Store.toggleFavorite(b.dataset.fav));
+    updateSavedCount();                       // the Saved count ticks up/down right away
+  });
   container.querySelectorAll('[data-op]').forEach(c => c.onclick = () => openOpening(c.dataset.op));
 }
 let libCat = 'All';
@@ -365,7 +373,7 @@ function renderOpening() {
     `<button class="btn${fav ? ' saved' : ''}" id="opFav">${fav ? '★ Saved' : '☆ Save'}</button>` +
     (op.custom ? `<button class="btn" id="opEdit">✎ Edit</button><button class="btn ghost" id="opDelete">🗑 Delete</button>` : '');
   $('#opTrain').onclick = () => showView('train');
-  $('#opFav').onclick = () => { const on = Store.toggleFavorite(op.id); $('#opFav').textContent = on ? '★ Saved' : '☆ Save'; $('#opFav').classList.toggle('saved', on); };
+  $('#opFav').onclick = () => { const on = Store.toggleFavorite(op.id); $('#opFav').textContent = on ? '★ Saved' : '☆ Save'; $('#opFav').classList.toggle('saved', on); updateSavedCount(); };
   if (op.custom) {
     $('#opEdit').onclick = () => loadIntoBuilder(op);
     $('#opDelete').onclick = () => { Store.deleteCustomOpening(op.id); showView('home'); };
@@ -1025,7 +1033,7 @@ trBoard.setMoveMethod(moveMethod);
 syncSeg('moveMethodSeg', moveMethod, 'mm');
 syncSeg('soundSeg', soundOn ? 'on' : 'off', 'snd');
 setMode('drill');
-refreshMastery(); renderHome(); heroFx(); updateEval(); renderAccount();
+refreshMastery(); renderHome(); heroFx(); updateEval(); renderAccount(); updateSavedCount();
 $('#trSound').textContent = Sound.enabled ? '🔊' : '🔇';
 $('#trSound').classList.toggle('on', Sound.enabled);
 const ROUTES = ['home', 'train', 'create', 'saved', 'coach'];
