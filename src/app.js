@@ -1,15 +1,15 @@
-import { Chess } from './vendor/chess.js?v=46';
-import { Board } from './board.js?v=46';
-import { openings, groupsOf, CATEGORIES } from './data/index.js?v=46';
-import { Store } from './store.js?v=46';
-import { evaluate, winPct, fmtEval } from './eval.js?v=46';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=46';
-import { Sound } from './sound.js?v=46';
-import { Auth } from './auth.js?v=46';
-import { ICON, siteIcon } from './icons.js?v=46';
-import { Engine } from './engine.js?v=46';
-import { CoachAI } from './coachai.js?v=46';
-import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=46';
+import { Chess } from './vendor/chess.js?v=47';
+import { Board } from './board.js?v=47';
+import { openings, groupsOf, CATEGORIES } from './data/index.js?v=47';
+import { Store } from './store.js?v=47';
+import { evaluate, winPct, fmtEval } from './eval.js?v=47';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=47';
+import { Sound } from './sound.js?v=47';
+import { Auth } from './auth.js?v=47';
+import { ICON, siteIcon } from './icons.js?v=47';
+import { Engine } from './engine.js?v=47';
+import { CoachAI } from './coachai.js?v=47';
+import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=47';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -317,7 +317,9 @@ function matchesSearch(op, q) {
 }
 function renderHome() {
   renderFilter();
-  let lib = library().sort((a, b) => (Store.isFavorite(b.id) ? 1 : 0) - (Store.isFavorite(a.id) ? 1 : 0)); // saved first
+  // order: tabia originals first, then saved, then the rest (stable within each tier)
+  const rank = o => (o.tabiaOriginal ? 2 : 0) + (Store.isFavorite(o.id) ? 1 : 0);
+  let lib = library().slice().sort((a, b) => rank(b) - rank(a));
   if (libCat !== 'All') lib = lib.filter(o => libCat === 'Yours' ? o.custom : o.category === libCat);
   const q = libSearch.trim().toLowerCase();
   if (q) lib = lib.filter(o => matchesSearch(o, q));
