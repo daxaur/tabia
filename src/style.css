@@ -24,6 +24,7 @@ button{font-family:var(--mono);cursor:pointer;}
 header.top{display:flex;align-items:center;gap:20px;padding:12px 22px;border-bottom:1px solid var(--line);
   background:#000;position:sticky;top:0;z-index:40;}   /* solid bg — no backdrop blur (kills scroll jank) */
 .brand{display:flex;align-items:center;gap:10px;}
+.brandword{display:none;}   /* shown only on mobile, where the canvas wordmark is hidden */
 .brand img{height:30px;width:30px;}
 .brand img{height:26px;width:26px;image-rendering:auto;}
 .brand .logo{font-family:var(--mono);font-weight:700;font-size:20px;letter-spacing:3px;text-transform:lowercase;}
@@ -581,10 +582,12 @@ main{flex:1 0 auto;}
   main{padding:18px 0 56px;}
 
   /* header: icon-only nav, compact brand, drop GitHub (still in footer) */
-  header.top{gap:6px;padding:10px 10px;}
-  .brand{gap:6px;}
-  .brand img{height:22px;width:22px;}
-  #brandLogo{width:66px!important;height:auto;}   /* override inline style set by the wordmark JS */
+  header.top{gap:8px;padding:10px 12px;}
+  .brand{gap:8px;}
+  .brand img{height:24px;width:24px;}
+  #brandLogo{display:none;}                /* the dot-matrix wordmark looks rough at phone size */
+  .brandword{display:inline;font-family:var(--mono);font-weight:700;font-size:19px;letter-spacing:1px;color:var(--ink);}
+  #footLogo{display:none;}                  /* decorative — footer already says "tabia" in text */
   nav.top{margin-left:0;gap:1px;}
   nav.top button{padding:8px 7px;font-size:0;letter-spacing:0;}
   nav.top button .bi{margin:0;}

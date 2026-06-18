@@ -8,7 +8,7 @@ export const repertoire = {
   color: 'w',
   eco: 'D00',
   tabiaOriginal: true,
-  oneLiner: '1.d4 d5 2.Nc3 Nf6 3.Bf4 — the London with teeth: Nb5 jumps, h4 storms, no dull symmetry.',
+  oneLiner: '1.d4 d5 2.Nc3 Nf6 3.Bf4 — an offbeat, aggressive London. Objectively Black equalizes, but the Nb5 jumps and h4 storms force awkward play and score well below master level.',
   offBook: ['The teeth are in the plan — {exp} keeps Nb5 and h4 live.', 'Play it straight and it’s just a dull London. {exp} keeps the bite.', 'Off the storm — {exp} is the move.'],
   trunk: '1.d4 d5 2.Nc3 Nf6 3.Bf4',
   groups: {
@@ -19,12 +19,12 @@ export const repertoire = {
   lines: [
     // ---------------- MAIN ----------------
     { id: 'nb5-jump', name: 'Nb5 Jump (3…e6)', group: 'main', star: true,
-      idea: 'The signature Jobava idea: 4.Nb5 provokes the awkward …Na6, then the knight returns home having ruined Black’s queenside.',
+      idea: 'The signature Jobava try: 4.Nb5 provokes …Na6 and dictates the setup. Honest: with best play Black is fine (≈ −0.3) — the knight reroutes via …Nb4 — but the awkward …Na6 trips up club opponents constantly.',
       moves: [
         ['d4'], ['d5'], ['Nc3'], ['Nf6'], ['Bf4', '3.Bf4 — the London bishop comes out before e3.'], ['e6'],
-        ['Nb5', '4.Nb5! — eyeing c7 and d6; Black must react.'], ['Na6', '4…Na6 — the only good defence of c7, but the knight is offside.'],
+        ['Nb5', '4.Nb5!? — eyeing c7 and d6; Black must react.'], ['Na6', '4…Na6 — defends c7, but the knight sits offside for now.'],
         ['e3'], ['Be7'], ['Bd3'], ['O-O'], ['Nf3'], ['c6'],
-        ['Nc3', '8.Nc3 — mission done: the knight returns and Black’s Na6 is misplaced.'],
+        ['Nc3', '8.Nc3 — the knight returns. Roughly level (≈ −0.3): you’re playing for the practical awkwardness of Black’s Na6, not an objective edge.'],
       ] },
     { id: 'e6-classical', name: 'Classical 4.e3 Bd6', group: 'main',
       idea: 'Black challenges the bishop with …Bd6; you keep it with Bg3 and recapture toward the centre, opening the h-file.',
@@ -36,7 +36,7 @@ export const repertoire = {
 
     // ---------------- SIDELINES ----------------
     { id: 'a6-antinb5', name: 'Anti-Nb5 (3…a6)', group: 'side',
-      idea: 'Black spends a tempo on …a6 to stop Nb5. Just build the London setup — that free tempo tells later.',
+      idea: 'Black spends a tempo on …a6 to stop Nb5. Just build the London setup — it’s roughly level, with the extra …a6 a small practical plus for you.',
       moves: [
         ['d4'], ['d5'], ['Nc3'], ['Nf6'], ['Bf4'], ['a6', '3…a6 — prophylaxis against Nb5.'], ['e3'], ['e6'],
         ['Bd3'], ['Bd6'], ['Bg3'], ['O-O'], ['Nf3'], ['c5'], ['Ne5'],
@@ -51,18 +51,18 @@ export const repertoire = {
 
     // ---------------- ATTACK ----------------
     { id: 'c5-break', name: 'Aggressive …c5', group: 'attack', star: true,
-      idea: 'Black strikes with …c5. Take it, jump to b5, and develop with tempo while Black scrambles to regain the pawn.',
+      idea: 'Black strikes with …c5. You grab it and jump Nb5, but Black recaptures cleanly with …Bxc5 and is comfortable (≈ −0.5). Play it as a sharp, fighting game — not a free pawn.',
       moves: [
         ['d4'], ['d5'], ['Nc3'], ['Nf6'], ['Bf4'], ['c5'],
-        ['dxc5', '4.dxc5 — grab it; Black must spend time recapturing.'], ['e6'],
-        ['Nb5', '5.Nb5! — heading for d6, hitting the loose dark squares.'], ['Bxc5'],
-        ['Nf3'], ['O-O'], ['e3'], ['a6'], ['Nbd4'],
+        ['dxc5', '4.dxc5 — grab it; the pawn comes back, but you get a lead in development.'], ['e6'],
+        ['Nb5', '5.Nb5!? — heading for d6, hitting the loose dark squares.'], ['Bxc5'],
+        ['Nf3'], ['O-O'], ['e3'], ['a6'], ['Nbd4', '8.Nbd4 — Black is comfortable (≈ −0.5); play actively for the initiative, the pawn was always coming back.'],
       ] },
     { id: 'kingside-g6', name: 'h4 vs …g6', group: 'attack',
-      idea: 'Against the fianchetto, the Jobava bayonet: h4–h5 to rip open the king before Black is ready.',
+      idea: 'Against the fianchetto, the Jobava bayonet: h4–h5 to pry at the king. Double-edged and very practical — sound for Black, dangerous over the board.',
       moves: [
         ['d4'], ['Nf6'], ['Nc3'], ['g6'], ['Bf4'], ['Bg7'], ['e3'], ['d6'],
-        ['h4', '5.h4! — the bayonet; …h5 is forced or g6 collapses.'], ['h5'], ['Nf3'], ['O-O'], ['Be2'], ['c5'], ['Qd2'],
+        ['h4', '5.h4!? — the bayonet; meet …h5 with a sharp game, or storm with h5 yourself.'], ['h5'], ['Nf3'], ['O-O'], ['Be2'], ['c5'], ['Qd2'],
       ] },
   ],
 };

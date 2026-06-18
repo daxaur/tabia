@@ -1,15 +1,15 @@
-import { Chess } from './vendor/chess.js?v=44';
-import { Board } from './board.js?v=44';
-import { openings, groupsOf, CATEGORIES } from './data/index.js?v=44';
-import { Store } from './store.js?v=44';
-import { evaluate, winPct, fmtEval } from './eval.js?v=44';
-import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=44';
-import { Sound } from './sound.js?v=44';
-import { Auth } from './auth.js?v=44';
-import { ICON, siteIcon } from './icons.js?v=44';
-import { Engine } from './engine.js?v=44';
-import { CoachAI } from './coachai.js?v=44';
-import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=44';
+import { Chess } from './vendor/chess.js?v=45';
+import { Board } from './board.js?v=45';
+import { openings, groupsOf, CATEGORIES } from './data/index.js?v=45';
+import { Store } from './store.js?v=45';
+import { evaluate, winPct, fmtEval } from './eval.js?v=45';
+import { coachSay, MSG_FIELDS, messagesFor, saveMessages } from './coach.js?v=45';
+import { Sound } from './sound.js?v=45';
+import { Auth } from './auth.js?v=45';
+import { ICON, siteIcon } from './icons.js?v=45';
+import { Engine } from './engine.js?v=45';
+import { CoachAI } from './coachai.js?v=45';
+import { renderShareCard, downloadCard, shareCardImage } from './sharecard.js?v=45';
 
 let repo = openings[0];             // the opening currently loaded in the study hub
 let currentOpening = openings[0];
@@ -72,8 +72,11 @@ function dotWordmark(canvas, text, dotMax) {
   }
   requestAnimationFrame(frame);
 }
-dotWordmark($('#brandLogo'), 'tabia', 1.55);
-dotWordmark($('#footLogo'), 'tabia', 1.2);
+// on phones the dot-matrix wordmark is hidden (we show clean text) — don't burn a rAF loop on it
+if (!window.matchMedia('(max-width:640px)').matches) {
+  dotWordmark($('#brandLogo'), 'tabia', 1.55);
+  dotWordmark($('#footLogo'), 'tabia', 1.2);
+}
 
 // ---------- crypto donate ----------
 const DONATE = [
@@ -331,7 +334,9 @@ function renderHome() {
 }
 {
   const si = $('#libSearch');
-  if (si) si.addEventListener('input', () => { libSearch = si.value; renderHome(); });
+  // debounce: renderHome() rebuilds all preview boards, so don't run it on every keystroke
+  let stim;
+  if (si) si.addEventListener('input', () => { libSearch = si.value; clearTimeout(stim); stim = setTimeout(renderHome, 140); });
 }
 function renderSaved() {
   const a = Auth.current();
